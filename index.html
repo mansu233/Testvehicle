@@ -1,0 +1,3482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<title>MANSKIT Vehicle Hub</title>
+<meta name="description" content="Shared vehicle ownership, finance and expense tracker.">
+<meta name="theme-color" content="#14181C">
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" href="./192.png">
+<link rel="apple-touch-icon" href="./180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MANSKIT">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --base:#14181C;
+    --surface:#1C2329;
+    --surface-2:#232B32;
+    --line:#313B43;
+    --text:#E9E5DA;
+    --text-dim:#8B96A0;
+    --amber:#F2A93B;
+    --teal:#3EA88F;
+    --red:#E2573A;
+    --blue:#5B8DEF;
+    --purple:#9B7EDE;
+    --radius:14px;
+    --font-display:'Oswald',sans-serif;
+    --font-mono:'Space Mono',monospace;
+    --font-body:'Inter',sans-serif;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 20% 0%, rgba(242,169,59,0.06), transparent 40%),
+      var(--base);
+    color:var(--text);
+    font-family:var(--font-body);
+    min-height:100vh;
+    padding-bottom:96px;
+    -webkit-user-select:none; user-select:none; -webkit-touch-callout:none;
+  }
+  input, textarea, select{
+    -webkit-user-select:text; user-select:text; -webkit-touch-callout:default;
+  }
+  ::selection{background:var(--amber); color:#1a1a1a;}
+  button{font-family:inherit;}
+  input,select{font-family:inherit;}
+  :focus-visible{outline:2px solid var(--amber); outline-offset:2px;}
+
+  /* ===== INSTALL BANNER ===== */
+  .install-bar{
+    display:none; align-items:center; justify-content:space-between; gap:10px;
+    background:var(--amber); color:#161616; padding:9px 14px; font-size:12.5px; font-weight:600;
+  }
+  .install-bar.show{display:flex;}
+  .install-bar button{
+    background:#161616; color:var(--amber); border:none; padding:6px 12px; border-radius:8px; font-size:12px; font-weight:700; cursor:pointer;
+  }
+  .install-bar .dismiss{background:transparent; color:#161616; font-size:16px; padding:0 4px; cursor:pointer; border:none;}
+
+  /* ===== HEADER / PLATE ===== */
+  header.top{
+    position:sticky; top:0; z-index:20;
+    background:linear-gradient(180deg, rgba(20,24,28,0.97), rgba(20,24,28,0.9));
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+    padding:14px 16px 12px;
+  }
+  .top-row{display:flex; align-items:center; justify-content:space-between; gap:10px;}
+  .brand{
+    font-family:var(--font-display);
+    font-size:13px; letter-spacing:3px; text-transform:uppercase;
+    color:var(--text-dim); font-weight:600;
+  }
+  .brand span{color:var(--amber);}
+  .ver-tag{font-size:9px; color:var(--text-dim); font-family:var(--font-mono); letter-spacing:0.5px; margin-left:5px;}
+  .top-actions{display:flex; gap:8px;}
+  .icon-btn{
+    background:var(--surface-2); border:1px solid var(--line); color:var(--text);
+    width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center;
+    cursor:pointer; font-size:15px;
+  }
+  .plate{
+    margin-top:12px;
+    background:linear-gradient(180deg,#F4EFDE,#E5DEC6);
+    border:2px solid #8a8262;
+    border-radius:8px;
+    padding:10px 14px;
+    display:flex; align-items:center; justify-content:space-between;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), 0 4px 14px rgba(0,0,0,0.35);
+    cursor:pointer;
+    position:relative;
+  }
+  .plate::before{
+    content:"IN"; position:absolute; left:8px; top:6px; font-size:8px; font-weight:700; color:#3a5a3a; font-family:var(--font-mono);
+  }
+  .plate-num{
+    font-family:var(--font-mono); font-weight:700; font-size:22px; letter-spacing:2px; color:#1a1a1a; padding-left:16px;
+  }
+  .plate-model{
+    text-align:right;
+  }
+  .plate-model .m1{display:block; font-family:var(--font-display); font-size:13px; font-weight:600; color:#2a2a2a; text-transform:uppercase; letter-spacing:1px;}
+  .plate-model .m2{display:block; font-size:10px; color:#5a5a4a; font-family:var(--font-mono); margin-top:2px;}
+
+  .partners-row{
+    margin-top:10px; display:flex; gap:8px;
+  }
+  .chip{
+    flex:1; background:var(--surface); border:1px solid var(--line); border-radius:10px;
+    padding:8px 10px; display:flex; align-items:center; gap:8px;
+  }
+  .chip .dot{width:8px; height:8px; border-radius:50%; flex-shrink:0;}
+  .chip .label{font-size:12px; color:var(--text-dim);}
+  .chip .name{font-size:13px; font-weight:600;}
+
+  /* ===== MAIN ===== */
+  main{padding:16px; max-width:520px; margin:0 auto;}
+
+  /* Finance summary — odometer style */
+  .dash{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:18px 16px;
+    position:relative;
+    overflow:hidden;
+    margin-bottom:16px;
+  }
+  .dash.light{
+    background:rgba(0,0,0,0.24);
+    border-color:rgba(255,255,255,0.15);
+  }
+  .dash-mini{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:14px 16px;
+  }
+  .dash::after{
+    content:""; position:absolute; inset:0;
+    background:repeating-linear-gradient(0deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 3px);
+    pointer-events:none;
+  }
+  .dash-label{
+    font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--text-dim); font-weight:600;
+    display:flex; justify-content:space-between; align-items:center;
+  }
+  .dash-label .tag{
+    font-family:var(--font-mono); font-size:9.5px; letter-spacing:0.5px; padding:2px 6px; border-radius:6px;
+    background:rgba(242,169,59,0.12); color:var(--amber); text-transform:none;
+  }
+  .odometer{
+    display:flex; align-items:baseline; gap:6px; margin-top:8px;
+  }
+  .odometer .cur{font-size:12px; color:var(--amber); font-family:var(--font-mono); align-self:center;}
+  .odo-digits{
+    display:flex; gap:3px; background:#0F1316; border:1px solid var(--line); border-radius:6px; padding:6px 8px;
+  }
+  .odo-digits .d{
+    font-family:var(--font-mono); font-weight:700; font-size:26px; color:var(--amber);
+    width:17px; text-align:center;
+    text-shadow:0 0 8px rgba(242,169,59,0.35);
+  }
+  .odo-digits .d.sep{color:var(--text-dim); width:8px;}
+  .dash-sub{margin-top:6px; font-size:12px; color:var(--text-dim);}
+  .dash-stats{
+    display:flex; gap:10px; margin-top:16px;
+  }
+  .stat{
+    flex:1; background:var(--surface-2); border:1px solid var(--line); border-radius:10px; padding:10px 12px;
+  }
+  .stat .n{font-family:var(--font-mono); font-size:17px; font-weight:700;}
+  .stat .l{font-size:10.5px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px; margin-top:2px;}
+
+  /* Purchase & finance card */
+  .fin-hero{
+    margin-top:12px; border-radius:18px; padding:20px 18px 18px; position:relative; overflow:hidden;
+    cursor:pointer; color:#fff;
+    background:linear-gradient(135deg, #3E6FD9, #7B5FD9 60%, #9B7EDE);
+    box-shadow:0 8px 24px rgba(91,141,239,0.25);
+  }
+  .fin-hero::before{
+    content:""; position:absolute; inset:0; pointer-events:none;
+    background:radial-gradient(circle at 85% -10%, rgba(255,255,255,0.18), transparent 55%);
+  }
+  .fin-hero-label{
+    font-size:11px; letter-spacing:2px; text-transform:uppercase; opacity:0.85; font-weight:600;
+    display:flex; justify-content:space-between; align-items:center; position:relative; z-index:1;
+  }
+  .fin-hero-grid{display:grid; grid-template-columns:1fr 1fr; gap:16px 12px; margin-top:16px; position:relative; z-index:1;}
+  .fin-hero-item .n{font-family:var(--font-mono); font-size:19px; font-weight:700;}
+  .fin-hero-item .l{font-size:10.5px; opacity:0.85; margin-top:2px; text-transform:uppercase; letter-spacing:0.5px;}
+  .fin-hero-badge{
+    font-size:9px; padding:3px 7px; border-radius:20px; font-weight:700; letter-spacing:0.5px;
+    background:rgba(255,255,255,0.2); color:#fff; margin-left:6px; text-transform:uppercase;
+  }
+  .fin-hero-badge.closed{background:rgba(62,168,143,0.4);}
+  .fin-hero-line{
+    margin-top:10px; background:rgba(255,255,255,0.12); border-radius:10px; padding:9px 12px;
+    display:flex; justify-content:space-between; align-items:center; gap:8px; font-size:11.5px;
+    position:relative; z-index:1; flex-wrap:wrap;
+  }
+  .fin-hero-line .fhl-label{opacity:0.85; white-space:nowrap;}
+  .fin-hero-line .fhl-value{font-family:var(--font-mono); font-weight:700; text-align:right;}
+  .fin-hero-acct{
+    margin-top:18px; background:rgba(255,255,255,0.16); border-radius:10px; padding:9px 12px;
+    display:flex; align-items:center; justify-content:space-between; font-family:var(--font-mono); font-size:12px;
+    letter-spacing:0.5px; position:relative; z-index:1;
+  }
+  .fin-hero-acct button{background:transparent; border:none; color:#fff; font-size:14px; cursor:pointer; opacity:0.85; padding:2px 4px;}
+  .fin-hero-empty{
+    font-size:12.5px; color:var(--text-dim); margin-top:8px; line-height:1.5; background:var(--surface);
+    border:1px solid var(--line); border-radius:var(--radius); padding:14px 16px; cursor:pointer;
+  }
+  .fin-hero-empty .big{font-family:var(--font-display); font-size:13px; text-transform:uppercase; letter-spacing:1px; color:var(--text); display:block; margin-bottom:4px;}
+
+  .pay-hist{margin-top:6px;}
+  .pay-hist-row{
+    display:flex; justify-content:space-between; align-items:center; gap:8px;
+    padding:9px 0; border-bottom:1px solid var(--line); font-size:12.5px;
+  }
+  .pay-hist-row:last-child{border-bottom:none;}
+  .pay-hist-row .idx{
+    width:22px; height:22px; border-radius:50%; background:var(--surface-2); color:var(--text-dim);
+    font-family:var(--font-mono); font-size:10.5px; display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .pay-hist-row .mid{flex:1;}
+  .pay-hist-row .mid .d{color:var(--text-dim); font-family:var(--font-mono); font-size:11px;}
+  .pay-hist-row .amt{font-family:var(--font-mono); font-weight:700; text-align:right;}
+  .pay-hist-row .out{font-size:10px; color:var(--text-dim); text-align:right;}
+  .pay-hist-empty{font-size:12px; color:var(--text-dim); padding:10px 0;}
+  .quick-emi-btn{
+    width:100%; background:var(--surface-2); border:1px dashed var(--line); color:var(--text-dim);
+    padding:11px; border-radius:10px; font-size:12.5px; font-weight:600; cursor:pointer; margin-top:12px;
+  }
+
+  .show-more-btn{
+    width:100%; background:var(--surface); border:1px solid var(--line); color:var(--text-dim);
+    padding:12px; border-radius:12px; font-size:12.5px; font-weight:700; cursor:pointer; margin-top:10px;
+  }
+  .show-more-btn:hover{color:var(--text);}
+
+  /* Backup & restore */
+  .backup-divider{border-top:1px solid var(--line); margin:18px 0;}
+  .file-drop{
+    width:100%; background:var(--surface-2); border:1px dashed var(--line); border-radius:10px;
+    padding:14px; text-align:center; font-size:12.5px; color:var(--text-dim); cursor:pointer;
+  }
+  textarea.paste-box{
+    width:100%; background:var(--surface-2); border:1px solid var(--line); color:var(--text);
+    padding:11px 12px; border-radius:10px; font-size:12px; font-family:var(--font-mono); min-height:90px; resize:vertical;
+  }
+
+  .settle-card{
+    margin-top:12px; background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+    padding:14px 16px; display:flex; align-items:center; justify-content:space-between; gap:10px; cursor:pointer;
+  }
+  .settle-card .st-label{font-family:var(--font-display); font-size:11.5px; text-transform:uppercase; letter-spacing:1.3px; color:var(--text-dim);}
+  .settle-card .st-right{display:flex; align-items:center; gap:8px;}
+  .settle-card .st-value{font-family:var(--font-mono); font-weight:700; font-size:14.5px; text-align:right;}
+  .settle-card .st-chevron{color:var(--text-dim); font-size:16px;}
+  .settle-card.settled{border-color:rgba(62,168,143,0.35);}
+  .settle-card.settled .st-value{color:var(--teal);}
+  .settle-card.owe{border-color:rgba(242,169,59,0.35);}
+  .settle-card.owe .st-value{color:var(--amber);}
+
+  .settle-detail-row{
+    display:flex; justify-content:space-between; align-items:center; gap:8px;
+    padding:11px 0; border-bottom:1px solid var(--line); font-size:12.5px;
+  }
+  .settle-detail-row:last-child{border-bottom:none;}
+  .settle-detail-row .sd-mid{flex:1; min-width:0;}
+  .settle-detail-row .sd-cat{font-weight:700;}
+  .settle-detail-row .sd-date{color:var(--text-dim); font-family:var(--font-mono); font-size:11px; margin-top:1px;}
+  .settle-detail-row .sd-nums{text-align:right; font-family:var(--font-mono); font-size:11.5px;}
+  .settle-detail-row .sd-net{font-weight:700; margin-top:2px;}
+  .settle-detail-row .sd-net.owe{color:var(--amber);}
+  .settle-detail-row .sd-net.settled{color:var(--teal);}
+
+  .log-entry-card{
+    margin-top:26px; background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+    padding:14px 16px; display:flex; align-items:center; gap:12px; cursor:pointer;
+  }
+  .log-entry-card .lec-icon{font-size:20px;}
+  .log-entry-card .lec-mid{flex:1; min-width:0;}
+  .log-entry-card .lec-title{font-family:var(--font-display); font-size:14px; text-transform:uppercase; letter-spacing:1px; display:block;}
+  .log-entry-card .lec-sub{font-size:11.5px; color:var(--text-dim); margin-top:2px; display:block;}
+  .log-entry-card .lec-chevron{color:var(--text-dim); font-size:18px;}
+
+  .sheet-top-row{display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;}
+  .search-input{
+    width:100%; background:var(--surface-2); border:1px solid var(--line); color:var(--text);
+    padding:11px 12px; border-radius:10px; font-size:13.5px; margin:12px 0; -webkit-appearance:none;
+  }
+  .search-input:focus{border-color:var(--amber); outline:none;}
+
+  /* Vehicle menu */
+  .menu-row{
+    display:flex; align-items:center; gap:12px; padding:13px 4px; border-bottom:1px solid var(--line); cursor:pointer;
+  }
+  .menu-row:last-of-type{border-bottom:none;}
+  .menu-row .mi{font-size:18px; width:26px; text-align:center;}
+  .menu-row .mt{flex:1; font-size:14px; font-weight:600;}
+  .menu-row .mc{color:var(--text-dim); font-size:16px;}
+  .menu-version{
+    text-align:center; font-size:10.5px; color:var(--text-dim); font-family:var(--font-mono);
+    margin-top:14px; letter-spacing:0.5px;
+  }
+
+  /* Reminders banner */
+  .rem-card{
+    margin-top:12px; background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:6px 4px;
+  }
+  .rem-card.empty{padding:14px 16px; cursor:pointer;}
+  .rem-card.empty .rem-empty-text{font-size:12.5px; color:var(--text-dim); line-height:1.5;}
+  .rem-row{display:flex; align-items:center; gap:10px; padding:10px 12px;}
+  .rem-row .ri{font-size:16px; width:22px; text-align:center; flex-shrink:0;}
+  .rem-row .rt{flex:1; min-width:0;}
+  .rem-row .rt .rl{font-size:12.5px; font-weight:700;}
+  .rem-row .rt .rd{font-size:11px; color:var(--text-dim); margin-top:1px;}
+  .rem-dot{width:8px; height:8px; border-radius:50%; flex-shrink:0;}
+  .rem-dot.ok{background:var(--teal);}
+  .rem-dot.soon{background:var(--amber);}
+  .rem-dot.overdue{background:var(--red);}
+
+  /* Usage periods */
+  .usage-row{
+    background:var(--surface-2); border:1px solid var(--line); border-radius:12px; padding:12px 14px; margin-bottom:10px;
+  }
+  .usage-row .ur-top{display:flex; justify-content:space-between; align-items:center;}
+  .usage-row .ur-who{font-size:13px; font-weight:700;}
+  .usage-row .ur-range{font-size:11px; color:var(--text-dim); font-family:var(--font-mono); margin-top:3px;}
+  .usage-row .ur-note{font-size:11.5px; color:var(--text-dim); margin-top:5px; font-style:italic;}
+  .usage-empty{font-size:12.5px; color:var(--text-dim); padding:6px 0 16px; line-height:1.5;}
+  .solo-badge{
+    font-size:10px; padding:3px 8px; border-radius:20px; font-weight:700; letter-spacing:0.3px;
+    background:rgba(155,126,222,0.15); color:var(--purple); border:1px solid rgba(155,126,222,0.4);
+  }
+
+  /* Insights bars */
+  .ins-bar-row{margin-bottom:12px;}
+  .ins-bar-row .ib-top{display:flex; justify-content:space-between; font-size:12px; margin-bottom:5px;}
+  .ins-bar-row .ib-top .ib-label{color:var(--text-dim); text-transform:uppercase; letter-spacing:0.5px; font-size:10.5px;}
+  .ins-bar-row .ib-top .ib-amt{font-family:var(--font-mono); font-weight:700;}
+  .ins-bar-track{height:8px; border-radius:5px; background:var(--surface-2); overflow:hidden;}
+  .ins-bar-fill{height:100%; border-radius:5px;}
+  .ins-empty{font-size:12.5px; color:var(--text-dim); padding:6px 0 16px;}
+
+  /* Documents */
+  .doc-category{margin-bottom:20px;}
+  .doc-cat-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;}
+  .doc-cat-title{font-family:var(--font-display); font-size:13px; text-transform:uppercase; letter-spacing:1px; color:var(--text-dim);}
+  .doc-row{
+    display:flex; align-items:center; gap:10px; background:var(--surface-2); border:1px solid var(--line);
+    border-radius:10px; padding:10px 12px; margin-bottom:8px;
+  }
+  .doc-link{display:flex; align-items:center; gap:10px; flex:1; min-width:0; text-decoration:none; color:var(--text); cursor:pointer;}
+  .doc-icon{font-size:18px; flex-shrink:0;}
+  .doc-name{flex:1; min-width:0; font-size:12.5px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .doc-date{font-size:10.5px; color:var(--text-dim); font-family:var(--font-mono); flex-shrink:0;}
+
+  /* Vehicle photos */
+  .photo-grid{
+    display:grid; grid-template-columns:repeat(3, 1fr); gap:8px;
+  }
+  .photo-slot{
+    position:relative; aspect-ratio:1/1; border-radius:12px; overflow:hidden; cursor:pointer;
+    background:var(--surface-2); border:1px solid var(--line);
+  }
+  .photo-slot.empty{
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    border:1px dashed var(--line); gap:4px;
+  }
+  .photo-slot.empty .ps-plus{font-size:20px; color:var(--text-dim);}
+  .photo-slot img{width:100%; height:100%; object-fit:cover; display:block;}
+  .photo-slot .ps-label{
+    position:absolute; left:0; right:0; bottom:0; padding:5px 8px 4px;
+    font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:#fff;
+    background:linear-gradient(0deg, rgba(0,0,0,0.75), transparent);
+  }
+  .photo-slot.empty .ps-label{position:static; background:none; color:var(--text-dim); padding:0;}
+  .photo-slot .ps-count{
+    position:absolute; top:6px; right:6px; background:rgba(0,0,0,0.6); color:#fff;
+    font-size:9.5px; font-weight:700; padding:2px 6px; border-radius:20px; font-family:var(--font-mono);
+  }
+
+  /* Full-screen photo viewer */
+  .photo-viewer{
+    position:fixed; inset:0; z-index:999; background:rgba(6,8,10,0.97);
+    display:none; flex-direction:column;
+  }
+  .photo-viewer.show{display:flex;}
+  .pv-top{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:14px 16px calc(10px + env(safe-area-inset-top)); flex-shrink:0;
+  }
+  .pv-label{color:#fff; font-family:var(--font-display); font-size:14px; text-transform:uppercase; letter-spacing:1px;}
+  .pv-label .pv-date{display:block; font-size:11px; color:var(--text-dim); font-family:var(--font-mono); text-transform:none; letter-spacing:0; margin-top:2px;}
+  .pv-close{
+    width:34px; height:34px; border-radius:50%; background:rgba(255,255,255,0.1); border:none; color:#fff;
+    font-size:16px; cursor:pointer; flex-shrink:0;
+  }
+  .pv-stage{
+    flex:1; overflow:hidden; position:relative; touch-action:none;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .pv-stage img{
+    max-width:100%; max-height:100%; touch-action:none; user-select:none; -webkit-user-drag:none;
+    transform-origin:center center; will-change:transform;
+  }
+  .pv-bottom{ flex-shrink:0; padding:10px 16px calc(16px + env(safe-area-inset-bottom)); }
+  .pv-hint{color:var(--text-dim); font-size:11px; text-align:center; margin-bottom:10px;}
+  .pv-history{display:flex; gap:8px; overflow-x:auto; padding-bottom:10px; -ms-overflow-style:none; scrollbar-width:none;}
+  .pv-history::-webkit-scrollbar{display:none;}
+  .pv-history .pvh-thumb{
+    flex-shrink:0; width:52px; height:52px; border-radius:8px; overflow:hidden; border:2px solid transparent; cursor:pointer;
+  }
+  .pv-history .pvh-thumb.sel{border-color:var(--amber);}
+  .pv-history .pvh-thumb img{width:100%; height:100%; object-fit:cover; display:block;}
+  .pv-actions{display:flex; gap:8px;}
+  .pv-actions .mini-btn{flex:1; text-align:center; padding:10px;}
+
+  .sect-mini{
+    font-size:11px; text-transform:uppercase; letter-spacing:1.5px; color:var(--purple); font-weight:700;
+    margin:18px 0 10px; padding-top:14px; border-top:1px solid var(--line);
+  }
+  .sect-mini.first{margin-top:0; padding-top:0; border-top:none;}
+  .reconcile-note{font-size:11px; color:var(--text-dim); margin:-6px 0 14px; line-height:1.4;}
+  .reconcile-note.warn{color:var(--amber);}
+
+  /* Section heading */
+  .sect-head{
+    display:flex; align-items:center; justify-content:space-between;
+    margin:26px 0 12px;
+  }
+  .sect-title{
+    font-family:var(--font-display); font-size:16px; text-transform:uppercase; letter-spacing:1.5px; font-weight:600;
+  }
+  .filter-row{display:flex; gap:6px; overflow-x:auto; padding-bottom:2px; -ms-overflow-style:none; scrollbar-width:none;}
+  .filter-row::-webkit-scrollbar{display:none;}
+  .fchip{
+    flex-shrink:0; font-size:11.5px; padding:6px 12px; border-radius:20px; border:1px solid var(--line);
+    background:var(--surface); color:var(--text-dim); cursor:pointer; font-weight:600;
+  }
+  .fchip.active{background:var(--amber); color:#1a1a1a; border-color:var(--amber);}
+
+  /* Transaction log */
+  .log{display:flex; flex-direction:column; gap:10px;}
+  .card{
+    background:var(--surface); border:1px solid var(--line); border-radius:12px;
+    padding:14px; position:relative; padding-left:16px;
+    border-left:3px solid var(--line);
+  }
+  .card.grp-maint{border-left-color:var(--teal);}
+  .card.grp-expense{border-left-color:var(--amber);}
+  .card.grp-finance{border-left-color:var(--blue);}
+  .card.cat-purchase{border-left-color:var(--purple);}
+  .card-top{display:flex; justify-content:space-between; align-items:flex-start;}
+  .card-type{font-size:10.5px; text-transform:uppercase; letter-spacing:1.5px; color:var(--text-dim); font-weight:700;}
+  .card-date{font-size:11px; color:var(--text-dim); margin-top:2px; font-family:var(--font-mono);}
+  .card-amt{font-family:var(--font-mono); font-size:19px; font-weight:700; text-align:right;}
+  .card-amt .sub{display:block; font-size:10px; color:var(--text-dim); font-weight:400; text-align:right;}
+  .card-mid{display:flex; align-items:center; gap:10px; margin-top:10px; flex-wrap:wrap;}
+  .badge{
+    font-size:10px; padding:3px 8px; border-radius:20px; font-weight:700; letter-spacing:0.5px;
+  }
+  .badge.open{background:rgba(226,87,58,0.15); color:var(--red); border:1px solid rgba(226,87,58,0.4);}
+  .badge.closed{background:rgba(62,168,143,0.15); color:var(--teal); border:1px solid rgba(62,168,143,0.4);}
+  .odo-read{
+    font-family:var(--font-mono); font-size:11px; color:var(--text-dim); display:flex; align-items:center; gap:4px;
+  }
+  .split-bar{
+    margin-top:10px; height:6px; border-radius:4px; overflow:hidden; display:flex; background:var(--surface-2);
+  }
+  .split-bar div{height:100%;}
+  .split-labels{display:flex; justify-content:space-between; margin-top:5px; font-size:10.5px; color:var(--text-dim);}
+  .card-note{margin-top:8px; font-size:12px; color:var(--text-dim); font-style:italic;}
+  .paid-row{display:flex; justify-content:space-between; margin-top:6px; font-size:10.5px; color:var(--text-dim);}
+  .settle-tag{font-size:10.5px; margin-top:5px; font-weight:700;}
+  .settle-tag.owe{color:var(--amber);}
+  .settle-tag.settled{color:var(--teal);}
+  .card-actions{display:flex; gap:8px; margin-top:10px;}
+  .mini-btn{
+    font-size:11px; background:var(--surface-2); border:1px solid var(--line); color:var(--text-dim);
+    padding:5px 10px; border-radius:8px; cursor:pointer; font-weight:600;
+  }
+  .mini-btn:hover{color:var(--text);}
+  .mini-btn.danger:hover{color:var(--red); border-color:var(--red);}
+
+  .empty{
+    text-align:center; padding:50px 20px; color:var(--text-dim);
+  }
+  .empty .big{font-family:var(--font-display); font-size:16px; color:var(--text); text-transform:uppercase; letter-spacing:1px;}
+  .empty p{font-size:13px; margin-top:6px; line-height:1.5;}
+
+  /* FAB */
+  .fab{
+    position:fixed; bottom:22px; right:20px; z-index:30;
+    width:58px; height:58px; border-radius:50%;
+    background:var(--amber); color:#161616; border:none;
+    font-size:28px; font-weight:700;
+    box-shadow:0 6px 20px rgba(242,169,59,0.4);
+    cursor:pointer; display:flex; align-items:center; justify-content:center;
+  }
+  .fab:active{transform:scale(0.94);}
+
+  /* Modal / bottom sheet */
+  .sheet-backdrop{
+    position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:40;
+    opacity:0; pointer-events:none; transition:opacity 0.25s;
+  }
+  .sheet-backdrop.show{opacity:1; pointer-events:auto;}
+  .sheet{
+    position:fixed; left:0; right:0; bottom:0; z-index:41;
+    background:var(--surface); border-top:1px solid var(--line);
+    border-radius:20px 20px 0 0;
+    max-height:88vh; overflow-y:auto;
+    padding:10px 18px calc(24px + env(safe-area-inset-bottom));
+    transform:translateY(100%); transition:transform 0.28s cubic-bezier(.32,.72,0,1);
+  }
+  .sheet.show{transform:translateY(0);}
+  .sheet-handle{width:36px; height:4px; background:var(--line); border-radius:4px; margin:6px auto 14px;}
+  .sheet h2{font-family:var(--font-display); font-size:18px; text-transform:uppercase; letter-spacing:1px; margin:0 0 4px;}
+  .sheet .sheet-note{font-size:12px; color:var(--text-dim); margin-bottom:16px;}
+  .field{margin-bottom:14px;}
+  .field label{display:block; font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--text-dim); margin-bottom:6px; font-weight:600;}
+  .field input, .field select{
+    width:100%; background:var(--surface-2); border:1px solid var(--line); color:var(--text);
+    padding:11px 12px; border-radius:10px; font-size:15px;
+  }
+  .field input:focus, .field select:focus{border-color:var(--amber);}
+  .uppercase-input{text-transform:uppercase;}
+  .row2{display:flex; gap:10px;}
+  .row2 .field{flex:1;}
+  .calc-box{
+    background:var(--surface-2); border:1px solid var(--line); border-radius:10px; padding:12px 14px; margin-bottom:14px;
+    display:flex; justify-content:space-between; align-items:center;
+  }
+  .calc-box .l{font-size:12px; color:var(--text-dim);}
+  .calc-box .v{font-family:var(--font-mono); font-size:19px; font-weight:700; color:var(--amber);}
+  .split-mode, .paid-mode{display:flex; gap:6px; margin-bottom:10px;}
+  .split-mode .opt, .paid-mode .opt{
+    flex:1; text-align:center; padding:7px; border-radius:8px; border:1px solid var(--line); background:var(--surface-2);
+    font-size:11.5px; font-weight:700; cursor:pointer; color:var(--text-dim);
+  }
+  .split-mode .opt.sel, .paid-mode .opt.sel{border-color:var(--amber); color:var(--amber); background:rgba(242,169,59,0.08);}
+  .split-inputs{display:flex; gap:10px; align-items:flex-end;}
+  .split-inputs .field{flex:1;}
+  .split-readout{display:flex; justify-content:space-between; font-size:11px; color:var(--text-dim); margin:-6px 0 14px;}
+  .err-text{color:var(--red); font-size:11.5px; margin-top:6px; display:none;}
+  .err-text.show{display:block;}
+  .toggle-row{display:flex; gap:8px;}
+  .toggle-opt{
+    flex:1; text-align:center; padding:9px; border-radius:10px; border:1px solid var(--line); background:var(--surface-2);
+    font-size:12px; font-weight:700; cursor:pointer; color:var(--text-dim);
+  }
+  .toggle-opt.sel.open{border-color:var(--red); color:var(--red); background:rgba(226,87,58,0.08);}
+  .toggle-opt.sel.closed{border-color:var(--teal); color:var(--teal); background:rgba(62,168,143,0.08);}
+  .save-btn{
+    width:100%; background:var(--amber); color:#161616; border:none; padding:14px; border-radius:12px;
+    font-family:var(--font-display); font-size:15px; text-transform:uppercase; letter-spacing:1px; font-weight:700;
+    cursor:pointer; margin-top:6px;
+  }
+  .save-btn:active{transform:scale(0.98);}
+  .save-btn.purple{background:var(--purple);}
+  .cancel-link{
+    text-align:center; margin-top:12px; font-size:12.5px; color:var(--text-dim); cursor:pointer;
+  }
+
+  /* Vehicle switcher list */
+  .veh-row{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    background:var(--surface-2); border:1px solid var(--line); border-radius:12px; padding:12px 14px; margin-bottom:10px; cursor:pointer;
+  }
+  .veh-row.active{border-color:var(--amber);}
+  .veh-info .vp{font-family:var(--font-mono); font-weight:700; font-size:14px;}
+  .veh-info .vm{font-size:11.5px; color:var(--text-dim); margin-top:2px;}
+  .veh-row-actions{display:flex; gap:6px;}
+  .add-veh-btn{
+    width:100%; background:var(--surface-2); border:1px dashed var(--line); color:var(--text-dim);
+    padding:12px; border-radius:12px; font-size:13px; font-weight:600; cursor:pointer; margin-top:4px;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none !important; animation:none !important;}
+  }
+</style>
+</head>
+<body>
+
+<div class="install-bar" id="installBar">
+  <span>Install MANSKIT Vehicle Hub for one-tap access</span>
+  <div style="display:flex; align-items:center; gap:6px;">
+    <button id="installBtn">Install</button>
+    <button class="dismiss" id="installDismiss" aria-label="Dismiss">✕</button>
+  </div>
+</div>
+
+<header class="top">
+  <div class="top-row">
+    <div class="brand">MANSKIT <span>VEHICLE HUB</span><span class="ver-tag" id="verTag"></span></div>
+    <div class="top-actions">
+      <button class="icon-btn" id="vehMenuBtn" aria-label="Vehicle menu">☰</button>
+    </div>
+  </div>
+  <div class="plate" id="plateBtn">
+    <div class="plate-num" id="plateNum">ADD-REG-NO</div>
+    <div class="plate-model">
+      <span class="m1" id="plateModel">Add Vehicle Name</span>
+      <span class="m2" id="plateSub">Tap to switch vehicle</span>
+    </div>
+  </div>
+  <div class="partners-row" id="partnersRow"></div>
+</header>
+
+<main>
+  <section class="dash-mini">
+    <div class="dash-stats" style="margin-top:0;">
+      <div class="stat"><div class="n" id="statOpenCount">0</div><div class="l">Open Items</div></div>
+      <div class="stat"><div class="n" id="statOpenBalance">₹0</div><div class="l">Open Balance</div></div>
+      <div class="stat"><div class="n" id="statOdo">0</div><div class="l">Last Odometer</div></div>
+    </div>
+  </section>
+
+  <div id="remindersCard"></div>
+
+  <div id="settleCard"></div>
+
+  <div class="sect-head">
+    <div class="sect-title">Purchase &amp; Finance</div>
+    <button class="mini-btn" id="toggleFinanceBtn">Show</button>
+  </div>
+  <div id="finCard" style="display:none;"></div>
+
+  <div class="sect-head">
+    <div class="sect-title">Vehicle Photos</div>
+    <button class="mini-btn" id="togglePhotosBtn">Show</button>
+  </div>
+  <div class="photo-grid" id="photoGrid" style="display:none;"></div>
+  <input type="file" id="photoFileInput" accept="image/*" style="display:none">
+
+  <div class="log-entry-card" id="logEntryCard">
+    <span class="lec-icon">📒</span>
+    <span class="lec-mid">
+      <span class="lec-title">Log History</span>
+      <span class="lec-sub" id="logEntrySummary">No entries yet</span>
+    </span>
+    <span class="lec-chevron">›</span>
+  </div>
+</main>
+
+<button class="fab" id="addBtn" aria-label="Add transaction">+</button>
+
+<div class="sheet-backdrop" id="backdrop"></div>
+
+<!-- Transaction entry sheet -->
+<div class="sheet" id="entrySheet">
+  <div class="sheet-handle"></div>
+  <h2 id="sheetTitle">Log a Transaction</h2>
+  <div class="sheet-note">Recorded against <span id="sheetVehLabel"></span></div>
+
+  <div class="field">
+    <label>Category</label>
+    <select id="fCategory">
+      <optgroup label="Maintenance">
+        <option value="service">Service</option>
+        <option value="repair">Repair</option>
+        <option value="tyre">Tyre</option>
+        <option value="insurance">Insurance</option>
+        <option value="puncture">Puncture</option>
+        <option value="wash">Wash</option>
+      </optgroup>
+      <optgroup label="Expenses">
+        <option value="fuel">Fuel</option>
+        <option value="parking">Parking</option>
+        <option value="toll">Toll</option>
+        <option value="fine">Fine</option>
+        <option value="accessory">Accessory</option>
+        <option value="other">Other</option>
+      </optgroup>
+      <optgroup label="Finance">
+        <option value="emi" hidden>EMI Payment</option>
+        <option value="purchase" hidden>Purchase / Down Payment</option>
+      </optgroup>
+    </select>
+  </div>
+
+  <div class="row2">
+    <div class="field">
+      <label>Date</label>
+      <input type="date" id="fDate">
+    </div>
+    <div class="field">
+      <label>Odometer (km)</label>
+      <input type="number" id="fOdo" placeholder="e.g. 14230" inputmode="numeric">
+    </div>
+  </div>
+  <div class="err-text" id="odoErr">New reading must be ≥ last logged odometer.</div>
+
+  <div class="row2">
+    <div class="field">
+      <label>Principal Amount (₹)</label>
+      <input type="number" id="fPrincipal" placeholder="0" inputmode="decimal">
+    </div>
+    <div class="field">
+      <label>Manual Interest (₹)</label>
+      <input type="number" id="fInterest" placeholder="0" inputmode="decimal">
+    </div>
+  </div>
+
+  <div class="calc-box">
+    <span class="l">Total Cost</span>
+    <span class="v" id="calcTotal">₹0</span>
+  </div>
+
+  <div id="ownershipSection">
+    <div class="field">
+      <label id="splitFieldLabel">Ownership Split (₹)</label>
+      <div class="split-inputs">
+        <div class="field">
+          <label id="splitLabel1">Partner 1 (₹)</label>
+          <input type="number" id="fSplit1" value="0">
+        </div>
+        <div class="field">
+          <label id="splitLabel2">Partner 2 (₹)</label>
+          <input type="number" id="fSplit2" value="0">
+        </div>
+      </div>
+      <div class="split-readout" id="splitReadout">Partner 1 50% · ₹0 &nbsp;·&nbsp; Partner 2 50% · ₹0</div>
+      <div class="reconcile-note" id="usagePeriodNote"></div>
+    </div>
+
+    <div class="field">
+      <label>Paid By (who actually handed over the money)</label>
+      <div class="paid-mode" id="paidQuick">
+        <div class="opt" data-who="1">Partner 1 paid</div>
+        <div class="opt" data-who="split">Split evenly</div>
+        <div class="opt" data-who="2">Partner 2 paid</div>
+      </div>
+      <div class="split-inputs">
+        <div class="field">
+          <label id="paidLabel1">Partner 1 ₹</label>
+          <input type="number" id="fPaid1" value="0">
+        </div>
+        <div class="field">
+          <label id="paidLabel2">Partner 2 ₹</label>
+          <input type="number" id="fPaid2" value="0">
+        </div>
+      </div>
+      <div class="reconcile-note" id="paidReadout"></div>
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Status</label>
+    <div class="toggle-row" id="statusToggle">
+      <div class="toggle-opt sel open" data-status="OPEN">Open</div>
+      <div class="toggle-opt closed" data-status="CLOSED">Closed</div>
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Notes (optional)</label>
+    <input type="text" id="fNotes" placeholder="e.g. Full tank, Highway ride">
+  </div>
+
+  <button class="save-btn" id="saveBtn">Save Entry</button>
+  <div class="cancel-link" id="cancelBtn">Cancel</div>
+</div>
+
+<!-- Vehicle Menu sheet -->
+<div class="sheet" id="vehMenuSheet">
+  <div class="sheet-handle"></div>
+  <h2>Vehicle Menu</h2>
+  <div class="sheet-note">For <span id="menuVehLabel"></span>.</div>
+  <div class="menu-row" data-open="share"><span class="mi">📤</span><span class="mt">Share Log (as text)</span><span class="mc">›</span></div>
+  <div class="menu-row" data-open="finance"><span class="mi">💰</span><span class="mt">Purchase &amp; Finance</span><span class="mc">›</span></div>
+  <div class="menu-row" data-open="renewals"><span class="mi">🔔</span><span class="mt">Renewals &amp; Reminders</span><span class="mc">›</span></div>
+  <div class="menu-row" data-open="usage" id="usageMenuRow"><span class="mi">🧳</span><span class="mt">Personal Use Periods</span><span class="mc">›</span></div>
+  <div class="menu-row" data-open="insights"><span class="mi">📊</span><span class="mt">Insights &amp; Spend History</span><span class="mc">›</span></div>
+  <div class="menu-row" data-open="editveh"><span class="mi">✏️</span><span class="mt">Edit Vehicle Details</span><span class="mc">›</span></div>
+  <div class="menu-row" data-open="documents"><span class="mi">📄</span><span class="mt">Documents (RC, Insurance…)</span><span class="mc">›</span></div>
+  <div class="menu-row" data-open="backup"><span class="mi">💾</span><span class="mt">Backup &amp; Restore (all vehicles)</span><span class="mc">›</span></div>
+  <div class="cancel-link" id="menuCancelBtn">Close</div>
+  <div class="menu-version" id="menuVersionTag"></div>
+</div>
+
+<!-- Log History sheet -->
+<div class="sheet" id="logSheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-top-row">
+    <h2 style="margin:0;">Log History</h2>
+    <button class="icon-btn" id="shareLogBtn" aria-label="Share log as text">⤴</button>
+  </div>
+  <input type="text" class="search-input" id="logSearchInput" placeholder="Search date, note, category, amount, odometer…">
+  <div class="filter-row" id="filterRow">
+    <div class="fchip active" data-filter="all">All</div>
+    <div class="fchip" data-filter="maint">Maintenance</div>
+    <div class="fchip" data-filter="expense">Expenses</div>
+    <div class="fchip" data-filter="finance">Finance</div>
+  </div>
+
+  <div class="log" id="logList"></div>
+  <div id="logShowMoreWrap"></div>
+  <div class="cancel-link" id="logSheetCancelBtn">Close</div>
+</div>
+
+<!-- Settlement detail sheet -->
+<div class="sheet" id="settleDetailSheet">
+  <div class="sheet-handle"></div>
+  <h2>Settlement Detail</h2>
+  <div class="sheet-note">For <span id="sdVehLabel"></span>.</div>
+  <div class="calc-box"><span class="l" id="sdSummary" style="flex:1;">All settled up.</span></div>
+
+  <button class="save-btn purple" id="settleZeroBtn" style="display:none; margin-bottom:18px;">Settle Up Now — Mark as Zero</button>
+
+  <div class="sect-mini first">Settlement History</div>
+  <div id="settleHistoryList"></div>
+
+  <div class="sect-mini">Record a Settlement Payment</div>
+  <div class="reconcile-note">Use this when money actually changed hands between partners — it adjusts the balance on top of the logged entries.</div>
+  <div class="row2">
+    <div class="field"><label>From</label><select id="stFrom"></select></div>
+    <div class="field"><label>To</label><select id="stTo"></select></div>
+  </div>
+  <div class="row2">
+    <div class="field"><label>Date</label><input type="date" id="stDate"></div>
+    <div class="field"><label>Amount (₹)</label><input type="number" id="stAmount" placeholder="0"></div>
+  </div>
+  <div class="field"><label>Note (optional)</label><input type="text" id="stNote" placeholder="e.g. Paid via UPI"></div>
+  <button class="save-btn" id="stSaveBtn">Save Settlement</button>
+
+  <div class="sect-mini">Per-Entry Breakdown</div>
+  <div id="settleDetailList"></div>
+  <div class="cancel-link" id="sdCancelBtn">Close</div>
+</div>
+
+<!-- Documents sheet -->
+<div class="sheet" id="documentsSheet">
+  <div class="sheet-handle"></div>
+  <h2>Documents</h2>
+  <div class="sheet-note">For <span id="docVehLabel"></span>. RC, insurance, pollution certificate, tax receipts, license — kept safely per vehicle. Photos or PDFs both work.</div>
+  <div id="documentsList"></div>
+  <input type="file" id="docFileInput" accept="image/*,application/pdf" style="display:none">
+  <div class="cancel-link" id="docCancelBtn">Close</div>
+</div>
+
+<!-- Backup & Restore sheet -->
+<div class="sheet" id="backupSheet">
+  <div class="sheet-handle"></div>
+  <h2>Backup &amp; Restore</h2>
+  <div class="sheet-note">Covers every vehicle, every entry, all in one file. Not tied to whichever vehicle is currently active.</div>
+
+  <div class="sect-mini first">Back Up</div>
+  <button class="save-btn purple" id="bkDownloadBtn">Download Backup File</button>
+  <button class="quick-emi-btn" id="bkCopyBtn">Copy Backup as Text</button>
+  <div class="reconcile-note" id="bkStatusNote"></div>
+
+  <div class="backup-divider"></div>
+
+  <div class="sect-mini first">Restore</div>
+  <div class="reconcile-note warn">Restoring replaces everything currently in the app — all vehicles, all entries. Back up first if you're not sure.</div>
+  <div class="field">
+    <label>From a File</label>
+    <input type="file" id="bkFileInput" accept=".json,application/json">
+  </div>
+  <div class="field">
+    <label>Or Paste Backup Text</label>
+    <textarea class="paste-box" id="bkPasteBox" placeholder="Paste the exported backup text here"></textarea>
+  </div>
+  <button class="save-btn" id="bkRestorePasteBtn" style="background:var(--red); color:#fff;">Restore from Pasted Text</button>
+
+  <div class="cancel-link" id="bkCancelBtn">Close</div>
+</div>
+
+<!-- Purchase & Finance sheet -->
+<div class="sheet" id="financeSheet">
+  <div class="sheet-handle"></div>
+  <h2>Purchase &amp; Finance</h2>
+  <div class="sheet-note">For <span id="finVehLabel"></span>. Enter the actual figures from your loan sanction letter — profit % is calculated for you, not guessed.</div>
+
+  <div class="sect-mini first">Vehicle Purchase</div>
+  <div class="row2">
+    <div class="field">
+      <label>Purchase Date</label>
+      <input type="date" id="pfDate">
+    </div>
+    <div class="field">
+      <label>On-Road Price (₹)</label>
+      <input type="number" id="pfPrice" placeholder="0" inputmode="decimal">
+    </div>
+  </div>
+  <div class="field">
+    <label>Down Payment (₹)</label>
+    <input type="number" id="pfDown" placeholder="0" inputmode="decimal">
+  </div>
+  <div class="field" id="pfDpPaidSection">
+    <label>Down Payment Paid By</label>
+    <div class="paid-mode" id="pfDpQuick">
+      <div class="opt" data-who="1">Partner 1 paid</div>
+      <div class="opt" data-who="split">Split evenly</div>
+      <div class="opt" data-who="2">Partner 2 paid</div>
+    </div>
+    <div class="split-inputs">
+      <div class="field">
+        <label id="pfDpLabel1">Partner 1 ₹</label>
+        <input type="number" id="pfDpPaid1" value="0">
+      </div>
+      <div class="field">
+        <label id="pfDpLabel2">Partner 2 ₹</label>
+        <input type="number" id="pfDpPaid2" value="0">
+      </div>
+    </div>
+    <div class="reconcile-note" id="pfDpReadout"></div>
+  </div>
+
+  <div class="sect-mini">Down Payment Status</div>
+  <div class="reconcile-note">Closed means the down payment has actually been paid over. Use Open if it's agreed but the money hasn't changed hands yet.</div>
+  <div class="toggle-row" id="pfDpStatusToggle">
+    <div class="toggle-opt open" data-status="OPEN">Open</div>
+    <div class="toggle-opt sel closed" data-status="CLOSED">Closed</div>
+  </div>
+
+  <div class="calc-box">
+    <span class="l">Balance Due to Dealer</span>
+    <span class="v" id="pfBalanceDealer">₹0</span>
+  </div>
+
+  <div class="sect-mini">Finance / Loan</div>
+  <div class="row2">
+    <div class="field">
+      <label>Loan Amount — Vehicle (₹)</label>
+      <input type="number" id="pfLoanAmt" placeholder="0" inputmode="decimal">
+    </div>
+    <div class="field">
+      <label>Insurance Financed (₹)</label>
+      <input type="number" id="pfInsurance" placeholder="0" inputmode="decimal">
+    </div>
+  </div>
+  <div class="calc-box">
+    <span class="l">Total Loan Amount</span>
+    <span class="v" id="pfTotalLoan">₹0</span>
+  </div>
+  <div class="field">
+    <label>Loan Account Number (optional)</label>
+    <input type="text" id="pfAccountNo" placeholder="e.g. TCFUC0068000014970051">
+  </div>
+  <div class="row2">
+    <div class="field">
+      <label>Processing Charge (₹)</label>
+      <input type="number" id="pfProcessing" placeholder="0" inputmode="decimal">
+    </div>
+    <div class="field">
+      <label>RTO Charges (₹)</label>
+      <input type="number" id="pfRto" placeholder="0" inputmode="decimal">
+    </div>
+  </div>
+  <div class="calc-box">
+    <span class="l">Net Disbursement (Loan − Processing)</span>
+    <span class="v" id="pfNetDisb">₹0</span>
+  </div>
+  <div class="calc-box">
+    <span class="l">Reaches Dealer (− RTO)</span>
+    <span class="v" id="pfReachesDealer">₹0</span>
+  </div>
+  <div class="reconcile-note" id="pfReconcileNote"></div>
+
+  <div class="sect-mini">Repayment</div>
+  <div class="row2">
+    <div class="field">
+      <label>Monthly EMI (₹)</label>
+      <input type="number" id="pfEmi" placeholder="0" inputmode="decimal">
+    </div>
+    <div class="field">
+      <label>Tenure (months)</label>
+      <input type="number" id="pfTenure" placeholder="e.g. 36" inputmode="numeric">
+    </div>
+  </div>
+  <div class="calc-box">
+    <span class="l">Total Payable (EMI × Tenure)</span>
+    <span class="v" id="pfTotalPayable">₹0</span>
+  </div>
+  <div class="calc-box">
+    <span class="l">Finance Profit (Interest)</span>
+    <span class="v" id="pfProfitAmt">₹0</span>
+  </div>
+  <div class="calc-box">
+    <span class="l">Effective Profit %</span>
+    <span class="v" id="pfProfitPct">0%</span>
+  </div>
+
+  <div class="sect-mini">Loan Status</div>
+  <div class="reconcile-note">Mark this Closed once the loan is fully paid off or foreclosed — the dashboard stops showing a scheduled EMI and the "Next EMI" reminder switches off.</div>
+  <div class="toggle-row" id="pfStatusToggle">
+    <div class="toggle-opt sel open" data-status="OPEN">Open</div>
+    <div class="toggle-opt closed" data-status="CLOSED">Closed</div>
+  </div>
+
+  <div class="sect-mini">Payment History</div>
+  <div class="reconcile-note">Outstanding is a straight-line estimate — the loan reduces evenly across the tenure as each EMI is marked closed. Your lender's actual reducing-balance figure may differ slightly.</div>
+  <div class="pay-hist" id="payHistList"></div>
+  <button class="quick-emi-btn" id="quickEmiBtn">+ Log an EMI payment</button>
+
+  <button class="save-btn purple" id="pfSaveBtn" style="margin-top:18px;">Save Purchase &amp; Finance</button>
+  <div class="cancel-link" id="pfClearBtn">Clear finance details for this vehicle</div>
+  <div class="cancel-link" id="pfCancelBtn">Cancel</div>
+</div>
+
+<!-- Renewals & Reminders sheet -->
+<div class="sheet" id="renewalsSheet">
+  <div class="sheet-handle"></div>
+  <h2>Renewals &amp; Reminders</h2>
+  <div class="sheet-note">For <span id="renVehLabel"></span>. Shown as a banner on the dashboard every time you open the app.</div>
+
+  <div class="sect-mini first">Oil / Service Interval</div>
+  <div class="row2">
+    <div class="field"><label>Every (km)</label><input type="number" id="rnIntervalKm" placeholder="e.g. 3000"></div>
+    <div class="field"><label>Every (months)</label><input type="number" id="rnIntervalMonths" placeholder="e.g. 6"></div>
+  </div>
+  <div class="row2">
+    <div class="field"><label>Last Service Odometer (km)</label><input type="number" id="rnLastOdo" placeholder="0"></div>
+    <div class="field"><label>Last Service Date</label><input type="date" id="rnLastDate"></div>
+  </div>
+
+  <div class="sect-mini">Insurance</div>
+  <div class="field"><label>Insurance Expiry Date</label><input type="date" id="rnInsurance"></div>
+
+  <div class="sect-mini">Road Tax / RC</div>
+  <div class="field"><label>Tax Renewal Due Date</label><input type="date" id="rnTax"></div>
+
+  <div class="sect-mini">Notifications</div>
+  <div class="reconcile-note">A real background push (while the app is closed) needs a server — this app doesn't have one. Turning this on fires an on-device notification the moment you open the app, if anything's due or overdue.</div>
+  <button class="quick-emi-btn" id="notifPermBtn">Enable on-open notifications</button>
+  <div class="reconcile-note" id="notifStatusNote"></div>
+
+  <button class="save-btn" id="rnSaveBtn" style="margin-top:16px;">Save Renewals</button>
+  <div class="cancel-link" id="rnCancelBtn">Cancel</div>
+</div>
+
+<!-- Usage Periods sheet -->
+<div class="sheet" id="usageSheet">
+  <div class="sheet-handle"></div>
+  <h2>Personal Use Periods</h2>
+  <div class="sheet-note">For <span id="usgVehLabel"></span>. Mark a stretch where one partner has the vehicle to themselves — costs logged in that window default to 100% theirs, automatically.</div>
+
+  <div id="usageList"></div>
+
+  <div class="sect-mini">Add a Period</div>
+  <div class="field">
+    <label>Who has the vehicle</label>
+    <select id="usgPartner">
+      <option value="0"></option>
+      <option value="1"></option>
+    </select>
+  </div>
+  <div class="row2">
+    <div class="field"><label>Start Date</label><input type="date" id="usgStart"></div>
+    <div class="field"><label>End Date (blank = ongoing)</label><input type="date" id="usgEnd"></div>
+  </div>
+  <div class="field"><label>Note (optional)</label><input type="text" id="usgNote" placeholder="e.g. Solo trip to Wayanad"></div>
+  <button class="save-btn purple" id="usgAddBtn">Add Period</button>
+  <div class="cancel-link" id="usgCancelBtn">Close</div>
+</div>
+
+<!-- Insights sheet -->
+<div class="sheet" id="insightsSheet">
+  <div class="sheet-handle"></div>
+  <h2>Insights &amp; Spend History</h2>
+  <div class="sheet-note">For <span id="insVehLabel"></span>.</div>
+
+  <div class="calc-box"><span class="l">Total Spent — All Time</span><span class="v" id="insTotalSpent">₹0</span></div>
+  <div class="calc-box"><span class="l">Total Invested in Vehicle</span><span class="v" id="insTotalInvested">₹0</span></div>
+  <div class="reconcile-note">Invested = on-road purchase price + every accessory/upgrade logged. Everything else (fuel, service, EMI, tolls…) is running cost, not added value.</div>
+
+  <div class="sect-mini">By Category — Lifetime</div>
+  <div id="insCatBars"></div>
+
+  <div class="sect-mini">By Year</div>
+  <div id="insYearBars"></div>
+
+  <div class="cancel-link" id="insCancelBtn">Close</div>
+</div>
+
+<!-- Vehicle switcher sheet -->
+<div class="sheet" id="vehicleSheet">
+  <div class="sheet-handle"></div>
+  <h2>Switch Vehicle</h2>
+  <div class="sheet-note">Each vehicle keeps its own log, partners and finance profile.</div>
+  <div id="vehicleList"></div>
+  <button class="add-veh-btn" id="addVehicleBtn">+ Add another vehicle</button>
+  <div class="cancel-link" id="vehCancelBtn">Close</div>
+</div>
+
+<!-- Edit vehicle sheet -->
+<div class="sheet" id="editVehicleSheet">
+  <div class="sheet-handle"></div>
+  <h2 id="editVehTitle">Edit Vehicle</h2>
+
+  <div class="field">
+    <label>Ownership</label>
+    <select id="evOwnership">
+      <option value="single">Single Owner</option>
+      <option value="partnership">Partnership (2 owners)</option>
+    </select>
+  </div>
+
+  <div class="row2">
+    <div class="field">
+      <label>Registration Number</label>
+      <input type="text" id="evPlate" placeholder="e.g. KA01AB1234" class="uppercase-input">
+    </div>
+    <div class="field">
+      <label>Model</label>
+      <input type="text" id="evModel" placeholder="e.g. Honda Activa" class="uppercase-input">
+    </div>
+  </div>
+  <div class="row2">
+    <div class="field">
+      <label id="evP1Label">Owner Name</label>
+      <input type="text" id="evP1" placeholder="e.g. Owner name" class="uppercase-input">
+    </div>
+    <div class="field" id="evP2Wrap">
+      <label>Partner 2 Name</label>
+      <input type="text" id="evP2" placeholder="e.g. Partner 2 name" class="uppercase-input">
+    </div>
+  </div>
+
+  <button class="save-btn" id="evSaveBtn">Save Vehicle</button>
+  <div class="cancel-link" id="evDeleteBtn" style="color:var(--red);">Delete this vehicle</div>
+  <div class="cancel-link" id="evCancelBtn">Cancel</div>
+</div>
+
+<!-- Full-screen photo viewer -->
+<div class="photo-viewer" id="photoViewer">
+  <div class="pv-top">
+    <div class="pv-label" id="pvLabel">Front</div>
+    <button class="pv-close" id="pvCloseBtn" aria-label="Close">✕</button>
+  </div>
+  <div class="pv-stage" id="pvStage">
+    <img id="pvImage" src="" alt="Vehicle photo">
+  </div>
+  <div class="pv-bottom">
+    <div class="pv-hint">Pinch to zoom · drag to pan · double-tap to reset</div>
+    <div class="pv-history" id="pvHistory"></div>
+    <div class="pv-actions">
+      <button class="mini-btn" id="pvAddBtn">+ Add new photo</button>
+      <button class="mini-btn danger" id="pvDeleteBtn">Delete this photo</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  const STORE_KEY_V2 = "manskit_vehicle_hub_v2";
+  const STORE_KEY_V1 = "manskit_vehicle_hub_v1";
+  const APP_VERSION = "2.8.0 · 2026-09-04";
+
+  const CATS = {
+    service:   {group:"maint",   label:"Service"},
+    repair:    {group:"maint",   label:"Repair"},
+    tyre:      {group:"maint",   label:"Tyre"},
+    insurance: {group:"maint",   label:"Insurance"},
+    puncture:  {group:"maint",   label:"Puncture"},
+    wash:      {group:"maint",   label:"Wash"},
+    fuel:      {group:"expense", label:"Fuel"},
+    parking:   {group:"expense", label:"Parking"},
+    toll:      {group:"expense", label:"Toll"},
+    fine:      {group:"expense", label:"Fine"},
+    accessory: {group:"expense", label:"Accessory"},
+    other:     {group:"expense", label:"Other"},
+    emi:       {group:"finance", label:"EMI Payment"},
+    purchase:  {group:"finance", label:"Purchase / Down Payment"}
+  };
+
+  function freshVehicle(plate, model, p1, p2, ownershipType){
+    return {
+      id: "v" + Date.now() + Math.random().toString(36).slice(2,6),
+      plate: plate || "ADD-REG-NO",
+      model: model || "New Vehicle",
+      ownershipType: ownershipType || "single",
+      partners: [p1 || "Owner", p2 || "Partner 2"],
+      partnerColors: ["#F2A93B", "#5B8DEF"],
+      purchase: null,
+      renewals: { intervalKm:0, intervalMonths:0, lastServiceOdo:0, lastServiceDate:"", insuranceExpiry:"", taxExpiry:"" },
+      usagePeriods: [],
+      photos: { front:[], back:[], left:[], right:[], interior:[] },
+      documents: { rc:[], pollution:[], insurance:[], tax:[], license:[], other:[] },
+      settlements: [],
+      entries: []
+    };
+  }
+
+
+  function migrateOrDefault(){
+    try{
+      const raw2 = localStorage.getItem(STORE_KEY_V2);
+      if(raw2) return JSON.parse(raw2);
+    }catch(e){}
+
+    // migrate v1 single-vehicle data if present
+    try{
+      const raw1 = localStorage.getItem(STORE_KEY_V1);
+      if(raw1){
+        const old = JSON.parse(raw1);
+        const veh = freshVehicle(
+          old.vehicle && old.vehicle.plate,
+          old.vehicle && old.vehicle.model,
+          old.partners && old.partners[0],
+          old.partners && old.partners[1]
+        );
+        if(old.partnerColors) veh.partnerColors = old.partnerColors;
+        veh.entries = (old.entries || []).map(e=>({
+          id: e.id, category: e.type === "emi" ? "emi" : (e.type || "other"),
+          date: e.date, odo: e.odo, principal: e.principal, interest: e.interest || 0,
+          split: e.split || [50,50], status: e.status || "OPEN", notes: e.notes || ""
+        }));
+        return { vehicles:[veh], activeVehicleId: veh.id };
+      }
+    }catch(e){}
+
+    const veh = freshVehicle("ADD-REG-NO", "Add Vehicle Name", "Owner", "Partner 2", "single");
+    return { vehicles:[veh], activeVehicleId: veh.id };
+  }
+
+  // Upgrades a purchase record from the old flat-rate-% shape to the
+  // real bank-figures shape (loan, insurance, processing, RTO, EMI).
+  function normalizePurchase(p){
+    if(!p) return null;
+    if(p.loanAmount !== undefined){
+      if(!p.financeStatus) p.financeStatus = "OPEN";
+      if(!p.downPaymentStatus) p.downPaymentStatus = "CLOSED"; // existing down payments were already made
+      return p; // already current shape
+    }
+    const loan = Math.max(0, (p.price||0) - (p.downPayment||0));
+    const profitAmt = loan * (p.profitPercent||0) / 100;
+    const totalPayable = loan + profitAmt;
+    const emi = p.tenureMonths > 0 ? Math.round(totalPayable / p.tenureMonths) : 0;
+    return {
+      date: p.date, price: p.price || 0, downPayment: p.downPayment || 0,
+      loanAmount: loan, insuranceAmount: 0, processingCharge: 0, rtoCharges: 0,
+      emiAmount: emi, tenureMonths: p.tenureMonths || 0, financeStatus: "OPEN", downPaymentStatus: "CLOSED"
+    };
+  }
+
+  let state = migrateOrDefault();
+  state.vehicles.forEach(v=>{
+    v.purchase = normalizePurchase(v.purchase);
+    if(!v.renewals) v.renewals = { intervalKm:0, intervalMonths:0, lastServiceOdo:0, lastServiceDate:"", insuranceExpiry:"", taxExpiry:"" };
+    if(!v.usagePeriods) v.usagePeriods = [];
+    if(!v.photos) v.photos = { front:[], back:[], left:[], right:[], interior:[] };
+    ["front","back","left","right","interior"].forEach(k=>{ if(!v.photos[k]) v.photos[k] = []; });
+    if(!v.ownershipType) v.ownershipType = "partnership"; // existing vehicles keep their current 2-owner behavior
+    if(!v.settlements) v.settlements = [];
+    if(!v.documents) v.documents = { rc:[], pollution:[], insurance:[], tax:[], license:[], other:[] };
+  });
+  let activeFilter = "all";
+  let logExpanded = false;
+  let logSearchTerm = "";
+  let editingId = null;
+  let splitManuallySet = false;
+  let usagePeriodPartnerIndex = null;
+  let paidManuallySet = false;
+  let editingVehicleId = null; // for edit-vehicle sheet ("new" when creating)
+
+  const $ = (sel)=>document.querySelector(sel);
+  const fmt = (n)=> "₹" + Math.round(n || 0).toLocaleString("en-IN");
+  const escapeHtml = (s)=> String(s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+  function saveState(){
+    try{
+      localStorage.setItem(STORE_KEY_V2, JSON.stringify(state));
+      return true;
+    }catch(e){
+      alert("Storage is full — this usually happens after adding a lot of photos. Delete a few older photos, or back up and clear some data, then try again.");
+      return false;
+    }
+  }
+
+  function activeVehicle(){
+    return state.vehicles.find(v=>v.id === state.activeVehicleId) || state.vehicles[0];
+  }
+
+  function getMaxOdometer(excludeId){
+    let max = 0;
+    activeVehicle().entries.forEach(e=>{
+      if(e.id === excludeId) return;
+      if(e.odo > max) max = e.odo;
+    });
+    return max;
+  }
+
+  // ===================== RENDER =====================
+
+  function renderHeader(){
+    const v = activeVehicle();
+    $("#plateNum").textContent = v.plate;
+    $("#plateModel").textContent = v.model;
+    const row = $("#partnersRow");
+    row.innerHTML = "";
+    const isSingle = v.ownershipType === "single";
+    const names = isSingle ? [v.partners[0]] : v.partners;
+    names.forEach((name, i)=>{
+      const div = document.createElement("div");
+      div.className = "chip";
+      div.innerHTML = `<span class="dot" style="background:${v.partnerColors[i]}"></span>
+        <span class="label">${isSingle ? "Owner" : "Partner"}</span><span class="name">${escapeHtml(name)}</span>`;
+      row.appendChild(div);
+    });
+  }
+
+  function renderDash(){
+    const v = activeVehicle();
+    const openAll = v.entries.filter(e=>e.status==="OPEN");
+    const openBalance = openAll.reduce((s,e)=> s + e.principal + (e.interest||0), 0);
+    $("#statOpenCount").textContent = openAll.length;
+    $("#statOpenBalance").textContent = fmt(openBalance);
+    $("#statOdo").textContent = getMaxOdometer(null).toLocaleString("en-IN");
+  }
+
+  function renderOdometerDigits(value){
+    const box = $("#odoDigits");
+    box.innerHTML = "";
+    const withCommas = value.toLocaleString("en-IN");
+    for(const ch of withCommas){
+      const d = document.createElement("span");
+      d.className = "d" + (ch === "," ? " sep" : "");
+      d.textContent = ch;
+      box.appendChild(d);
+    }
+  }
+
+  // p = {price, downPayment, loanAmount, insuranceAmount, processingCharge, rtoCharges, emiAmount, tenureMonths}
+  function computeFinance(p){
+    const totalLoan = (p.loanAmount||0) + (p.insuranceAmount||0);
+    const netDisb = (p.loanAmount||0) - (p.processingCharge||0);
+    const reachesDealer = netDisb - (p.rtoCharges||0);
+    const totalPayable = (p.emiAmount||0) * (p.tenureMonths||0);
+    const profitAmt = totalPayable - totalLoan;
+    const profitPct = totalLoan > 0 ? (profitAmt/totalLoan*100) : 0;
+    const balanceDueDealer = Math.max(0, (p.price||0) - (p.downPayment||0));
+    return { totalLoan, netDisb, reachesDealer, totalPayable, profitAmt, profitPct, balanceDueDealer };
+  }
+
+  // Paid EMI installments = closed 'emi' log entries for this vehicle, oldest first.
+  function paidEmiEntries(v){
+    return v.entries
+      .filter(e=> e.category === "emi" && e.status === "CLOSED")
+      .slice()
+      .sort((a,b)=> new Date(a.date) - new Date(b.date));
+  }
+
+  // How many EMI installments each partner has actually paid — majority payer per entry wins the count.
+  function computeEmiPaymentCounts(v){
+    let count1 = 0, count2 = 0;
+    paidEmiEntries(v).forEach(e=>{
+      const paid = e.paid || [0,0];
+      if(paid[0] >= paid[1]) count1++; else count2++;
+    });
+    return [count1, count2];
+  }
+
+  // Straight-line outstanding estimate: loan reduces evenly across the tenure
+  // as each EMI is marked closed. Not the lender's exact reducing-balance figure.
+  function computeOutstanding(v){
+    if(!v.purchase || !v.purchase.loanAmount) return null;
+    const f = computeFinance(v.purchase);
+    const paid = paidEmiEntries(v);
+    const tenure = v.purchase.tenureMonths || 0;
+    const paidCount = Math.min(paid.length, tenure || paid.length);
+    const outstanding = tenure > 0
+      ? Math.max(0, Math.round(f.totalLoan * (1 - paidCount/tenure)))
+      : f.totalLoan;
+    const lastPaid = paid.length ? paid[paid.length-1] : null;
+    return {
+      paidCount, remaining: Math.max(0, tenure - paidCount), outstanding,
+      lastPaidAmount: lastPaid ? (lastPaid.principal + (lastPaid.interest||0)) : null,
+      lastPaidDate: lastPaid ? lastPaid.date : null,
+      paidList: paid
+    };
+  }
+
+  function computeMonthlyDue(v){
+    const openEmi = v.entries.filter(e=>e.category==="emi" && e.status==="OPEN");
+    const loggedMonthlyDue = openEmi.reduce((s,e)=> s + e.principal + (e.interest||0), 0);
+    let monthlyDue = loggedMonthlyDue, tag = "from logged EMI", sub;
+    if(v.purchase && v.purchase.emiAmount > 0 && v.purchase.financeStatus !== "CLOSED"){
+      const f = computeFinance(v.purchase);
+      monthlyDue = v.purchase.emiAmount;
+      tag = "scheduled EMI";
+      sub = `${v.purchase.tenureMonths} month tenure · ${f.profitPct.toFixed(1)}% effective finance profit.`;
+    } else if(v.purchase && v.purchase.financeStatus === "CLOSED"){
+      tag = "finance closed";
+      sub = "Loan marked closed — fully paid off. No scheduled EMI.";
+    } else {
+      sub = openEmi.length
+        ? `${openEmi.length} open EMI ${openEmi.length===1?"entry":"entries"} across the log.`
+        : "No open EMI entries this cycle. Set up Purchase & Finance for a scheduled EMI.";
+    }
+    return { monthlyDue, tag, sub };
+  }
+
+  function dueDigitsHtml(){
+    return `
+      <div class="dash-label"><span>Active Monthly Due</span><span class="tag" id="dashTag">from logged EMI</span></div>
+      <div class="odometer">
+        <span class="cur">₹</span>
+        <div class="odo-digits" id="odoDigits"></div>
+      </div>
+      <div class="dash-sub" id="dashSub"></div>
+    `;
+  }
+
+  function fillDueDigits(v){
+    const { monthlyDue, tag, sub } = computeMonthlyDue(v);
+    renderOdometerDigits(Math.round(monthlyDue));
+    $("#dashTag").textContent = tag;
+    $("#dashSub").textContent = sub;
+  }
+
+  function renderFinCard(){
+    const v = activeVehicle();
+    const container = $("#finCard");
+    if(!v.purchase || !v.purchase.loanAmount){
+      container.innerHTML = `
+        <div class="dash">${dueDigitsHtml()}</div>
+        <div class="fin-hero-empty" id="finEmptyTap">
+          No purchase or finance details logged yet. Tap to add the on-road price, down payment, loan and EMI figures from your sanction letter.
+        </div>
+      `;
+      fillDueDigits(v);
+      $("#finEmptyTap").addEventListener("click", openFinanceSheet);
+      return;
+    }
+    const f = computeFinance(v.purchase);
+    const o = computeOutstanding(v);
+    const isSingle = v.ownershipType === "single";
+    const status = v.purchase.financeStatus === "CLOSED" ? "CLOSED" : "OPEN";
+
+    let dpLineHtml = "";
+    if(v.purchase.downPayment > 0){
+      let contrib = "";
+      if(!isSingle && v.purchase.downPaymentPaid){
+        const [dp1, dp2] = v.purchase.downPaymentPaid;
+        contrib = dp1 > 0 && dp2 > 0
+          ? ` — ${escapeHtml(v.partners[0])} ${fmt(dp1)} · ${escapeHtml(v.partners[1])} ${fmt(dp2)}`
+          : dp1 >= dp2
+            ? ` — ${escapeHtml(v.partners[0])} paid`
+            : ` — ${escapeHtml(v.partners[1])} paid`;
+      }
+      const dpPending = v.purchase.downPaymentStatus === "OPEN";
+      dpLineHtml = `
+        <div class="fin-hero-line">
+          <span class="fhl-label">💰 Down Payment${dpPending ? ` <span class="fin-hero-badge">PENDING</span>` : ""}</span>
+          <span class="fhl-value">${fmt(v.purchase.downPayment)}${contrib}</span>
+        </div>
+      `;
+    }
+
+    let emiCountHtml = "";
+    if(!isSingle){
+      const [c1, c2] = computeEmiPaymentCounts(v);
+      if(c1 + c2 > 0){
+        emiCountHtml = `
+          <div class="fin-hero-line">
+            <span class="fhl-label">💳 EMIs Paid</span>
+            <span class="fhl-value">${escapeHtml(v.partners[0])} ${c1} · ${escapeHtml(v.partners[1])} ${c2}</span>
+          </div>
+        `;
+      }
+    }
+
+    container.innerHTML = `
+      <div class="fin-hero" id="finHeroCard">
+        <div class="fin-hero-label">
+          <span class="fin-hero-badge ${status==='CLOSED'?'closed':''}">${status}</span>
+          <span>${v.model}</span>
+        </div>
+        <div class="dash light">${dueDigitsHtml()}</div>
+        <div class="fin-hero-grid">
+          <div class="fin-hero-item"><div class="n">${fmt(v.purchase.price)}</div><div class="l">On-Road Price</div></div>
+          <div class="fin-hero-item"><div class="n">${fmt(f.totalLoan)}</div><div class="l">Total Loan Amount</div></div>
+          <div class="fin-hero-item"><div class="n">${fmt(v.purchase.emiAmount)}</div><div class="l">EMI Amount</div></div>
+          <div class="fin-hero-item"><div class="n">${v.purchase.tenureMonths || 0} mo</div><div class="l">Tenure</div></div>
+          <div class="fin-hero-item"><div class="n">${o.lastPaidAmount !== null ? fmt(o.lastPaidAmount) : "—"}</div><div class="l">Last Paid Amount</div></div>
+          <div class="fin-hero-item"><div class="n">${fmt(o.outstanding)}</div><div class="l">Outstanding (est.)</div></div>
+          <div class="fin-hero-item"><div class="n">${o.paidCount} / ${v.purchase.tenureMonths || 0}</div><div class="l">Installments Paid</div></div>
+          <div class="fin-hero-item"><div class="n">${f.profitPct.toFixed(1)}%</div><div class="l">Finance Profit</div></div>
+        </div>
+        ${dpLineHtml}
+        ${emiCountHtml}
+        ${v.purchase.accountNo ? `
+        <div class="fin-hero-acct">
+          <span>${escapeHtml(v.purchase.accountNo)}</span>
+          <button type="button" id="acctCopyBtn" aria-label="Copy account number">⧉</button>
+        </div>` : ""}
+      </div>
+    `;
+    fillDueDigits(v);
+    $("#finHeroCard").addEventListener("click", (e)=>{
+      if(e.target.closest("#acctCopyBtn")) return;
+      openFinanceSheet();
+    });
+    const copyBtn = $("#acctCopyBtn");
+    if(copyBtn){
+      copyBtn.addEventListener("click", (e)=>{
+        e.stopPropagation();
+        const text = v.purchase.accountNo;
+        if(navigator.clipboard && navigator.clipboard.writeText){
+          navigator.clipboard.writeText(text).then(()=>{
+            copyBtn.textContent = "✓";
+            setTimeout(()=>{ copyBtn.textContent = "⧉"; }, 1200);
+          }).catch(()=>{});
+        }
+      });
+    }
+  }
+
+  function renderPaymentHistory(){
+    const v = activeVehicle();
+    const list = $("#payHistList");
+    const o = computeOutstanding(v);
+    if(!o || !o.paidList.length){
+      list.innerHTML = `<div class="pay-hist-empty">No EMI payments logged yet. Closed EMI entries in the log will show up here as payment history.</div>`;
+      return;
+    }
+    const f = computeFinance(v.purchase);
+    const tenure = v.purchase.tenureMonths || o.paidList.length;
+    list.innerHTML = "";
+    o.paidList.forEach((e, i)=>{
+      const n = i + 1;
+      const paidSoFar = Math.min(n, tenure);
+      const runningOutstanding = tenure > 0 ? Math.max(0, Math.round(f.totalLoan * (1 - paidSoFar/tenure))) : 0;
+      const row = document.createElement("div");
+      row.className = "pay-hist-row";
+      row.innerHTML = `
+        <span class="idx">${n}</span>
+        <span class="mid"><span class="d">${formatDate(e.date)}</span></span>
+        <span>
+          <div class="amt">${fmt(e.principal + (e.interest||0))}</div>
+          <div class="out">outstanding ${fmt(runningOutstanding)}</div>
+        </span>
+      `;
+      list.appendChild(row);
+    });
+  }
+
+
+  function entryMatchesSearch(e, meta, term){
+    if(!term) return true;
+    const total = e.principal + (e.interest||0);
+    const haystack = [
+      formatDate(e.date), e.date, meta.label, e.notes || "",
+      String(total), String(e.principal), String(e.interest||0), String(e.odo||"")
+    ].join(" ").toLowerCase();
+    return haystack.includes(term);
+  }
+
+  function renderLog(){
+    const v = activeVehicle();
+    const list = $("#logList");
+    let entries = v.entries.slice().sort((a,b)=> new Date(b.date) - new Date(a.date) || b.odo - a.odo);
+    if(activeFilter !== "all") entries = entries.filter(e=> (CATS[e.category] || CATS.other).group === activeFilter);
+
+    const term = logSearchTerm.trim().toLowerCase();
+    if(term) entries = entries.filter(e=> entryMatchesSearch(e, CATS[e.category] || CATS.other, term));
+
+    if(!entries.length){
+      list.innerHTML = `<div class="empty">
+        <div class="big">${term ? "No matches" : "Log's empty"}</div>
+        <p>${term ? "Nothing matches that search — try a different date, note, category or amount." : "No entries here yet.<br>Tap the + button to log maintenance, an expense, or a finance payment."}</p>
+      </div>`;
+      $("#logShowMoreWrap").innerHTML = "";
+      return;
+    }
+
+    const totalCount = entries.length;
+    const visibleEntries = (logExpanded || term) ? entries : entries.slice(0, 5);
+    const isSingle = v.ownershipType === "single";
+
+    list.innerHTML = "";
+    visibleEntries.forEach(e=>{
+      const total = e.principal + (e.interest||0);
+      const meta = CATS[e.category] || CATS.other;
+      const card = document.createElement("div");
+      card.className = `card grp-${meta.group}${e.category==="purchase" ? " cat-purchase" : ""}`;
+
+      let ownershipHtml = "";
+      if(!isSingle){
+        const s1 = e.split ? e.split[0] : 50;
+        const s2 = e.split ? e.split[1] : 50;
+        const owed1 = total * s1/100, owed2 = total - owed1;
+        const paid1 = e.paid ? e.paid[0] : owed1;
+        const paid2 = e.paid ? e.paid[1] : owed2;
+        const net1 = paid1 - owed1; // positive: partner1 overpaid vs their share
+        let settleHtml;
+        if(Math.abs(net1) >= 1){
+          const from = net1 > 0 ? v.partners[1] : v.partners[0];
+          const to = net1 > 0 ? v.partners[0] : v.partners[1];
+          settleHtml = `<div class="settle-tag owe">${escapeHtml(from)} owes ${escapeHtml(to)} ${fmt(Math.abs(net1))}</div>`;
+        } else {
+          settleHtml = `<div class="settle-tag settled">Settled — paid matches share</div>`;
+        }
+        ownershipHtml = `
+        <div class="split-bar">
+          <div style="width:${s1}%; background:${v.partnerColors[0]}"></div>
+          <div style="width:${s2}%; background:${v.partnerColors[1]}"></div>
+        </div>
+        <div class="split-labels">
+          <span>${escapeHtml(v.partners[0])} ${s1}% · owes ${fmt(owed1)}</span>
+          <span>${escapeHtml(v.partners[1])} ${s2}% · owes ${fmt(owed2)}</span>
+        </div>
+        <div class="paid-row">
+          <span>Paid: ${escapeHtml(v.partners[0])} ${fmt(paid1)}</span>
+          <span>Paid: ${escapeHtml(v.partners[1])} ${fmt(paid2)}</span>
+        </div>
+        ${settleHtml}`;
+      }
+
+      card.innerHTML = `
+        <div class="card-top">
+          <div>
+            <div class="card-type">${meta.label}</div>
+            <div class="card-date">${formatDate(e.date)}</div>
+          </div>
+          <div class="card-amt">${fmt(total)}
+            ${e.interest ? `<span class="sub">incl. ${fmt(e.interest)} interest</span>` : ""}
+          </div>
+        </div>
+        <div class="card-mid">
+          <span class="badge ${e.status==='OPEN'?'open':'closed'}">${e.status}</span>
+          <span class="odo-read">⏲ ${(e.odo||0).toLocaleString("en-IN")} km</span>
+          ${(!isSingle && (()=>{ const per = activeUsagePeriodFor(v, e.date); return per ? `<span class="solo-badge">🧳 Solo · ${escapeHtml(v.partners[per.partnerIndex])}</span>` : ""; })()) || ""}
+        </div>
+        ${ownershipHtml}
+        ${e.notes ? `<div class="card-note">"${escapeHtml(e.notes)}"</div>` : ""}
+        <div class="card-actions">
+          <button class="mini-btn" data-edit="${e.id}">Edit</button>
+          <button class="mini-btn" data-toggle="${e.id}">${e.status==='OPEN'?'Mark closed':'Reopen'}</button>
+          <button class="mini-btn danger" data-del="${e.id}">Delete</button>
+        </div>
+      `;
+      list.appendChild(card);
+    });
+
+    const wrap = $("#logShowMoreWrap");
+    if(!logExpanded && !term && totalCount > 5){
+      wrap.innerHTML = `<button class="show-more-btn" id="showMoreBtn">Show ${totalCount - 5} more</button>`;
+      $("#showMoreBtn").addEventListener("click", ()=>{
+        logExpanded = true;
+        renderLog();
+      });
+    } else {
+      wrap.innerHTML = "";
+    }
+  }
+
+  // Overall settlement across every logged entry for this vehicle: who owes whom, net.
+  function computeEntriesNet(v){
+    let net1 = 0;
+    v.entries.forEach(e=>{
+      const total = e.principal + (e.interest||0);
+      const s1 = e.split ? e.split[0] : 50;
+      const owed1 = total * s1/100;
+      const paid1 = e.paid ? e.paid[0] : owed1; // entries without a recorded payer assume paid = share (no net effect)
+      net1 += (paid1 - owed1);
+    });
+    return net1;
+  }
+
+  // Real-world settlement payments (partners actually exchanging money) reduce
+  // the outstanding balance on top of what the logged entries alone show.
+  function computeSettlementAdjustment(v){
+    let adj = 0; // net amount partner 2 has paid partner 1 via recorded settlements
+    (v.settlements||[]).forEach(s=>{
+      if(s.fromIndex === 1 && s.toIndex === 0) adj += s.amount;
+      else if(s.fromIndex === 0 && s.toIndex === 1) adj -= s.amount;
+    });
+    return adj;
+  }
+
+  // Down payment is set up once in Purchase & Finance, not as a log entry — but it's
+  // real shared money, so it counts toward the settlement just like any other cost.
+  // Assumes an equal (50/50) owed share of the down payment, same as a new entry's default.
+  function computeDownPaymentNet(v){
+    if(!v.purchase || !v.purchase.downPayment || !v.purchase.downPaymentPaid) return 0;
+    if(v.purchase.downPaymentStatus === "OPEN") return 0; // not actually paid yet — no settlement effect
+    const total = v.purchase.downPayment;
+    const owed1 = total / 2;
+    const paid1 = v.purchase.downPaymentPaid[0] || 0;
+    return paid1 - owed1;
+  }
+
+  function computeSettlement(v){
+    return computeEntriesNet(v) + computeDownPaymentNet(v) - computeSettlementAdjustment(v);
+  }
+
+  function renderSettleCard(){
+    const v = activeVehicle();
+    const container = $("#settleCard");
+    if(v.ownershipType === "single"){
+      container.innerHTML = "";
+      container.className = "";
+      return;
+    }
+    const net1 = computeSettlement(v);
+    const settled = Math.abs(net1) < 1;
+    container.className = "settle-card " + (settled ? "settled" : "owe");
+    const valueHtml = settled
+      ? "All settled up"
+      : `${escapeHtml(net1 < 0 ? v.partners[0] : v.partners[1])} owes ${escapeHtml(net1 < 0 ? v.partners[1] : v.partners[0])} ${fmt(Math.abs(net1))}`;
+    container.innerHTML = `
+      <span class="st-label">🤝 Settlement</span>
+      <span class="st-right"><span class="st-value">${valueHtml}</span><span class="st-chevron">›</span></span>
+    `;
+  }
+
+  function renderSettleHistory(){
+    const v = activeVehicle();
+    const list = $("#settleHistoryList");
+    const records = (v.settlements||[]).slice().sort((a,b)=> new Date(b.date) - new Date(a.date));
+    if(!records.length){
+      list.innerHTML = `<div class="usage-empty">No settlement payments recorded yet.</div>`;
+      return;
+    }
+    list.innerHTML = records.map(s=>`
+      <div class="usage-row">
+        <div class="ur-top">
+          <span class="ur-who">${escapeHtml(v.partners[s.fromIndex])} → ${escapeHtml(v.partners[s.toIndex])} · ${fmt(s.amount)}</span>
+          <button class="mini-btn danger" data-del-settle="${s.id}">Remove</button>
+        </div>
+        <div class="ur-range">${formatDate(s.date)}</div>
+        ${s.note ? `<div class="ur-note">"${escapeHtml(s.note)}"</div>` : ""}
+      </div>
+    `).join("");
+  }
+
+  function renderSettleEntryBreakdown(){
+    const v = activeVehicle();
+    const entries = v.entries.slice().sort((a,b)=> new Date(b.date) - new Date(a.date));
+    const list = $("#settleDetailList");
+
+    let dpRowHtml = "";
+    if(v.purchase && v.purchase.downPayment && v.purchase.downPaymentPaid){
+      const net = computeDownPaymentNet(v);
+      const netSettled = Math.abs(net) < 1;
+      const netText = netSettled ? "Settled" : `${net > 0 ? v.partners[1] : v.partners[0]} owes ${net > 0 ? v.partners[0] : v.partners[1]} ${fmt(Math.abs(net))}`;
+      dpRowHtml = `
+        <div class="settle-detail-row">
+          <div class="sd-mid">
+            <div class="sd-cat">Down Payment</div>
+            <div class="sd-date">${formatDate(v.purchase.date)}</div>
+          </div>
+          <div class="sd-nums">
+            <div>${fmt(v.purchase.downPayment)}</div>
+            <div class="sd-net ${netSettled ? "settled" : "owe"}">${netText}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    if(!entries.length && !dpRowHtml){
+      list.innerHTML = `<div class="usage-empty">No entries logged yet.</div>`;
+      return;
+    }
+    const entriesHtml = entries.map(e=>{
+      const total = e.principal + (e.interest||0);
+      const s1 = e.split ? e.split[0] : 50;
+      const owed1 = total*s1/100;
+      const paid1 = e.paid ? e.paid[0] : owed1;
+      const net = paid1 - owed1;
+      const meta = CATS[e.category] || CATS.other;
+      const netSettled = Math.abs(net) < 1;
+      const netText = netSettled ? "Settled" : `${net > 0 ? v.partners[1] : v.partners[0]} owes ${net > 0 ? v.partners[0] : v.partners[1]} ${fmt(Math.abs(net))}`;
+      return `
+        <div class="settle-detail-row">
+          <div class="sd-mid">
+            <div class="sd-cat">${meta.label}</div>
+            <div class="sd-date">${formatDate(e.date)}</div>
+          </div>
+          <div class="sd-nums">
+            <div>${fmt(total)}</div>
+            <div class="sd-net ${netSettled ? "settled" : "owe"}">${netText}</div>
+          </div>
+        </div>
+      `;
+    }).join("");
+    list.innerHTML = dpRowHtml + entriesHtml;
+  }
+
+  function openSettleDetailSheet(){
+    const v = activeVehicle();
+    if(v.ownershipType === "single") return;
+    const net1 = computeSettlement(v);
+    const settled = Math.abs(net1) < 1;
+    $("#sdVehLabel").textContent = `${v.plate} · ${v.model}`;
+    $("#sdSummary").textContent = settled
+      ? "All settled up — paid matches owed share across every entry."
+      : `${net1 < 0 ? v.partners[0] : v.partners[1]} owes ${net1 < 0 ? v.partners[1] : v.partners[0]} ${fmt(Math.abs(net1))} overall.`;
+
+    const fromSel = $("#stFrom"), toSel = $("#stTo");
+    fromSel.innerHTML = `<option value="0">${escapeHtml(v.partners[0])}</option><option value="1">${escapeHtml(v.partners[1])}</option>`;
+    toSel.innerHTML = `<option value="0">${escapeHtml(v.partners[0])}</option><option value="1">${escapeHtml(v.partners[1])}</option>`;
+    const fromIdx = net1 < 0 ? 0 : 1;
+    fromSel.value = String(fromIdx);
+    toSel.value = String(fromIdx === 0 ? 1 : 0);
+    $("#stDate").value = new Date().toISOString().slice(0,10);
+    $("#stAmount").value = settled ? "" : Math.round(Math.abs(net1));
+    $("#stNote").value = "";
+
+    const zeroBtn = $("#settleZeroBtn");
+    if(settled){
+      zeroBtn.style.display = "none";
+    } else {
+      zeroBtn.style.display = "block";
+      zeroBtn.textContent = `Settle Up Now — Mark as Zero (${fmt(Math.abs(net1))})`;
+    }
+
+    renderSettleHistory();
+    renderSettleEntryBreakdown();
+    showSheet(settleDetailSheet);
+  }
+
+  function formatDate(iso){
+    const d = new Date(iso + "T00:00:00");
+    if(isNaN(d)) return iso;
+    return d.toLocaleDateString("en-IN", {day:"2-digit", month:"short", year:"numeric"});
+  }
+
+  function daysUntil(iso){
+    if(!iso) return null;
+    const target = new Date(iso + "T00:00:00");
+    if(isNaN(target)) return null;
+    const today = new Date(); today.setHours(0,0,0,0);
+    return Math.round((target - today) / 86400000);
+  }
+
+  function addMonths(iso, months){
+    const d = new Date(iso + "T00:00:00");
+    if(isNaN(d)) return null;
+    d.setMonth(d.getMonth() + months);
+    return d.toISOString().slice(0,10);
+  }
+
+  // ===================== USAGE PERIODS (personal / exclusive use) =====================
+  function activeUsagePeriodFor(v, dateStr){
+    if(!dateStr) return null;
+    return (v.usagePeriods || []).find(p=>{
+      if(dateStr < p.startDate) return false;
+      if(p.endDate && dateStr > p.endDate) return false;
+      return true;
+    }) || null;
+  }
+
+  function applyUsagePeriodToEntrySheet(){
+    const v = activeVehicle();
+    const date = $("#fDate").value;
+    const period = activeUsagePeriodFor(v, date);
+    const note = $("#usagePeriodNote");
+    if(!period){
+      usagePeriodPartnerIndex = null;
+      note.textContent = "";
+      note.classList.remove("warn");
+      return;
+    }
+    const partnerName = v.partners[period.partnerIndex];
+    note.textContent = `🧳 Personal use active — ${partnerName} has the vehicle${period.note ? " (" + period.note + ")" : ""}. Split auto-assigned 100% to ${partnerName}; adjust if this cost is actually shared.`;
+    note.classList.add("warn");
+    // Only auto-override the split for a brand-new entry, so editing existing
+    // data never silently rewrites what was actually saved.
+    if(editingId === null){
+      usagePeriodPartnerIndex = period.partnerIndex;
+      syncDefaultSplit();
+      updateSplitReadout();
+    }
+  }
+  $("#fDate").addEventListener("input", applyUsagePeriodToEntrySheet);
+
+  function renderUsageList(){
+    const v = activeVehicle();
+    const list = $("#usageList");
+    const periods = (v.usagePeriods||[]).slice().sort((a,b)=> new Date(b.startDate) - new Date(a.startDate));
+    if(!periods.length){
+      list.innerHTML = `<div class="usage-empty">No personal-use periods logged. Add one whenever a partner takes the vehicle solo — costs during that window will default to 100% theirs.</div>`;
+      return;
+    }
+    list.innerHTML = "";
+    periods.forEach(p=>{
+      const row = document.createElement("div");
+      row.className = "usage-row";
+      row.innerHTML = `
+        <div class="ur-top">
+          <span class="ur-who">🧳 ${escapeHtml(v.partners[p.partnerIndex])}</span>
+          <button class="mini-btn danger" data-del-usage="${p.id}">Remove</button>
+        </div>
+        <div class="ur-range">${formatDate(p.startDate)} → ${p.endDate ? formatDate(p.endDate) : "ongoing"}</div>
+        ${p.note ? `<div class="ur-note">"${escapeHtml(p.note)}"</div>` : ""}
+      `;
+      list.appendChild(row);
+    });
+  }
+
+  // ===================== REMINDERS (oil, insurance, tax, finance) =====================
+  function computeReminders(v){
+    const items = [];
+    const r = v.renewals || {};
+    const maxOdo = getMaxOdometer(null);
+
+    // Oil / service
+    if(r.intervalKm > 0 || r.intervalMonths > 0){
+      let dueByOdo = null, dueByDate = null;
+      if(r.intervalKm > 0 && r.lastServiceOdo >= 0){
+        dueByOdo = r.lastServiceOdo + r.intervalKm;
+      }
+      if(r.intervalMonths > 0 && r.lastServiceDate){
+        dueByDate = addMonths(r.lastServiceDate, r.intervalMonths);
+      }
+      let status = "ok", detail = [];
+      if(dueByOdo !== null){
+        const kmLeft = dueByOdo - maxOdo;
+        detail.push(kmLeft <= 0 ? `${Math.abs(kmLeft).toLocaleString("en-IN")} km overdue` : `${kmLeft.toLocaleString("en-IN")} km left`);
+        if(kmLeft <= 0) status = "overdue"; else if(kmLeft <= 300 && status !== "overdue") status = "soon";
+      }
+      if(dueByDate !== null){
+        const d = daysUntil(dueByDate);
+        detail.push(d <= 0 ? `${Math.abs(d)}d overdue` : `${d}d left`);
+        if(d <= 0) status = "overdue"; else if(d <= 14 && status !== "overdue") status = "soon";
+      }
+      items.push({ icon:"🛢", label:"Oil / Service", detail: detail.join(" · ") || "Set an interval to track this", status });
+    }
+
+    // Insurance
+    if(r.insuranceExpiry){
+      const d = daysUntil(r.insuranceExpiry);
+      const status = d <= 0 ? "overdue" : (d <= 30 ? "soon" : "ok");
+      items.push({ icon:"🛡", label:"Insurance", detail: d <= 0 ? `Expired ${Math.abs(d)}d ago (${formatDate(r.insuranceExpiry)})` : `Renews in ${d}d (${formatDate(r.insuranceExpiry)})`, status });
+    }
+
+    // Tax
+    if(r.taxExpiry){
+      const d = daysUntil(r.taxExpiry);
+      const status = d <= 0 ? "overdue" : (d <= 30 ? "soon" : "ok");
+      items.push({ icon:"🧾", label:"Road Tax", detail: d <= 0 ? `Overdue ${Math.abs(d)}d (${formatDate(r.taxExpiry)})` : `Due in ${d}d (${formatDate(r.taxExpiry)})`, status });
+    }
+
+    // Finance / EMI
+    if(v.purchase && v.purchase.tenureMonths > 0 && v.purchase.emiAmount > 0 && v.purchase.financeStatus !== "CLOSED"){
+      const o = computeOutstanding(v);
+      if(o.remaining > 0){
+        const nextDue = addMonths(v.purchase.date, o.paidCount + 1);
+        const d = daysUntil(nextDue);
+        const status = d <= 0 ? "overdue" : (d <= 7 ? "soon" : "ok");
+        items.push({ icon:"💳", label:"Next EMI", detail: d <= 0 ? `Overdue since ${formatDate(nextDue)}` : `Due in ${d}d (${formatDate(nextDue)})`, status });
+      }
+    }
+
+    return items;
+  }
+
+  function renderReminders(){
+    const v = activeVehicle();
+    const container = $("#remindersCard");
+    const items = computeReminders(v);
+    if(!items.length){
+      container.innerHTML = `<div class="rem-card empty" id="remEmptyTap">
+        <div class="rem-empty-text">🔔 No renewal reminders set up. Tap to add oil change, insurance and tax due dates.</div>
+      </div>`;
+      $("#remEmptyTap").addEventListener("click", openRenewalsSheet);
+      return;
+    }
+    const order = {overdue:0, soon:1, ok:2};
+    items.sort((a,b)=> order[a.status]-order[b.status]);
+    container.innerHTML = `<div class="rem-card">${items.map(it=>`
+      <div class="rem-row">
+        <span class="ri">${it.icon}</span>
+        <span class="rt"><span class="rl">${it.label}</span><span class="rd">${escapeHtml(it.detail)}</span></span>
+        <span class="rem-dot ${it.status}"></span>
+      </div>
+    `).join("")}</div>`;
+    maybeNotify(v, items);
+  }
+
+  function maybeNotify(v, items){
+    if(!("Notification" in window) || Notification.permission !== "granted") return;
+    const urgent = items.filter(it=> it.status === "overdue" || it.status === "soon");
+    if(!urgent.length) return;
+    const today = new Date().toISOString().slice(0,10);
+    const key = "manskit_notified_" + v.id + "_" + today;
+    if(localStorage.getItem(key)) return;
+    const title = `${v.plate} — ${urgent.length} reminder${urgent.length>1?"s":""}`;
+    const body = urgent.map(it=> `${it.label}: ${it.detail}`).join("\n");
+    try{
+      if("serviceWorker" in navigator){
+        navigator.serviceWorker.ready.then(reg=> reg.showNotification(title, {body, icon:"./192.png"})).catch(()=>{
+          new Notification(title, {body});
+        });
+      } else {
+        new Notification(title, {body});
+      }
+      localStorage.setItem(key, "1");
+    }catch(e){}
+  }
+
+  // ===================== INSIGHTS (lifetime & yearly spend) =====================
+  function computeInsights(v){
+    const byGroup = { maint:0, expense:0, finance:0 };
+    let totalSpent = 0;
+    let accessorySpend = 0;
+    const yearly = {};
+    v.entries.forEach(e=>{
+      const total = e.principal + (e.interest||0);
+      const meta = CATS[e.category] || CATS.other;
+      totalSpent += total;
+      byGroup[meta.group] = (byGroup[meta.group]||0) + total;
+      if(e.category === "accessory") accessorySpend += total;
+      const year = (e.date||"").slice(0,4) || "Unknown";
+      yearly[year] = (yearly[year]||0) + total;
+    });
+    const totalInvested = (v.purchase ? (v.purchase.price||0) : 0) + accessorySpend;
+    const yearlyArr = Object.keys(yearly).sort((a,b)=> b.localeCompare(a)).map(y=>({year:y, total:yearly[y]}));
+    return { byGroup, totalSpent, totalInvested, yearlyArr };
+  }
+
+  function renderInsights(){
+    const v = activeVehicle();
+    $("#insVehLabel").textContent = `${v.plate} · ${v.model}`;
+    const ins = computeInsights(v);
+    $("#insTotalSpent").textContent = fmt(ins.totalSpent);
+    $("#insTotalInvested").textContent = fmt(ins.totalInvested);
+
+    const groupLabels = { maint:"Maintenance", expense:"Expenses", finance:"Finance" };
+    const groupColors = { maint:"var(--teal)", expense:"var(--amber)", finance:"var(--blue)" };
+    const maxGroup = Math.max(1, ...Object.values(ins.byGroup));
+    const catBox = $("#insCatBars");
+    const groupKeys = Object.keys(groupLabels).filter(k=> ins.byGroup[k] > 0);
+    catBox.innerHTML = groupKeys.length ? groupKeys.map(k=>`
+      <div class="ins-bar-row">
+        <div class="ib-top"><span class="ib-label">${groupLabels[k]}</span><span class="ib-amt">${fmt(ins.byGroup[k])}</span></div>
+        <div class="ins-bar-track"><div class="ins-bar-fill" style="width:${(ins.byGroup[k]/maxGroup*100).toFixed(1)}%; background:${groupColors[k]}"></div></div>
+      </div>
+    `).join("") : `<div class="ins-empty">No spend logged yet.</div>`;
+
+    const maxYear = Math.max(1, ...ins.yearlyArr.map(y=>y.total));
+    const yearBox = $("#insYearBars");
+    yearBox.innerHTML = ins.yearlyArr.length ? ins.yearlyArr.map(y=>`
+      <div class="ins-bar-row">
+        <div class="ib-top"><span class="ib-label">${y.year}</span><span class="ib-amt">${fmt(y.total)}</span></div>
+        <div class="ins-bar-track"><div class="ins-bar-fill" style="width:${(y.total/maxYear*100).toFixed(1)}%; background:var(--purple)"></div></div>
+      </div>
+    `).join("") : `<div class="ins-empty">No spend logged yet.</div>`;
+  }
+
+  function renderLogEntrySummary(){
+    const v = activeVehicle();
+    const count = v.entries.length;
+    if(!count){
+      $("#logEntrySummary").textContent = "No entries yet — tap to add one";
+      return;
+    }
+    const total = v.entries.reduce((s,e)=> s + e.principal + (e.interest||0), 0);
+    $("#logEntrySummary").textContent = `${count} ${count===1?"entry":"entries"} · ${fmt(total)} total`;
+  }
+
+  function renderAll(){
+    renderHeader();
+    renderDash();
+    renderReminders();
+    renderSettleCard();
+    renderFinCard();
+    renderPhotoGrid();
+    renderLogEntrySummary();
+    renderLog();
+  }
+
+  // ===================== FILTERS =====================
+  $("#filterRow").addEventListener("click", (e)=>{
+    const chip = e.target.closest(".fchip");
+    if(!chip) return;
+    document.querySelectorAll(".fchip").forEach(c=>c.classList.remove("active"));
+    chip.classList.add("active");
+    activeFilter = chip.dataset.filter;
+    logExpanded = false;
+    renderLog();
+  });
+
+  // ===================== LOG ACTIONS =====================
+  $("#logList").addEventListener("click", (e)=>{
+    const editId = e.target.dataset.edit;
+    const delId = e.target.dataset.del;
+    const toggleId = e.target.dataset.toggle;
+    const v = activeVehicle();
+    if(editId) openSheet(editId);
+    if(delId){
+      if(confirm("Delete this entry? This can't be undone.")){
+        v.entries = v.entries.filter(x=>x.id !== delId);
+        saveState(); renderAll();
+      }
+    }
+    if(toggleId){
+      const entry = v.entries.find(x=>x.id === toggleId);
+      if(entry){
+        entry.status = entry.status === "OPEN" ? "CLOSED" : "OPEN";
+        saveState(); renderAll();
+      }
+    }
+  });
+
+  // ===================== ENTRY SHEET =====================
+  const backdrop = $("#backdrop");
+  const entrySheet = $("#entrySheet");
+  const financeSheet = $("#financeSheet");
+  const vehicleSheet = $("#vehicleSheet");
+  const editVehicleSheet = $("#editVehicleSheet");
+  const vehMenuSheet = $("#vehMenuSheet");
+  const renewalsSheet = $("#renewalsSheet");
+  const usageSheet = $("#usageSheet");
+  const insightsSheet = $("#insightsSheet");
+  const backupSheet = $("#backupSheet");
+  const settleDetailSheet = $("#settleDetailSheet");
+  const logSheet = $("#logSheet");
+  const documentsSheet = $("#documentsSheet");
+  const allSheets = [entrySheet, financeSheet, vehicleSheet, editVehicleSheet, vehMenuSheet, renewalsSheet, usageSheet, insightsSheet, backupSheet, settleDetailSheet, logSheet, documentsSheet];
+
+  function openLogSheet(){
+    logSearchTerm = "";
+    $("#logSearchInput").value = "";
+    renderLog();
+    showSheet(logSheet);
+  }
+  $("#logEntryCard").addEventListener("click", openLogSheet);
+  $("#logSheetCancelBtn").addEventListener("click", hideSheets);
+  $("#logSearchInput").addEventListener("input", (e)=>{
+    logSearchTerm = e.target.value;
+    renderLog();
+  });
+
+  function showSheet(sheet){
+    allSheets.forEach(s=> s.classList.remove("show"));
+    backdrop.classList.add("show");
+    sheet.classList.add("show");
+  }
+  function hideSheets(){
+    backdrop.classList.remove("show");
+    allSheets.forEach(s=> s.classList.remove("show"));
+  }
+  backdrop.addEventListener("click", hideSheets);
+
+  $("#addBtn").addEventListener("click", ()=> openSheet(null));
+  $("#cancelBtn").addEventListener("click", hideSheets);
+
+  $("#fCategory").addEventListener("change", updateCalc);
+
+  $("#statusToggle").addEventListener("click", (e)=>{
+    const opt = e.target.closest(".toggle-opt");
+    if(!opt) return;
+    document.querySelectorAll("#statusToggle .toggle-opt").forEach(o=>o.classList.remove("sel"));
+    opt.classList.add("sel");
+  });
+
+  $("#pfStatusToggle").addEventListener("click", (e)=>{
+    const opt = e.target.closest(".toggle-opt");
+    if(!opt) return;
+    document.querySelectorAll("#pfStatusToggle .toggle-opt").forEach(o=>o.classList.remove("sel"));
+    opt.classList.add("sel");
+  });
+
+  $("#pfDpStatusToggle").addEventListener("click", (e)=>{
+    const opt = e.target.closest(".toggle-opt");
+    if(!opt) return;
+    document.querySelectorAll("#pfDpStatusToggle .toggle-opt").forEach(o=>o.classList.remove("sel"));
+    opt.classList.add("sel");
+  });
+
+  function currentTotal(){
+    const p = parseFloat($("#fPrincipal").value) || 0;
+    const i = parseFloat($("#fInterest").value) || 0;
+    return p + i;
+  }
+
+  function updateCalc(){
+    $("#calcTotal").textContent = fmt(currentTotal());
+    syncDefaultSplit();
+    updateSplitReadout();
+  }
+  $("#fPrincipal").addEventListener("input", updateCalc);
+  $("#fInterest").addEventListener("input", updateCalc);
+
+  function currentSplitPercent(){
+    // fSplit1/fSplit2 are always ₹ amounts now — percentage is derived, informational only.
+    const total = currentTotal();
+    let a1 = Math.max(0, parseFloat($("#fSplit1").value) || 0);
+    if(total <= 0) return [50,50];
+    a1 = Math.min(a1, total);
+    const pct1 = Math.round((a1/total)*100);
+    return [pct1, 100 - pct1];
+  }
+
+  // Keeps the ₹ split at a sensible default (50/50, or 100/0 during an active
+  // personal-use period) as the total changes — until the user types their own numbers.
+  function syncDefaultSplit(){
+    if(splitManuallySet) return;
+    const total = currentTotal();
+    let amt1;
+    if(usagePeriodPartnerIndex !== null){
+      amt1 = usagePeriodPartnerIndex === 0 ? total : 0;
+    } else {
+      amt1 = Math.round(total/2);
+    }
+    $("#fSplit1").value = amt1;
+    $("#fSplit2").value = Math.round(total - amt1);
+  }
+
+  $("#fSplit1").addEventListener("input", ()=>{
+    splitManuallySet = true;
+    const total = currentTotal();
+    let v = Math.max(0, Math.min(total, parseFloat($("#fSplit1").value) || 0));
+    $("#fSplit2").value = Math.round(total - v);
+    updateSplitReadout();
+  });
+  $("#fSplit2").addEventListener("input", ()=>{
+    splitManuallySet = true;
+    const total = currentTotal();
+    let v = Math.max(0, Math.min(total, parseFloat($("#fSplit2").value) || 0));
+    $("#fSplit1").value = Math.round(total - v);
+    updateSplitReadout();
+  });
+
+  function updateSplitReadout(){
+    const v = activeVehicle();
+    const total = currentTotal();
+    const [pct1, pct2] = currentSplitPercent();
+    $("#splitReadout").textContent =
+      `${v.partners[0]} ${pct1}% · ${fmt(total*pct1/100)}  ·  ${v.partners[1]} ${pct2}% · ${fmt(total*pct2/100)}`;
+    syncPaidToSplit();
+  }
+
+  // ----- Paid By (who actually handed over the money, distinct from ownership split) -----
+  function syncPaidToSplit(){
+    if(paidManuallySet) return;
+    const total = currentTotal();
+    const [pct1] = currentSplitPercent();
+    const amt1 = Math.round(total * pct1/100);
+    $("#fPaid1").value = amt1;
+    $("#fPaid2").value = Math.round(total - amt1);
+    updatePaidReadout();
+  }
+
+  function updatePaidReadout(){
+    const total = currentTotal();
+    const p1 = parseFloat($("#fPaid1").value) || 0;
+    const p2 = parseFloat($("#fPaid2").value) || 0;
+    const sum = p1 + p2;
+    const note = $("#paidReadout");
+    if(Math.abs(sum - total) < 1){
+      note.textContent = "Fully accounted for.";
+      note.classList.remove("warn");
+    } else {
+      note.textContent = `Paid amounts total ${fmt(sum)} vs cost ${fmt(total)} — off by ${fmt(Math.abs(sum-total))}.`;
+      note.classList.add("warn");
+    }
+  }
+
+  $("#paidQuick").addEventListener("click", (e)=>{
+    const opt = e.target.closest(".opt");
+    if(!opt) return;
+    document.querySelectorAll("#paidQuick .opt").forEach(o=>o.classList.remove("sel"));
+    opt.classList.add("sel");
+    paidManuallySet = true;
+    const total = currentTotal();
+    const who = opt.dataset.who;
+    if(who === "1"){ $("#fPaid1").value = Math.round(total); $("#fPaid2").value = 0; }
+    else if(who === "2"){ $("#fPaid1").value = 0; $("#fPaid2").value = Math.round(total); }
+    else { const half = Math.round(total/2); $("#fPaid1").value = half; $("#fPaid2").value = Math.round(total-half); }
+    updatePaidReadout();
+  });
+
+  $("#fPaid1").addEventListener("input", ()=>{
+    paidManuallySet = true;
+    document.querySelectorAll("#paidQuick .opt").forEach(o=>o.classList.remove("sel"));
+    const total = currentTotal();
+    let v = Math.max(0, parseFloat($("#fPaid1").value) || 0);
+    if(v > total) v = total;
+    $("#fPaid2").value = Math.round(total - v);
+    updatePaidReadout();
+  });
+  $("#fPaid2").addEventListener("input", ()=>{
+    paidManuallySet = true;
+    document.querySelectorAll("#paidQuick .opt").forEach(o=>o.classList.remove("sel"));
+    const total = currentTotal();
+    let v = Math.max(0, parseFloat($("#fPaid2").value) || 0);
+    if(v > total) v = total;
+    $("#fPaid1").value = Math.round(total - v);
+    updatePaidReadout();
+  });
+
+  // Bounds come from the entry's own date, not the global max — so a backdated entry
+  // only has to sit between whatever was logged just before and just after it in time.
+  function getOdometerBounds(excludeId, dateStr){
+    const v = activeVehicle();
+    let prevMax = 0, prevDate = null;
+    let nextMin = Infinity, nextDate = null;
+    v.entries.forEach(e=>{
+      if(e.id === excludeId || !e.odo) return;
+      if(e.date <= dateStr){
+        if(e.odo > prevMax){ prevMax = e.odo; prevDate = e.date; }
+      } else {
+        if(e.odo < nextMin){ nextMin = e.odo; nextDate = e.date; }
+      }
+    });
+    return { prevMax, prevDate, nextMin, nextDate };
+  }
+
+  function validateOdo(){
+    const odo = parseFloat($("#fOdo").value);
+    const date = $("#fDate").value;
+    const errBox = $("#odoErr");
+    if(isNaN(odo)){
+      errBox.classList.add("show");
+      errBox.textContent = "Enter a valid odometer reading.";
+      return false;
+    }
+    if(!date){
+      errBox.classList.remove("show");
+      return true; // date validation happens elsewhere on save
+    }
+    const { prevMax, prevDate, nextMin, nextDate } = getOdometerBounds(editingId, date);
+    if(odo < prevMax){
+      errBox.classList.add("show");
+      errBox.textContent = `New reading must be ≥ ${prevMax.toLocaleString("en-IN")} km — logged on ${formatDate(prevDate)}.`;
+      return false;
+    }
+    if(nextMin !== Infinity && odo > nextMin){
+      errBox.classList.add("show");
+      errBox.textContent = `This entry is dated before ${formatDate(nextDate)} (${nextMin.toLocaleString("en-IN")} km) — reading must be ≤ that.`;
+      return false;
+    }
+    errBox.classList.remove("show");
+    return true;
+  }
+  $("#fOdo").addEventListener("input", validateOdo);
+  $("#fDate").addEventListener("input", validateOdo);
+
+  function openSheet(id){
+    editingId = id;
+    const v = activeVehicle();
+    const isSingle = v.ownershipType === "single";
+    $("#sheetVehLabel").textContent = `${v.plate} · ${v.model}`;
+    $("#ownershipSection").style.display = isSingle ? "none" : "block";
+    $("#splitLabel1").textContent = v.partners[0] + " (₹)";
+    $("#splitLabel2").textContent = v.partners[1] + " (₹)";
+    $("#paidLabel1").textContent = v.partners[0] + " ₹";
+    $("#paidLabel2").textContent = v.partners[1] + " ₹";
+    $("#paidQuick").querySelector('[data-who="1"]').textContent = v.partners[0] + " paid";
+    $("#paidQuick").querySelector('[data-who="2"]').textContent = v.partners[1] + " paid";
+    $("#odoErr").classList.remove("show");
+    document.querySelectorAll("#paidQuick .opt").forEach(o=>o.classList.remove("sel"));
+
+    if(id){
+      const e = v.entries.find(x=>x.id === id);
+      $("#sheetTitle").textContent = "Edit Transaction";
+      $("#fCategory").value = e.category;
+      $("#fDate").value = e.date;
+      $("#fOdo").value = e.odo;
+      $("#fPrincipal").value = e.principal;
+      $("#fInterest").value = e.interest || 0;
+      $("#fNotes").value = e.notes || "";
+      document.querySelectorAll("#statusToggle .toggle-opt").forEach(o=>o.classList.toggle("sel", o.dataset.status === e.status));
+
+      const total = e.principal + (e.interest||0);
+      const pct1 = e.split ? e.split[0] : 50;
+      const mirroredAmt1 = Math.round(total * pct1 / 100);
+      splitManuallySet = true; // saved data is explicit — don't let a later total edit silently reshuffle it
+      usagePeriodPartnerIndex = null;
+      $("#fSplit1").value = mirroredAmt1;
+      $("#fSplit2").value = total - mirroredAmt1;
+
+      if(e.paid && Math.round(e.paid[0]) !== mirroredAmt1){
+        paidManuallySet = true;
+        $("#fPaid1").value = e.paid[0];
+        $("#fPaid2").value = e.paid[1];
+      } else {
+        paidManuallySet = false;
+        $("#fPaid1").value = e.paid ? e.paid[0] : mirroredAmt1;
+        $("#fPaid2").value = e.paid ? e.paid[1] : (total - mirroredAmt1);
+      }
+    } else {
+      $("#sheetTitle").textContent = "Log a Transaction";
+      $("#fCategory").value = "fuel";
+      $("#fDate").value = new Date().toISOString().slice(0,10);
+      $("#fOdo").value = "";
+      $("#fPrincipal").value = "";
+      $("#fInterest").value = "";
+      $("#fSplit1").value = 0;
+      $("#fSplit2").value = 0;
+      $("#fNotes").value = "";
+      $("#fPaid1").value = 0;
+      $("#fPaid2").value = 0;
+      splitManuallySet = false;
+      usagePeriodPartnerIndex = null;
+      paidManuallySet = false;
+      document.querySelectorAll("#statusToggle .toggle-opt").forEach(o=>o.classList.toggle("sel", o.dataset.status === "OPEN"));
+    }
+    updateCalc();
+    updatePaidReadout();
+    applyUsagePeriodToEntrySheet();
+    showSheet(entrySheet);
+  }
+
+  $("#saveBtn").addEventListener("click", ()=>{
+    if(!validateOdo()) return;
+    const date = $("#fDate").value;
+    if(!date){ alert("Pick a date."); return; }
+    const principal = parseFloat($("#fPrincipal").value) || 0;
+    const interest = parseFloat($("#fInterest").value) || 0;
+    if(principal <= 0 && interest <= 0){ alert("Enter an amount."); return; }
+    const odo = parseFloat($("#fOdo").value);
+    const v = activeVehicle();
+    const total = principal + interest;
+    let pct1, pct2, paid1, paid2;
+    if(v.ownershipType === "single"){
+      pct1 = 100; pct2 = 0; paid1 = total; paid2 = 0;
+    } else {
+      [pct1, pct2] = currentSplitPercent();
+      paid1 = Math.max(0, parseFloat($("#fPaid1").value) || 0);
+      paid2 = Math.max(0, parseFloat($("#fPaid2").value) || 0);
+    }
+    const status = document.querySelector("#statusToggle .toggle-opt.sel").dataset.status;
+    const notes = $("#fNotes").value.trim();
+    const category = $("#fCategory").value;
+
+    if(editingId){
+      const e = v.entries.find(x=>x.id === editingId);
+      Object.assign(e, {category, date, odo, principal, interest, split:[pct1,pct2], paid:[paid1,paid2], status, notes});
+    } else {
+      v.entries.push({
+        id: "e" + Date.now() + Math.random().toString(36).slice(2,6),
+        category, date, odo, principal, interest, split:[pct1,pct2], paid:[paid1,paid2], status, notes
+      });
+    }
+    saveState();
+    hideSheets();
+    renderAll();
+  });
+
+  // ===================== PURCHASE & FINANCE SHEET =====================
+  $("#pfCancelBtn").addEventListener("click", hideSheets);
+
+  let dpManuallySet = false;
+
+  function currentDpTotal(){
+    return parseFloat($("#pfDown").value) || 0;
+  }
+
+  function updateDpReadout(){
+    const total = currentDpTotal();
+    const p1 = parseFloat($("#pfDpPaid1").value) || 0;
+    const p2 = parseFloat($("#pfDpPaid2").value) || 0;
+    const sum = p1 + p2;
+    const note = $("#pfDpReadout");
+    if(total <= 0){
+      note.textContent = "";
+      note.classList.remove("warn");
+    } else if(Math.abs(sum - total) < 1){
+      note.textContent = "Fully accounted for.";
+      note.classList.remove("warn");
+    } else {
+      note.textContent = `Paid amounts total ${fmt(sum)} vs down payment ${fmt(total)} — off by ${fmt(Math.abs(sum-total))}.`;
+      note.classList.add("warn");
+    }
+  }
+
+  function syncDpDefault(){
+    if(dpManuallySet) return;
+    const total = currentDpTotal();
+    const half = Math.round(total/2);
+    $("#pfDpPaid1").value = half;
+    $("#pfDpPaid2").value = total - half;
+    updateDpReadout();
+  }
+  $("#pfDown").addEventListener("input", syncDpDefault);
+
+  $("#pfDpQuick").addEventListener("click", (e)=>{
+    const opt = e.target.closest(".opt");
+    if(!opt) return;
+    document.querySelectorAll("#pfDpQuick .opt").forEach(o=>o.classList.remove("sel"));
+    opt.classList.add("sel");
+    dpManuallySet = true;
+    const total = currentDpTotal();
+    const who = opt.dataset.who;
+    if(who === "1"){ $("#pfDpPaid1").value = Math.round(total); $("#pfDpPaid2").value = 0; }
+    else if(who === "2"){ $("#pfDpPaid1").value = 0; $("#pfDpPaid2").value = Math.round(total); }
+    else { const half = Math.round(total/2); $("#pfDpPaid1").value = half; $("#pfDpPaid2").value = Math.round(total-half); }
+    updateDpReadout();
+  });
+  $("#pfDpPaid1").addEventListener("input", ()=>{
+    dpManuallySet = true;
+    document.querySelectorAll("#pfDpQuick .opt").forEach(o=>o.classList.remove("sel"));
+    const total = currentDpTotal();
+    let v = Math.max(0, Math.min(total, parseFloat($("#pfDpPaid1").value) || 0));
+    $("#pfDpPaid2").value = Math.round(total - v);
+    updateDpReadout();
+  });
+  $("#pfDpPaid2").addEventListener("input", ()=>{
+    dpManuallySet = true;
+    document.querySelectorAll("#pfDpQuick .opt").forEach(o=>o.classList.remove("sel"));
+    const total = currentDpTotal();
+    let v = Math.max(0, Math.min(total, parseFloat($("#pfDpPaid2").value) || 0));
+    $("#pfDpPaid1").value = Math.round(total - v);
+    updateDpReadout();
+  });
+
+  function openFinanceSheet(){
+    const v = activeVehicle();
+    $("#finVehLabel").textContent = `${v.plate} · ${v.model}`;
+    const p = v.purchase || {
+      date:new Date().toISOString().slice(0,10), price:0, downPayment:0,
+      loanAmount:0, insuranceAmount:0, accountNo:"", processingCharge:0, rtoCharges:0,
+      emiAmount:0, tenureMonths:0, downPaymentPaid:null, financeStatus:"OPEN", downPaymentStatus:"CLOSED"
+    };
+    $("#pfDate").value = p.date;
+    $("#pfPrice").value = p.price || "";
+    $("#pfDown").value = p.downPayment || "";
+    $("#pfLoanAmt").value = p.loanAmount || "";
+    $("#pfInsurance").value = p.insuranceAmount || "";
+    $("#pfAccountNo").value = p.accountNo || "";
+    $("#pfProcessing").value = p.processingCharge || "";
+    $("#pfRto").value = p.rtoCharges || "";
+    $("#pfEmi").value = p.emiAmount || "";
+    $("#pfTenure").value = p.tenureMonths || "";
+    document.querySelectorAll("#pfStatusToggle .toggle-opt").forEach(o=>o.classList.toggle("sel", o.dataset.status === (p.financeStatus || "OPEN")));
+    document.querySelectorAll("#pfDpStatusToggle .toggle-opt").forEach(o=>o.classList.toggle("sel", o.dataset.status === (p.downPaymentStatus || "CLOSED")));
+
+    const isSingle = v.ownershipType === "single";
+    $("#pfDpPaidSection").style.display = isSingle ? "none" : "block";
+    if(!isSingle){
+      $("#pfDpLabel1").textContent = v.partners[0] + " ₹";
+      $("#pfDpLabel2").textContent = v.partners[1] + " ₹";
+      $("#pfDpQuick").querySelector('[data-who="1"]').textContent = v.partners[0] + " paid";
+      $("#pfDpQuick").querySelector('[data-who="2"]').textContent = v.partners[1] + " paid";
+      document.querySelectorAll("#pfDpQuick .opt").forEach(o=>o.classList.remove("sel"));
+      const down = p.downPayment || 0;
+      if(p.downPaymentPaid){
+        dpManuallySet = true;
+        $("#pfDpPaid1").value = p.downPaymentPaid[0];
+        $("#pfDpPaid2").value = p.downPaymentPaid[1];
+      } else {
+        dpManuallySet = false;
+        const half = Math.round(down/2);
+        $("#pfDpPaid1").value = half;
+        $("#pfDpPaid2").value = down - half;
+      }
+      updateDpReadout();
+    }
+
+    updateFinanceCalc();
+    renderPaymentHistory();
+    showSheet(financeSheet);
+  }
+
+  function currentFinanceInputs(){
+    const v = activeVehicle();
+    const isSingle = v.ownershipType === "single";
+    return {
+      date: $("#pfDate").value,
+      price: parseFloat($("#pfPrice").value) || 0,
+      downPayment: parseFloat($("#pfDown").value) || 0,
+      downPaymentPaid: isSingle ? null : [
+        Math.max(0, parseFloat($("#pfDpPaid1").value) || 0),
+        Math.max(0, parseFloat($("#pfDpPaid2").value) || 0)
+      ],
+      downPaymentStatus: document.querySelector("#pfDpStatusToggle .toggle-opt.sel").dataset.status,
+      loanAmount: parseFloat($("#pfLoanAmt").value) || 0,
+      insuranceAmount: parseFloat($("#pfInsurance").value) || 0,
+      accountNo: $("#pfAccountNo").value.trim(),
+      processingCharge: parseFloat($("#pfProcessing").value) || 0,
+      rtoCharges: parseFloat($("#pfRto").value) || 0,
+      emiAmount: parseFloat($("#pfEmi").value) || 0,
+      tenureMonths: parseInt($("#pfTenure").value) || 0,
+      financeStatus: document.querySelector("#pfStatusToggle .toggle-opt.sel").dataset.status
+    };
+  }
+
+  $("#quickEmiBtn").addEventListener("click", ()=>{
+    const v = activeVehicle();
+    openSheet(null);
+    $("#fCategory").value = "emi";
+    $("#fPrincipal").value = v.purchase ? v.purchase.emiAmount || "" : "";
+    $("#fInterest").value = "";
+    document.querySelectorAll("#statusToggle .toggle-opt").forEach(o=>o.classList.toggle("sel", o.dataset.status === "CLOSED"));
+    updateCalc();
+  });
+
+
+  function updateFinanceCalc(){
+    const p = currentFinanceInputs();
+    const f = computeFinance(p);
+    $("#pfBalanceDealer").textContent = fmt(f.balanceDueDealer);
+    $("#pfTotalLoan").textContent = fmt(f.totalLoan);
+    $("#pfNetDisb").textContent = fmt(f.netDisb);
+    $("#pfReachesDealer").textContent = fmt(f.reachesDealer);
+    $("#pfTotalPayable").textContent = fmt(f.totalPayable);
+    $("#pfProfitAmt").textContent = fmt(f.profitAmt);
+    $("#pfProfitPct").textContent = f.profitPct.toFixed(1) + "%";
+
+    const note = $("#pfReconcileNote");
+    if(p.loanAmount > 0 && p.price > 0){
+      const delta = Math.round(f.reachesDealer - f.balanceDueDealer);
+      if(Math.abs(delta) <= 50){
+        note.textContent = "Reaches dealer matches the balance due — figures reconcile.";
+        note.classList.remove("warn");
+      } else {
+        note.textContent = `Reaches dealer is ₹${Math.abs(delta).toLocaleString("en-IN")} ${delta>0?"more":"less"} than the balance due to the dealer — worth double-checking your figures.`;
+        note.classList.add("warn");
+      }
+    } else {
+      note.textContent = "";
+      note.classList.remove("warn");
+    }
+  }
+  ["#pfPrice","#pfDown","#pfLoanAmt","#pfInsurance","#pfProcessing","#pfRto","#pfEmi","#pfTenure"].forEach(sel=>{
+    $(sel).addEventListener("input", updateFinanceCalc);
+  });
+
+  $("#pfSaveBtn").addEventListener("click", ()=>{
+    const p = currentFinanceInputs();
+    if(p.price <= 0){ alert("Enter the on-road price."); return; }
+    if(p.loanAmount <= 0){ alert("Enter the loan amount."); return; }
+    const v = activeVehicle();
+    v.purchase = p;
+    saveState();
+    hideSheets();
+    renderAll();
+  });
+  $("#pfClearBtn").addEventListener("click", ()=>{
+    if(!confirm("Clear purchase & finance details for this vehicle?")) return;
+    const v = activeVehicle();
+    v.purchase = null;
+    saveState();
+    hideSheets();
+    renderAll();
+  });
+
+  // ===================== VEHICLE SWITCHER =====================
+  $("#plateBtn").addEventListener("click", openVehicleSheet);
+  $("#vehCancelBtn").addEventListener("click", hideSheets);
+
+  function openVehicleSheet(){
+    const list = $("#vehicleList");
+    list.innerHTML = "";
+    state.vehicles.forEach(v=>{
+      const row = document.createElement("div");
+      row.className = "veh-row" + (v.id === state.activeVehicleId ? " active" : "");
+      row.innerHTML = `
+        <div class="veh-info">
+          <div class="vp">${escapeHtml(v.plate)}</div>
+          <div class="vm">${escapeHtml(v.model)} · ${escapeHtml(v.partners[0])} &amp; ${escapeHtml(v.partners[1])}</div>
+        </div>
+        <div class="veh-row-actions">
+          <button class="mini-btn" data-edit-veh="${v.id}">Edit</button>
+        </div>
+      `;
+      row.addEventListener("click", (e)=>{
+        if(e.target.closest("[data-edit-veh]")) return;
+        state.activeVehicleId = v.id;
+        saveState();
+        hideSheets();
+        activeFilter = "all";
+        logExpanded = false;
+        document.querySelectorAll(".fchip").forEach(c=>c.classList.toggle("active", c.dataset.filter==="all"));
+        renderAll();
+      });
+      row.querySelector("[data-edit-veh]").addEventListener("click", ()=> openEditVehicleSheet(v.id));
+      list.appendChild(row);
+    });
+    showSheet(vehicleSheet);
+  }
+
+  $("#addVehicleBtn").addEventListener("click", ()=> openEditVehicleSheet("new"));
+
+  function updateOwnershipFieldVisibility(){
+    const isSingle = $("#evOwnership").value === "single";
+    $("#evP2Wrap").style.display = isSingle ? "none" : "block";
+    $("#evP1Label").textContent = isSingle ? "Owner Name" : "Partner 1 Name";
+    $("#evP1").placeholder = isSingle ? "e.g. Owner name" : "e.g. Partner 1 name";
+  }
+  $("#evOwnership").addEventListener("change", updateOwnershipFieldVisibility);
+
+  // Registration, model, and owner/partner names always store as uppercase.
+  document.querySelectorAll(".uppercase-input").forEach(el=>{
+    el.addEventListener("input", ()=>{
+      const pos = el.selectionStart;
+      el.value = el.value.toUpperCase();
+      if(pos !== null) el.setSelectionRange(pos, pos);
+    });
+  });
+
+  function openEditVehicleSheet(vehicleId){
+    editingVehicleId = vehicleId;
+    if(vehicleId === "new"){
+      $("#editVehTitle").textContent = "Add Vehicle";
+      $("#evOwnership").value = "single";
+      $("#evPlate").value = "";
+      $("#evModel").value = "";
+      $("#evP1").value = "";
+      $("#evP2").value = state.vehicles[0] ? state.vehicles[0].partners[1] : "";
+      $("#evDeleteBtn").style.display = "none";
+    } else {
+      const v = state.vehicles.find(x=>x.id === vehicleId);
+      $("#editVehTitle").textContent = "Edit Vehicle";
+      $("#evOwnership").value = v.ownershipType || "single";
+      $("#evPlate").value = v.plate;
+      $("#evModel").value = v.model;
+      $("#evP1").value = v.partners[0];
+      $("#evP2").value = v.partners[1];
+      $("#evDeleteBtn").style.display = state.vehicles.length > 1 ? "block" : "none";
+    }
+    updateOwnershipFieldVisibility();
+    showSheet(editVehicleSheet);
+  }
+
+  $("#evCancelBtn").addEventListener("click", hideSheets);
+
+  $("#evSaveBtn").addEventListener("click", ()=>{
+    const ownershipType = $("#evOwnership").value === "partnership" ? "partnership" : "single";
+    const plate = $("#evPlate").value.trim().toUpperCase();
+    const model = $("#evModel").value.trim().toUpperCase();
+    const p1 = $("#evP1").value.trim().toUpperCase();
+    const p2 = $("#evP2").value.trim().toUpperCase();
+    if(!plate || !model){ alert("Enter registration number and model."); return; }
+    if(!p1){ alert(ownershipType === "single" ? "Enter the owner's name." : "Enter both partner names."); return; }
+    if(ownershipType === "partnership" && !p2){ alert("Enter both partner names."); return; }
+
+    if(editingVehicleId === "new"){
+      const veh = freshVehicle(plate, model, p1, p2 || "Partner 2", ownershipType);
+      state.vehicles.push(veh);
+      state.activeVehicleId = veh.id;
+    } else {
+      const v = state.vehicles.find(x=>x.id === editingVehicleId);
+      v.plate = plate; v.model = model; v.partners = [p1, p2 || v.partners[1]]; v.ownershipType = ownershipType;
+    }
+    saveState();
+    hideSheets();
+    activeFilter = "all";
+    logExpanded = false;
+    document.querySelectorAll(".fchip").forEach(c=>c.classList.toggle("active", c.dataset.filter==="all"));
+    renderAll();
+  });
+
+  $("#evDeleteBtn").addEventListener("click", ()=>{
+    if(state.vehicles.length <= 1){ alert("At least one vehicle must remain."); return; }
+    if(!confirm("Delete this vehicle and all its logged entries? This can't be undone.")) return;
+    state.vehicles = state.vehicles.filter(x=>x.id !== editingVehicleId);
+    if(state.activeVehicleId === editingVehicleId){
+      state.activeVehicleId = state.vehicles[0].id;
+    }
+    saveState();
+    hideSheets();
+    renderAll();
+  });
+
+  // ===================== PWA: INSTALL PROMPT =====================
+  let deferredInstallPrompt = null;
+  const installBar = $("#installBar");
+
+  window.addEventListener("beforeinstallprompt", (e)=>{
+    e.preventDefault();
+    deferredInstallPrompt = e;
+    if(localStorage.getItem("manskit_install_dismissed") !== "1"){
+      installBar.classList.add("show");
+    }
+  });
+  $("#installBtn").addEventListener("click", async ()=>{
+    if(!deferredInstallPrompt) return;
+    deferredInstallPrompt.prompt();
+    await deferredInstallPrompt.userChoice;
+    deferredInstallPrompt = null;
+    installBar.classList.remove("show");
+  });
+  $("#installDismiss").addEventListener("click", ()=>{
+    installBar.classList.remove("show");
+    localStorage.setItem("manskit_install_dismissed", "1");
+  });
+  window.addEventListener("appinstalled", ()=>{
+    installBar.classList.remove("show");
+    deferredInstallPrompt = null;
+  });
+
+  // ===================== PWA: SERVICE WORKER =====================
+  if("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")){
+    window.addEventListener("load", ()=>{
+      navigator.serviceWorker.register("./sw.js").catch(()=>{ /* offline support unavailable */ });
+    });
+  }
+
+  // ===================== VEHICLE MENU =====================
+  $("#settleCard").addEventListener("click", openSettleDetailSheet);
+  $("#sdCancelBtn").addEventListener("click", hideSheets);
+
+  $("#settleZeroBtn").addEventListener("click", ()=>{
+    const v = activeVehicle();
+    const net1 = computeSettlement(v);
+    if(Math.abs(net1) < 1) return;
+    const fromIdx = net1 < 0 ? 0 : 1;
+    const toIdx = fromIdx === 0 ? 1 : 0;
+    const amount = Math.round(Math.abs(net1));
+    if(!confirm(`Record that ${v.partners[fromIdx]} paid ${v.partners[toIdx]} ${fmt(amount)} to settle up? This brings the balance to zero.`)) return;
+    v.settlements = v.settlements || [];
+    v.settlements.push({
+      id: "s" + Date.now() + Math.random().toString(36).slice(2,6),
+      date: new Date().toISOString().slice(0,10),
+      fromIndex: fromIdx, toIndex: toIdx, amount, note: "Settle up — fresh start"
+    });
+    saveState();
+    openSettleDetailSheet();
+    renderAll();
+  });
+
+  $("#stSaveBtn").addEventListener("click", ()=>{
+    const v = activeVehicle();
+    const fromIdx = parseInt($("#stFrom").value);
+    const toIdx = parseInt($("#stTo").value);
+    const date = $("#stDate").value;
+    const amount = parseFloat($("#stAmount").value) || 0;
+    const note = $("#stNote").value.trim();
+    if(fromIdx === toIdx){ alert("From and To must be different people."); return; }
+    if(!date){ alert("Pick a date."); return; }
+    if(amount <= 0){ alert("Enter an amount."); return; }
+    v.settlements = v.settlements || [];
+    v.settlements.push({
+      id: "s" + Date.now() + Math.random().toString(36).slice(2,6),
+      date, fromIndex: fromIdx, toIndex: toIdx, amount, note
+    });
+    saveState();
+    openSettleDetailSheet();
+    renderAll();
+  });
+
+  $("#settleHistoryList").addEventListener("click", (e)=>{
+    const delId = e.target.dataset.delSettle;
+    if(!delId) return;
+    if(!confirm("Remove this settlement record? The balance will update to reflect this.")) return;
+    const v = activeVehicle();
+    v.settlements = (v.settlements||[]).filter(s=>s.id !== delId);
+    saveState();
+    openSettleDetailSheet();
+    renderAll();
+  });
+  $("#vehMenuBtn").addEventListener("click", ()=>{
+    const v = activeVehicle();
+    $("#menuVehLabel").textContent = `${v.plate} · ${v.model}`;
+    $("#usageMenuRow").style.display = v.ownershipType === "single" ? "none" : "flex";
+    showSheet(vehMenuSheet);
+  });
+  $("#menuCancelBtn").addEventListener("click", hideSheets);
+  $("#vehMenuSheet").addEventListener("click", (e)=>{
+    const row = e.target.closest(".menu-row");
+    if(!row) return;
+    const dest = row.dataset.open;
+    if(dest === "share"){ hideSheets(); shareLogAsText(); }
+    else if(dest === "finance") openFinanceSheet();
+    else if(dest === "renewals") openRenewalsSheet();
+    else if(dest === "usage") openUsageSheet();
+    else if(dest === "insights") openInsightsSheet();
+    else if(dest === "editveh") openEditVehicleSheet(state.activeVehicleId);
+    else if(dest === "documents") openDocumentsSheet();
+    else if(dest === "backup") openBackupSheet();
+  });
+
+  // ===================== RENEWALS & REMINDERS SHEET =====================
+  function openRenewalsSheet(){
+    const v = activeVehicle();
+    $("#renVehLabel").textContent = `${v.plate} · ${v.model}`;
+    const r = v.renewals || {};
+    $("#rnIntervalKm").value = r.intervalKm || "";
+    $("#rnIntervalMonths").value = r.intervalMonths || "";
+    $("#rnLastOdo").value = r.lastServiceOdo || "";
+    $("#rnLastDate").value = r.lastServiceDate || "";
+    $("#rnInsurance").value = r.insuranceExpiry || "";
+    $("#rnTax").value = r.taxExpiry || "";
+    updateNotifStatusNote();
+    showSheet(renewalsSheet);
+  }
+  $("#rnCancelBtn").addEventListener("click", hideSheets);
+  $("#rnSaveBtn").addEventListener("click", ()=>{
+    const v = activeVehicle();
+    v.renewals = {
+      intervalKm: parseInt($("#rnIntervalKm").value) || 0,
+      intervalMonths: parseInt($("#rnIntervalMonths").value) || 0,
+      lastServiceOdo: parseFloat($("#rnLastOdo").value) || 0,
+      lastServiceDate: $("#rnLastDate").value || "",
+      insuranceExpiry: $("#rnInsurance").value || "",
+      taxExpiry: $("#rnTax").value || ""
+    };
+    saveState();
+    hideSheets();
+    renderAll();
+  });
+
+  function updateNotifStatusNote(){
+    const note = $("#notifStatusNote");
+    if(!("Notification" in window)){
+      note.textContent = "Notifications aren't supported in this browser.";
+      return;
+    }
+    if(Notification.permission === "granted") note.textContent = "✓ On-open notifications are enabled.";
+    else if(Notification.permission === "denied") note.textContent = "Notifications are blocked in your browser settings.";
+    else note.textContent = "Not enabled yet.";
+  }
+  $("#notifPermBtn").addEventListener("click", async ()=>{
+    if(!("Notification" in window)){ updateNotifStatusNote(); return; }
+    try{ await Notification.requestPermission(); }catch(e){}
+    updateNotifStatusNote();
+    renderReminders();
+  });
+
+  // ===================== USAGE PERIODS SHEET =====================
+  function openUsageSheet(){
+    const v = activeVehicle();
+    $("#usgVehLabel").textContent = `${v.plate} · ${v.model}`;
+    const sel = $("#usgPartner");
+    sel.options[0].textContent = v.partners[0];
+    sel.options[0].value = "0";
+    sel.options[1].textContent = v.partners[1];
+    sel.options[1].value = "1";
+    $("#usgStart").value = new Date().toISOString().slice(0,10);
+    $("#usgEnd").value = "";
+    $("#usgNote").value = "";
+    renderUsageList();
+    showSheet(usageSheet);
+  }
+  $("#usgCancelBtn").addEventListener("click", hideSheets);
+  $("#usgAddBtn").addEventListener("click", ()=>{
+    const start = $("#usgStart").value;
+    if(!start){ alert("Pick a start date."); return; }
+    const end = $("#usgEnd").value || null;
+    if(end && end < start){ alert("End date can't be before the start date."); return; }
+    const v = activeVehicle();
+    v.usagePeriods.push({
+      id: "u" + Date.now() + Math.random().toString(36).slice(2,6),
+      partnerIndex: parseInt($("#usgPartner").value) || 0,
+      startDate: start, endDate: end, note: $("#usgNote").value.trim()
+    });
+    saveState();
+    $("#usgStart").value = new Date().toISOString().slice(0,10);
+    $("#usgEnd").value = "";
+    $("#usgNote").value = "";
+    renderUsageList();
+    renderAll();
+  });
+  $("#usageList").addEventListener("click", (e)=>{
+    const delId = e.target.dataset.delUsage;
+    if(!delId) return;
+    if(!confirm("Remove this personal-use period?")) return;
+    const v = activeVehicle();
+    v.usagePeriods = v.usagePeriods.filter(p=>p.id !== delId);
+    saveState();
+    renderUsageList();
+    renderAll();
+  });
+
+  // ===================== INSIGHTS SHEET =====================
+  function openInsightsSheet(){
+    renderInsights();
+    showSheet(insightsSheet);
+  }
+  $("#insCancelBtn").addEventListener("click", hideSheets);
+
+  // ===================== SHARE LOG AS TEXT =====================
+  const FILTER_LABELS = { all:"All", maint:"Maintenance", expense:"Expenses", finance:"Finance" };
+
+  function buildLogShareText(){
+    const v = activeVehicle();
+    let entries = v.entries.slice().sort((a,b)=> new Date(b.date) - new Date(a.date) || b.odo - a.odo);
+    if(activeFilter !== "all") entries = entries.filter(e=> (CATS[e.category] || CATS.other).group === activeFilter);
+
+    const lines = [];
+    lines.push(`MANSKIT Vehicle Hub — ${v.plate} · ${v.model}`);
+    lines.push(`Filter: ${FILTER_LABELS[activeFilter] || "All"}   ·   Generated: ${formatDate(new Date().toISOString().slice(0,10))}`);
+    lines.push("");
+
+    if(!entries.length){
+      lines.push("No entries for this filter.");
+    } else {
+      let totalSum = 0;
+      entries.forEach(e=>{
+        const total = e.principal + (e.interest||0);
+        totalSum += total;
+        const meta = CATS[e.category] || CATS.other;
+        const s1 = e.split ? e.split[0] : 50, s2 = e.split ? e.split[1] : 50;
+        const owed1 = total*s1/100, owed2 = total-owed1;
+        const paid1 = e.paid ? e.paid[0] : owed1, paid2 = e.paid ? e.paid[1] : owed2;
+        lines.push(`${formatDate(e.date)} — ${meta.label} — ${fmt(total)} — ${e.status}`);
+        lines.push(`  Split: ${v.partners[0]} ${s1}% (${fmt(owed1)}) · ${v.partners[1]} ${s2}% (${fmt(owed2)})`);
+        lines.push(`  Paid: ${v.partners[0]} ${fmt(paid1)} · ${v.partners[1]} ${fmt(paid2)}`);
+        if(e.odo) lines.push(`  Odometer: ${e.odo.toLocaleString("en-IN")} km`);
+        if(e.notes) lines.push(`  Note: ${e.notes}`);
+        lines.push("");
+      });
+      lines.push(`— ${entries.length} ${entries.length===1?"entry":"entries"} · Total ${fmt(totalSum)}`);
+    }
+    return lines.join("\n");
+  }
+
+  async function shareLogAsText(){
+    const text = buildLogShareText();
+    const v = activeVehicle();
+    if(navigator.share){
+      try{ await navigator.share({ title: `${v.plate} — Vehicle Log`, text }); }
+      catch(e){ /* user cancelled — ignore */ }
+    } else if(navigator.clipboard && navigator.clipboard.writeText){
+      try{ await navigator.clipboard.writeText(text); alert("Log details copied to clipboard."); }
+      catch(e){ alert("Couldn't share or copy — try again."); }
+    } else {
+      alert("Sharing isn't available in this browser.");
+    }
+  }
+  $("#shareLogBtn").addEventListener("click", shareLogAsText);
+
+  // ===================== BACKUP & RESTORE (all vehicles) =====================
+  function openBackupSheet(){
+    $("#bkPasteBox").value = "";
+    $("#bkFileInput").value = "";
+    $("#bkStatusNote").textContent = "";
+    showSheet(backupSheet);
+  }
+  $("#bkCancelBtn").addEventListener("click", hideSheets);
+
+  function backupJSON(){
+    return JSON.stringify({ manskitBackup:true, exportedAt:new Date().toISOString(), state }, null, 2);
+  }
+
+  $("#bkDownloadBtn").addEventListener("click", ()=>{
+    const json = backupJSON();
+    const blob = new Blob([json], {type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    const stamp = new Date().toISOString().slice(0,10);
+    a.href = url; a.download = `manskit-backup-${stamp}.json`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(()=> URL.revokeObjectURL(url), 2000);
+    $("#bkStatusNote").textContent = "Backup file downloaded.";
+  });
+
+  $("#bkCopyBtn").addEventListener("click", async ()=>{
+    const json = backupJSON();
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      try{ await navigator.clipboard.writeText(json); $("#bkStatusNote").textContent = "Backup copied to clipboard."; }
+      catch(e){ $("#bkStatusNote").textContent = "Couldn't copy — try the download option instead."; }
+    } else {
+      $("#bkStatusNote").textContent = "Clipboard isn't available here — try the download option instead.";
+    }
+  });
+
+  function restoreFromParsed(parsed){
+    let incoming = null;
+    if(parsed && parsed.manskitBackup && parsed.state && Array.isArray(parsed.state.vehicles)) incoming = parsed.state;
+    else if(parsed && Array.isArray(parsed.vehicles)) incoming = parsed;
+
+    if(!incoming || !incoming.vehicles.length){
+      alert("That doesn't look like a MANSKIT backup.");
+      return false;
+    }
+    if(!confirm(`This will replace all current vehicles and entries with the backup (${incoming.vehicles.length} vehicle${incoming.vehicles.length===1?"":"s"}). Continue?`)) return false;
+
+    incoming.vehicles.forEach(v=>{
+      v.purchase = normalizePurchase(v.purchase);
+      if(!v.renewals) v.renewals = { intervalKm:0, intervalMonths:0, lastServiceOdo:0, lastServiceDate:"", insuranceExpiry:"", taxExpiry:"" };
+      if(!v.usagePeriods) v.usagePeriods = [];
+      if(!v.photos) v.photos = { front:[], back:[], left:[], right:[], interior:[] };
+      ["front","back","left","right","interior"].forEach(k=>{ if(!v.photos[k]) v.photos[k] = []; });
+      if(!v.ownershipType) v.ownershipType = "partnership";
+      if(!v.settlements) v.settlements = [];
+      if(!v.documents) v.documents = { rc:[], pollution:[], insurance:[], tax:[], license:[], other:[] };
+    });
+    state = incoming;
+    if(!state.vehicles.find(v=>v.id===state.activeVehicleId)){
+      state.activeVehicleId = state.vehicles[0].id;
+    }
+    saveState();
+    activeFilter = "all";
+    logExpanded = false;
+    document.querySelectorAll(".fchip").forEach(c=>c.classList.toggle("active", c.dataset.filter==="all"));
+    hideSheets();
+    renderAll();
+    return true;
+  }
+
+  $("#bkFileInput").addEventListener("change", (e)=>{
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      try{
+        const parsed = JSON.parse(reader.result);
+        if(restoreFromParsed(parsed)) alert("Backup restored.");
+      }catch(err){
+        alert("Couldn't read that file — make sure it's a MANSKIT backup JSON file.");
+      }
+    };
+    reader.readAsText(file);
+  });
+
+  $("#bkRestorePasteBtn").addEventListener("click", ()=>{
+    const text = $("#bkPasteBox").value.trim();
+    if(!text){ alert("Paste your backup text first."); return; }
+    try{
+      const parsed = JSON.parse(text);
+      if(restoreFromParsed(parsed)) alert("Backup restored.");
+    }catch(err){
+      alert("Couldn't parse that text — make sure it's the full backup text, unedited.");
+    }
+  });
+
+  // ===================== VEHICLE PHOTOS =====================
+  const PHOTO_SLOTS = ["front","back","left","right","interior"];
+  const PHOTO_LABELS = { front:"Front", back:"Back", left:"Left Side", right:"Right Side", interior:"Interior" };
+  let pendingPhotoSlot = null;
+  let viewerEntryId = null;
+  let photosVisible = false;
+
+  $("#togglePhotosBtn").addEventListener("click", ()=>{
+    photosVisible = !photosVisible;
+    $("#photoGrid").style.display = photosVisible ? "grid" : "none";
+    $("#togglePhotosBtn").textContent = photosVisible ? "Hide" : "Show";
+  });
+
+  let financeVisible = false;
+  $("#toggleFinanceBtn").addEventListener("click", ()=>{
+    financeVisible = !financeVisible;
+    $("#finCard").style.display = financeVisible ? "block" : "none";
+    $("#toggleFinanceBtn").textContent = financeVisible ? "Hide" : "Show";
+  });
+
+  function renderPhotoGrid(){
+    const v = activeVehicle();
+    const grid = $("#photoGrid");
+    grid.innerHTML = "";
+    PHOTO_SLOTS.forEach(slot=>{
+      const arr = v.photos[slot] || [];
+      const latest = arr.length ? arr[arr.length-1] : null;
+      const div = document.createElement("div");
+      div.className = "photo-slot" + (latest ? "" : " empty");
+      if(latest){
+        div.innerHTML = `
+          <img src="${latest.dataUrl}" alt="${PHOTO_LABELS[slot]}">
+          ${arr.length > 1 ? `<span class="ps-count">${arr.length}</span>` : ""}
+          <span class="ps-label">${PHOTO_LABELS[slot]}</span>
+        `;
+        div.addEventListener("click", ()=> openPhotoViewer(slot, latest.id));
+      } else {
+        div.innerHTML = `<span class="ps-plus">+</span><span class="ps-label">${PHOTO_LABELS[slot]}</span>`;
+        div.addEventListener("click", ()=>{ pendingPhotoSlot = slot; $("#photoFileInput").click(); });
+      }
+      grid.appendChild(div);
+    });
+  }
+
+  // Resize + compress before storing — keeps localStorage usage sane across years of photos.
+  function compressImage(file, maxDim, quality){
+    maxDim = maxDim || 1400; quality = quality || 0.75;
+    return new Promise((resolve, reject)=>{
+      const reader = new FileReader();
+      reader.onerror = ()=> reject(new Error("read failed"));
+      reader.onload = ()=>{
+        const img = new Image();
+        img.onerror = ()=> reject(new Error("decode failed"));
+        img.onload = ()=>{
+          let w = img.width, h = img.height;
+          if(w > maxDim || h > maxDim){
+            if(w >= h){ h = Math.round(h * maxDim/w); w = maxDim; }
+            else { w = Math.round(w * maxDim/h); h = maxDim; }
+          }
+          const canvas = document.createElement("canvas");
+          canvas.width = w; canvas.height = h;
+          canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+          resolve(canvas.toDataURL("image/jpeg", quality));
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  $("#photoFileInput").addEventListener("change", async (e)=>{
+    const file = e.target.files[0];
+    e.target.value = "";
+    if(!file || !pendingPhotoSlot) return;
+    const slot = pendingPhotoSlot;
+    try{
+      const dataUrl = await compressImage(file);
+      const v = activeVehicle();
+      const entry = { id:"p"+Date.now()+Math.random().toString(36).slice(2,6), dataUrl, date:new Date().toISOString().slice(0,10) };
+      v.photos[slot].push(entry);
+      if(saveState()){
+        renderPhotoGrid();
+        if(viewerSource && viewerSource.type === "photo" && viewerSource.slot === slot) openPhotoViewer(slot, entry.id);
+      } else {
+        v.photos[slot].pop(); // storage failed — don't keep it in memory either
+      }
+    }catch(err){
+      alert("Couldn't process that photo. Try a different image.");
+    }
+  });
+
+  // ===================== DOCUMENTS (RC, insurance, pollution, tax, license) =====================
+  const DOC_CATS = ["rc","pollution","insurance","tax","license","other"];
+  const DOC_LABELS = {
+    rc:"RC (Registration)", pollution:"Pollution (PUC)", insurance:"Insurance",
+    tax:"Road Tax", license:"License", other:"Other"
+  };
+  let pendingDocCategory = null;
+
+  // Images get resized/compressed like photos; PDFs are read as-is (canvas can't touch them).
+  function readDocumentFile(file){
+    if(file.type && file.type.startsWith("image/")){
+      return compressImage(file, 1600, 0.75).then(dataUrl=> ({ dataUrl, mimeType:"image/jpeg" }));
+    }
+    return new Promise((resolve, reject)=>{
+      const reader = new FileReader();
+      reader.onerror = ()=> reject(new Error("read failed"));
+      reader.onload = ()=> resolve({ dataUrl: reader.result, mimeType: file.type || "application/octet-stream" });
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function openDocumentsSheet(){
+    const v = activeVehicle();
+    $("#docVehLabel").textContent = `${v.plate} · ${v.model}`;
+    renderDocumentsSheet();
+    showSheet(documentsSheet);
+  }
+  $("#docCancelBtn").addEventListener("click", hideSheets);
+
+  function renderDocumentsSheet(){
+    const v = activeVehicle();
+    const container = $("#documentsList");
+    container.innerHTML = DOC_CATS.map(cat=>{
+      const docs = v.documents[cat] || [];
+      const rows = docs.length ? docs.map(d=>{
+        const isImg = d.mimeType && d.mimeType.startsWith("image/");
+        const inner = `
+          <span class="doc-icon">${isImg ? "🖼" : "📄"}</span>
+          <span class="doc-name">${escapeHtml(d.fileName)}</span>
+          <span class="doc-date">${formatDate(d.date)}</span>
+        `;
+        // Images open in the same pinch-zoom viewer as Vehicle Photos; PDFs use the browser's own viewer.
+        const linkOpen = isImg
+          ? `<div class="doc-link" data-view-doc="${cat}|${d.id}">`
+          : `<a href="${d.dataUrl}" download="${escapeHtml(d.fileName)}" target="_blank" class="doc-link">`;
+        const linkClose = isImg ? `</div>` : `</a>`;
+        return `
+          <div class="doc-row">
+            ${linkOpen}${inner}${linkClose}
+            <button class="mini-btn danger" data-del-doc="${cat}|${d.id}">Delete</button>
+          </div>
+        `;
+      }).join("") : `<div class="usage-empty">No ${DOC_LABELS[cat]} documents yet.</div>`;
+      return `
+        <div class="doc-category">
+          <div class="doc-cat-head">
+            <span class="doc-cat-title">${DOC_LABELS[cat]}</span>
+            <button class="mini-btn" data-add-doc="${cat}">+ Add</button>
+          </div>
+          ${rows}
+        </div>
+      `;
+    }).join("");
+  }
+
+  $("#documentsList").addEventListener("click", (e)=>{
+    const addCat = e.target.dataset.addDoc;
+    const delKey = e.target.dataset.delDoc;
+    const viewKey = e.target.closest("[data-view-doc]") ? e.target.closest("[data-view-doc]").dataset.viewDoc : null;
+    if(addCat){
+      pendingDocCategory = addCat;
+      $("#docFileInput").click();
+    }
+    if(viewKey){
+      const [cat, id] = viewKey.split("|");
+      openDocumentViewer(cat, id);
+    }
+    if(delKey){
+      const [cat, id] = delKey.split("|");
+      if(!confirm("Delete this document?")) return;
+      const v = activeVehicle();
+      v.documents[cat] = v.documents[cat].filter(d=>d.id !== id);
+      saveState();
+      renderDocumentsSheet();
+    }
+  });
+
+  $("#docFileInput").addEventListener("change", async (e)=>{
+    const file = e.target.files[0];
+    e.target.value = "";
+    if(!file || !pendingDocCategory) return;
+    const cat = pendingDocCategory;
+    try{
+      const { dataUrl, mimeType } = await readDocumentFile(file);
+      const v = activeVehicle();
+      const entry = {
+        id: "d" + Date.now() + Math.random().toString(36).slice(2,6),
+        fileName: file.name, mimeType, dataUrl, date: new Date().toISOString().slice(0,10)
+      };
+      v.documents[cat].push(entry);
+      if(saveState()){
+        renderDocumentsSheet();
+        if(viewerSource && viewerSource.type === "document" && viewerSource.category === cat) openDocumentViewer(cat, entry.id);
+      } else {
+        v.documents[cat].pop();
+      }
+    }catch(err){
+      alert("Couldn't process that file. Try a different one.");
+    }
+  });
+
+  // viewerSource describes what's currently open: {type:"photo", slot} or {type:"document", category}
+  let viewerSource = null;
+
+  function viewerArray(){
+    const v = activeVehicle();
+    return viewerSource.type === "photo" ? v.photos[viewerSource.slot] : v.documents[viewerSource.category];
+  }
+  function viewerLabel(){
+    return viewerSource.type === "photo" ? PHOTO_LABELS[viewerSource.slot] : DOC_LABELS[viewerSource.category];
+  }
+
+  function openPhotoViewer(slot, entryId){
+    const v = activeVehicle();
+    const arr = v.photos[slot] || [];
+    if(!arr.length) return;
+    viewerSource = { type:"photo", slot };
+    viewerEntryId = entryId || arr[arr.length-1].id;
+    renderPhotoViewer();
+    $("#photoViewer").classList.add("show");
+  }
+
+  function openDocumentViewer(category, entryId){
+    const v = activeVehicle();
+    const arr = v.documents[category] || [];
+    if(!arr.length) return;
+    viewerSource = { type:"document", category };
+    viewerEntryId = entryId || arr[arr.length-1].id;
+    renderPhotoViewer();
+    $("#photoViewer").classList.add("show");
+  }
+
+  function renderPhotoViewer(){
+    const arr = viewerArray() || [];
+    let entry = arr.find(p=>p.id === viewerEntryId);
+    if(!entry) entry = arr[arr.length-1];
+    if(!entry){ closePhotoViewer(); return; }
+    viewerEntryId = entry.id;
+
+    $("#pvLabel").innerHTML = `${viewerLabel()}<span class="pv-date" id="pvDate">${formatDate(entry.date)}</span>`;
+    $("#pvImage").src = entry.dataUrl;
+    resetZoom();
+
+    const isDoc = viewerSource.type === "document";
+    $("#pvAddBtn").textContent = isDoc ? "+ Add new document" : "+ Add new photo";
+    $("#pvDeleteBtn").textContent = isDoc ? "Delete this document" : "Delete this photo";
+
+    const hist = $("#pvHistory");
+    const sorted = arr.slice().sort((a,b)=> new Date(b.date) - new Date(a.date));
+    hist.innerHTML = sorted.map(p=>`
+      <div class="pvh-thumb ${p.id===viewerEntryId ? "sel" : ""}" data-photo-id="${p.id}">
+        <img src="${p.dataUrl}" alt="">
+      </div>
+    `).join("");
+    hist.querySelectorAll(".pvh-thumb").forEach(el=>{
+      el.addEventListener("click", ()=>{ viewerEntryId = el.dataset.photoId; renderPhotoViewer(); });
+    });
+  }
+
+  function closePhotoViewer(){
+    $("#photoViewer").classList.remove("show");
+    viewerSource = null; viewerEntryId = null;
+  }
+  $("#pvCloseBtn").addEventListener("click", closePhotoViewer);
+
+  $("#pvAddBtn").addEventListener("click", ()=>{
+    if(viewerSource.type === "photo"){
+      pendingPhotoSlot = viewerSource.slot;
+      $("#photoFileInput").click();
+    } else {
+      pendingDocCategory = viewerSource.category;
+      $("#docFileInput").click();
+    }
+  });
+
+  $("#pvDeleteBtn").addEventListener("click", ()=>{
+    if(!confirm("Delete this? This can't be undone.")) return;
+    const v = activeVehicle();
+    const src = viewerSource;
+    const arr = viewerArray();
+    const remaining = arr.filter(p=>p.id !== viewerEntryId);
+    if(src.type === "photo"){
+      v.photos[src.slot] = remaining;
+      saveState();
+      renderPhotoGrid();
+    } else {
+      v.documents[src.category] = remaining;
+      saveState();
+      renderDocumentsSheet();
+    }
+    if(remaining.length){
+      viewerEntryId = null;
+      renderPhotoViewer();
+    } else {
+      closePhotoViewer();
+    }
+  });
+
+  // ----- pinch-zoom / pan / double-tap reset on the viewer image -----
+  const pvStage = $("#pvStage");
+  const pvImage = $("#pvImage");
+  let zScale = 1, zX = 0, zY = 0;
+  let pinchStartDist = null, pinchStartScale = 1;
+  let panStartX = 0, panStartY = 0, panOriginX = 0, panOriginY = 0, isPanning = false;
+  let lastTapTime = 0;
+
+  function applyZoomTransform(){
+    pvImage.style.transform = `translate(${zX}px, ${zY}px) scale(${zScale})`;
+  }
+  function resetZoom(){
+    zScale = 1; zX = 0; zY = 0;
+    pvImage.style.transition = "none";
+    applyZoomTransform();
+  }
+  function touchDist(t0, t1){
+    return Math.hypot(t1.clientX - t0.clientX, t1.clientY - t0.clientY);
+  }
+
+  pvStage.addEventListener("touchstart", (e)=>{
+    pvImage.style.transition = "none";
+    if(e.touches.length === 2){
+      pinchStartDist = touchDist(e.touches[0], e.touches[1]);
+      pinchStartScale = zScale;
+      isPanning = false;
+    } else if(e.touches.length === 1){
+      const now = Date.now();
+      if(now - lastTapTime < 300){
+        resetZoom();
+        lastTapTime = 0;
+        return;
+      }
+      lastTapTime = now;
+      isPanning = true;
+      panStartX = e.touches[0].clientX; panStartY = e.touches[0].clientY;
+      panOriginX = zX; panOriginY = zY;
+    }
+  }, {passive:true});
+
+  pvStage.addEventListener("touchmove", (e)=>{
+    if(e.touches.length === 2 && pinchStartDist){
+      const dist = touchDist(e.touches[0], e.touches[1]);
+      zScale = Math.min(4, Math.max(1, pinchStartScale * (dist/pinchStartDist)));
+      applyZoomTransform();
+    } else if(e.touches.length === 1 && isPanning && zScale > 1){
+      zX = panOriginX + (e.touches[0].clientX - panStartX);
+      zY = panOriginY + (e.touches[0].clientY - panStartY);
+      applyZoomTransform();
+    }
+  }, {passive:true});
+
+  pvStage.addEventListener("touchend", (e)=>{
+    if(e.touches.length < 2) pinchStartDist = null;
+    if(e.touches.length === 0) isPanning = false;
+    if(zScale <= 1){ zScale = 1; zX = 0; zY = 0; applyZoomTransform(); }
+  }, {passive:true});
+
+  $("#verTag").textContent = "v" + APP_VERSION;
+  $("#menuVersionTag").textContent = "MANSKIT Vehicle Hub · v" + APP_VERSION;
+
+  renderAll();
+})();
+</script>
+</body>
+</html>

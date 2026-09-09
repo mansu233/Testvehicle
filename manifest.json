@@ -1,0 +1,28 @@
+{
+  "name": "MANSKIT Vehicle Hub",
+  "short_name": "MANSKIT",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#14181C",
+  "theme_color": "#14181C",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "./192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "./512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./1024.png",
+      "sizes": "1024x1024",
+      "type": "image/png"
+    }
+  ]
+}
