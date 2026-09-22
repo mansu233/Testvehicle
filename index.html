@@ -2,425 +2,295 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>MANSKIT Vehicle Hub</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MANSKIT VehicleHub</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="manifest" href="manifest.json">
-  <link rel="icon" href="icons/favicon-32.png" sizes="32x32">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-  <meta name="theme-color" content="#090909">
+  <meta name="theme-color" content="#0b0f17">
+  <style>
+    /* Login Overlay Screen Styling */
+    .login-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: var(--bg-color, #0b0f17);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      z-index: 1000;
+    }
+
+    .login-card {
+      background-color: var(--card-bg, #161c28);
+      border: 1px solid var(--card-border, #232d3f);
+      border-radius: 16px;
+      padding: 24px;
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+
+    .login-brand {
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-bottom: 6px;
+      color: var(--text-main, #ffffff);
+    }
+
+    .login-sub {
+      font-size: 0.85rem;
+      color: var(--text-sub, #94a3b8);
+      margin-bottom: 24px;
+    }
+
+    .guest-btn {
+      width: 100%;
+      background-color: transparent;
+      border: 1px solid var(--card-border, #232d3f);
+      color: var(--text-sub, #94a3b8);
+      border-radius: 8px;
+      padding: 12px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      margin-top: 12px;
+      transition: all 0.2s ease;
+    }
+
+    .guest-btn:hover, .guest-btn:active {
+      background-color: rgba(255, 255, 255, 0.05);
+      color: var(--text-main, #ffffff);
+      border-color: var(--sky-blue, #38bdf8);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
 </head>
 <body>
 
-  <!-- REQUIRED FIREBASE EMAIL SIGN-IN -->
-  <div id="auth-screen" class="auth-screen">
-    <div class="auth-card">
-      <img src="icons/icon-192.png" alt="" class="lock-logo">
-      <h2>Manskit Vehicle Hub</h2>
-      <p class="hint-text">Sign in to continue and keep your vehicle data backed up securely.</p>
-      <div id="auth-signin-view">
-        <div class="form-group"><label>Email Address</label><input type="email" id="auth-email" autocomplete="email" placeholder="you@example.com"></div>
-        <div class="form-group"><label>Password</label><input type="password" id="auth-password" autocomplete="current-password"></div>
-        <button class="btn-primary auth-submit" onclick="signInToApp()">Sign In</button>
-        <button class="btn-secondary auth-submit" onclick="createAppAccount()">Create Account</button>
-        <button class="text-button" onclick="showAuthReset()">Forgot Password?</button>
+  <!-- Login / Guest Gate Screen -->
+  <div id="login-overlay" class="login-overlay">
+    <div class="login-card">
+      <div class="brand-logo" style="margin: 0 auto 16px auto; width: 48px; height: 48px;">
+        <svg viewBox="0 0 24 24">
+          <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5-1.5zM5 11l1.5-4.5h11L19 11H5z"/>
+        </svg>
       </div>
-      <div id="auth-reset-view" class="hidden">
-        <div class="form-group"><label>Email Address</label><input type="email" id="auth-reset-email" autocomplete="email" placeholder="you@example.com"></div>
-        <button class="btn-primary auth-submit" onclick="sendAppPasswordReset()">Send Reset Email</button>
-        <button class="text-button" onclick="showAuthSignIn()">Back to Sign In</button>
-      </div>
-      <p class="hint-text error-text hidden" id="auth-error"></p>
-      <p class="hint-text" id="auth-status">Checking secure sign-in…</p>
+      <div class="login-brand">MANSKIT VehicleHub</div>
+      <div class="login-sub">Manage your vehicle logs & expenses</div>
+
+      <form id="login-form">
+        <div class="form-group" style="text-align: left;">
+          <label for="login-email">Email</label>
+          <input type="email" id="login-email" class="form-control" placeholder="enter your email">
+        </div>
+        <div class="form-group" style="text-align: left;">
+          <label for="login-password">Password</label>
+          <input type="password" id="login-password" class="form-control" placeholder="••••••••">
+        </div>
+        <button type="submit" class="submit-btn">Log In</button>
+      </form>
+
+      <div style="margin: 16px 0 8px 0; font-size: 0.8rem; color: var(--text-sub, #94a3b8);">OR</div>
+
+      <!-- Skip / Guest Mode Option -->
+      <button type="button" id="skip-login-btn" class="guest-btn">
+        🚀 Continue Without Login (Offline Mode)
+      </button>
     </div>
   </div>
 
-  <!-- APP LOCK SCREEN — shown on top of everything when App Lock is enabled -->
-  <div id="lock-screen" class="lock-screen hidden">
-    <div class="lock-card">
-      <img src="icons/icon-192.png" alt="" class="lock-logo">
-      <h2>Manskit Vehicle Hub</h2>
-      <p class="hint-text">Enter your password to continue.</p>
-
-      <div id="lock-password-view">
-        <div class="form-group">
-          <label>Password</label>
-          <input type="password" id="lock-password-input" autocomplete="current-password">
-        </div>
-        <button class="btn-primary" onclick="attemptUnlock()">Unlock</button>
-        <button class="btn-secondary" onclick="showForgotPassword()">Forgot Password?</button>
-        <p class="hint-text error-text hidden" id="lock-error"></p>
+  <!-- App Header -->
+  <header class="app-header">
+    <div class="brand-container">
+      <div class="brand-logo">
+        <svg viewBox="0 0 24 24">
+          <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5-1.5zM5 11l1.5-4.5h11L19 11H5z"/>
+        </svg>
       </div>
-
-      <div id="lock-forgot-view" class="hidden">
-        <p class="hint-text">Security question:</p>
-        <p><strong id="lock-question-text"></strong></p>
-        <div class="form-group">
-          <label>Your Answer</label>
-          <input type="text" id="lock-answer-input">
-        </div>
-        <div class="form-group">
-          <label>New Password</label>
-          <input type="password" id="lock-new-password">
-        </div>
-        <button class="btn-primary" onclick="attemptRecovery()">Reset Password</button>
-        <button class="btn-secondary" onclick="showPasswordView()">Back to Password</button>
-        <p class="hint-text error-text hidden" id="lock-recovery-error"></p>
-        <p class="hint-text" id="lock-recovery-email-hint"></p>
+      <div class="brand-titles">
+        <span class="brand-name">MANSKIT</span>
+        <span class="brand-sub">VehicleHub</span>
       </div>
     </div>
-  </div>
-
-  <!-- GLOBAL TOP BAR — vehicle switcher lives on every screen -->
-  <header class="top-bar">
-    <div class="brand">
-      <img src="icons/icon-192.png" alt="" class="brand-logo">
-      <div class="brand-text">
-        <span class="logo-text">MANSKIT</span>
-        <span class="sub-logo">Vehicle Hub</span>
-      </div>
-    </div>
-    <div class="top-bar-right">
-      <select id="vehicle-switcher" class="vehicle-select"></select>
-      <button class="icon-btn" onclick="openSettings()" aria-label="Settings">⚙️</button>
+    <div class="header-actions">
+      <select id="vehicle-select" class="vehicle-selector">
+      </select>
     </div>
   </header>
 
-  <!-- MAIN CONTENT CONTAINER (SWITCHES VIEWS) -->
-  <main id="app-container">
+  <!-- Main Content Area -->
+  <main class="main-container">
+    
+    <div class="section-label">Overview</div>
+    <h1 class="section-title">Dashboard</h1>
 
-    <!-- ===================================================================
-         SCREEN 1: DASHBOARD & QUICK ENTRY
-    =================================================================== -->
-    <section id="screen-quick-entry" class="app-screen active">
-      <div class="dashboard-heading"><div><p class="eyebrow">OVERVIEW</p><h2>Dashboard</h2></div><span class="dashboard-date" id="dashboard-date"></span></div>
-      <div class="dashboard-grid" id="dashboard-alerts"></div>
-      <details class="quick-entry-drawer" open><summary>Quick Log Entry</summary>
+    <!-- Dashboard Grid Cards -->
+    <div class="dashboard-grid" id="dashboard-cards">
+      
+      <!-- Card 1: Urgent Alerts -->
+      <div class="grid-card border-red">
+        <div class="grid-card-title">Urgent Alerts</div>
+        <div class="grid-card-body">
+          <div class="grid-card-subtitle" id="urgent-line-1">No critical issues</div>
+          <div class="grid-card-subtitle" id="urgent-line-2">All systems normal</div>
+        </div>
+      </div>
 
-      <div class="action-pills" id="action-pills"></div>
+      <!-- Card 2: Warnings / Near Expiry -->
+      <div class="grid-card border-amber">
+        <div class="grid-card-title">Warnings</div>
+        <div class="grid-card-body">
+          <div class="grid-card-subtitle" id="warning-line-1">Documents clear</div>
+          <div class="grid-card-subtitle" id="warning-line-2">No pending items</div>
+        </div>
+      </div>
 
-      <form id="quick-entry-form" onsubmit="handleFormSubmit(event)">
+      <!-- Card 3: Reminders -->
+      <div class="grid-card border-blue">
+        <div class="grid-card-title">Reminders</div>
+        <div class="grid-card-body">
+          <div class="grid-card-subtitle" id="reminder-line-1">No upcoming service</div>
+          <div class="grid-card-subtitle" id="reminder-line-2">Schedule is clear</div>
+        </div>
+      </div>
+
+      <!-- Card 4: Other Notifications -->
+      <div class="grid-card border-green">
+        <div class="grid-card-title">Notifications</div>
+        <div class="grid-card-body">
+          <div class="grid-card-subtitle" id="notify-line-1">System synchronized</div>
+          <div class="grid-card-subtitle" id="notify-line-2">Local database ready</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Vehicle Setup Form -->
+    <div class="quick-log-card" style="margin-bottom: 20px;">
+      <div class="section-title" style="font-size: 1.1rem; margin-bottom: 12px;">🚘 Vehicle Setup</div>
+      <form id="vehicle-setup-form">
         <div class="form-group">
-          <label>Date</label>
-          <input type="date" id="entry-date" required>
-        </div>
-
-        <div class="form-group">
-          <label>Current Odometer (KM)</label>
-          <input type="number" id="entry-odometer" inputmode="numeric" placeholder="e.g. 45200" required>
-          <p class="hint-text" id="entry-odometer-hint"></p>
-        </div>
-
-        <!-- Category fields (fuel / expense / maintenance / custom) -->
-        <div id="fields-category">
-          <div class="form-group">
-            <label>Category</label>
-            <select id="entry-category-select" onchange="handleCategorySelectChange()"></select>
-          </div>
-          <div class="form-group hidden" id="entry-category-other-group">
-            <label>Specify Category</label>
-            <input type="text" id="entry-category-other" placeholder="Type category">
-          </div>
-          <div class="form-group hidden" id="entry-workshop-group">
-            <label>Workshop / Mechanic</label>
-            <input type="text" id="entry-workshop" placeholder="e.g. Downtown Auto Care">
-          </div>
-        </div>
-
-        <!-- Damage-specific fields -->
-        <div id="fields-damage" class="hidden">
-          <div class="form-group">
-            <label>Body Zone</label>
-            <select id="entry-damage-zone"></select>
-          </div>
-          <div class="form-group">
-            <label>Description</label>
-            <input type="text" id="entry-damage-desc" placeholder="e.g. Scratch on rear bumper">
-          </div>
-          <div class="form-group">
-            <label>Status</label>
-            <select id="entry-damage-status">
-              <option value="Pending">Pending</option>
-              <option value="Fixed">Fixed</option>
-            </select>
-          </div>
+          <label for="input-vehicle-name">Vehicle Name</label>
+          <input type="text" id="input-vehicle-name" class="form-control" placeholder="e.g. Primary Car, Toyota Hiace" required>
         </div>
 
         <div class="form-group">
-          <label id="entry-amount-label">Amount Paid</label>
-          <input type="number" step="0.01" id="entry-amount" inputmode="decimal" placeholder="0.00" required oninput="handleAmountChange()">
+          <label for="input-reg-number">Registration Number (Vehicle Number)</label>
+          <input type="text" id="input-reg-number" class="form-control" placeholder="e.g. KL 65 K 606" required>
         </div>
 
-        <div class="form-group" id="entry-settlement-group">
-          <label>Expense Type</label>
-          <div class="action-pills settlement-type-pills">
-            <button type="button" class="pill" data-settlement="shared" onclick="selectSettlementType('shared')">🔗 Shared</button>
-            <button type="button" class="pill active" data-settlement="personal" onclick="selectSettlementType('personal')">👤 Personal (not shared)</button>
-          </div>
-          <p class="hint-text" id="settlement-type-hint">Shared costs (purchase, most maintenance) split the bill between both of you. Personal costs (a solo trip, your own fine) don't create a debt.</p>
-        </div>
-
-        <div class="form-group" id="entry-paid-by-group">
-          <label id="entry-paid-by-label">Paid By</label>
-          <select id="entry-paid-by" onchange="handlePaidByChange()"></select>
-        </div>
-
-        <div id="entry-split-group" class="hidden split-fields">
-          <div class="form-group">
-            <label id="entry-split-you-label">You Paid</label>
-            <input type="number" step="0.01" id="entry-split-you" inputmode="decimal" oninput="handleSplitYouChange()">
-          </div>
-          <div class="form-group">
-            <label id="entry-split-partner-label">Partner Paid</label>
-            <input type="number" step="0.01" id="entry-split-partner" inputmode="decimal" oninput="handleSplitPartnerChange()">
-          </div>
-          <p class="hint-text" id="entry-split-remaining"></p>
-        </div>
-
-        <div class="form-group">
-          <label>Receipt / Proof Photo</label>
-          <input type="file" id="entry-proof" accept="image/*" capture="environment">
-          <div id="entry-proof-preview" class="proof-preview"></div>
-        </div>
-
-        <button type="button" class="expandable-toggle" id="entry-note-toggle" onclick="toggleNoteField()">+ Add Note</button>
-        <div class="form-group hidden" id="entry-note-group">
-          <label>Note</label>
-          <textarea id="entry-note" rows="3" placeholder="Any extra detail worth remembering..."></textarea>
-        </div>
-
-        <button type="submit" class="btn-primary" id="entry-submit-btn">Save Entry</button>
-        <button type="button" class="btn-secondary hidden" id="entry-cancel-edit" onclick="cancelEditLog()">Cancel Edit</button>
+        <button type="submit" class="submit-btn" style="background-color: var(--accent-blue); color: #fff;">Update Vehicle Info</button>
       </form>
-      </details>
-    </section>
+    </div>
 
-    <!-- ===================================================================
-         SCREEN 2: VEHICLE PROFILE, SPECS & VISUAL GALLERY
-    =================================================================== -->
-    <section id="screen-profile" class="app-screen">
-      <h2>Vehicle Profile & Glovebox</h2>
-
-      <div class="cover-card" id="cover-card"></div>
-
-      <button class="btn-secondary" onclick="openShareVehicleDetails()">📤 Share Vehicle Details</button>
-
-      <div class="card">
-        <div class="card-header-row">
-          <h3>Key Specifications</h3>
-          <button class="btn-chip" onclick="openSpecEditor('keySpecs')">Edit</button>
-        </div>
-        <p class="hint-text">The essentials — what this vehicle actually is.</p>
-        <div id="spec-keySpecs"></div>
+    <!-- Quick Log Section -->
+    <div class="quick-log-card">
+      <div class="section-title" style="font-size: 1.1rem; margin-bottom: 12px;">▼ Quick Log Entry</div>
+      
+      <div class="log-tabs">
+        <button class="tab-btn active" data-type="fuel">⛽ Fuel</button>
+        <button class="tab-btn" data-type="maintenance">🔧 Maintenance</button>
+        <button class="tab-btn" data-type="expense">💸 Expense / Toll</button>
       </div>
 
-      <div class="card">
-        <div class="card-header-row">
-          <h3>Engine Oil & Filter</h3>
-          <button class="btn-chip" onclick="openSpecEditor('engineOil')">Edit</button>
-        </div>
-        <div id="spec-engineOil"></div>
-      </div>
-
-      <div class="card">
-        <div class="card-header-row">
-          <h3>Coolant & Brake Fluid</h3>
-          <button class="btn-chip" onclick="openSpecEditor('coolantBrake')">Edit</button>
-        </div>
-        <div id="spec-coolantBrake"></div>
-      </div>
-
-      <div class="card">
-        <div class="card-header-row">
-          <h3>Tyre Specifications</h3>
-          <button class="btn-chip" onclick="openSpecEditor('tyre')">Edit</button>
-        </div>
-        <div id="spec-tyre"></div>
-      </div>
-
-      <div class="card">
-        <div class="card-header-row">
-          <h3>Filters & Consumables</h3>
-          <button class="btn-chip" onclick="openSpecEditor('filters')">Edit</button>
-        </div>
-        <div id="spec-filters"></div>
-      </div>
-
-      <div class="card">
-        <div class="card-header-row">
-          <h3>Preferred Service Station</h3>
-          <button class="btn-chip" onclick="openSpecEditor('serviceStation')">Edit</button>
-        </div>
-        <div id="spec-serviceStation"></div>
-      </div>
-
-      <div class="card">
-        <h3>Multi-Angle Photo Gallery</h3>
-        <p class="hint-text">Tap a slot to add or replace a photo. Left Side doubles as the cover photo.</p>
-        <div class="photo-grid" id="photo-grid"></div>
-        <button class="btn-secondary" onclick="openCustomPhotoUpload()">+ Add Custom Photo</button>
-      </div>
-
-      <div class="card">
-        <h3>Damage Log</h3>
-        <p class="hint-text">Logged from Quick Entry &gt; 📸 Damage / Scratch.</p>
-        <div id="damage-table"></div>
-      </div>
-
-      <div class="card">
-        <div class="card-header-row"><h3>Documents</h3></div>
-        <p class="hint-text">RC, insurance, pollution certificate, license — with expiry tracking.</p>
-        <div id="documents-list"></div>
-        <button class="btn-secondary" onclick="openAddDocument()">+ Add Document</button>
-      </div>
-
-      <div class="card">
-        <div class="card-header-row"><h3>Reminders</h3></div>
-        <p class="hint-text">Shown as an in-app alert when due — this only works while MANSKIT is open (it's an offline app with no server to push notifications from).</p>
-        <div id="reminders-list"></div>
-        <button class="btn-secondary" onclick="openAddReminder()">+ Add Reminder</button>
-      </div>
-    </section>
-
-    <!-- ===================================================================
-         SCREEN 3: PURCHASE & FINANCE CALCULATOR
-    =================================================================== -->
-    <section id="screen-finance" class="app-screen">
-      <h2>Purchase & Finance</h2>
-
-      <div class="card">
-        <div class="card-header-row">
-          <h3>Acquisition Cost Breakdown</h3>
-          <button class="btn-chip" onclick="openAcquisitionEditor()">Edit</button>
-        </div>
-        <div id="acquisition-body"></div>
-      </div>
-
-      <div class="card" id="contributions-card">
-        <div class="card-header-row"><h3>Down Payment Contributions</h3></div>
-        <div id="contributions-summary"></div>
-        <div id="contributions-list"></div>
-        <button class="btn-secondary" onclick="openAddContribution()">+ Add Contribution</button>
-      </div>
-
-      <div class="card" id="loan-card">
-        <div class="card-header-row">
-          <h3>Loan Details</h3>
-          <button class="btn-chip" onclick="openLoanEditor()">Edit</button>
-        </div>
-        <div id="loan-body"></div>
-      </div>
-
-      <div class="card" id="emi-card">
-        <div class="card-header-row"><h3>EMI Payment Tracker</h3></div>
-        <div id="emi-progress"></div>
-        <div id="emi-list"></div>
-        <button class="btn-secondary" onclick="openAddEmiPayment()">+ Log EMI Payment</button>
-      </div>
-    </section>
-
-    <!-- ===================================================================
-         SCREEN 4: SEPARATE LOGS & PARTNER LEDGER
-    =================================================================== -->
-    <section id="screen-logs" class="app-screen">
-      <h2>Logs & Partners Ledger</h2>
-
-      <div class="action-pills">
-        <button class="pill active" data-subtab="maintenance" onclick="switchLogsSubtab('maintenance', this)">🔧 Maintenance</button>
-        <button class="pill" data-subtab="expenses" onclick="switchLogsSubtab('expenses', this)">💸 Expenses</button>
-        <button class="pill" data-subtab="dashboard" onclick="switchLogsSubtab('dashboard', this)">📊 Dashboard</button>
-      </div>
-
-      <div class="log-filters card">
-        <div class="card-header-row"><h3>Find in history</h3><button class="btn-chip" onclick="clearLogFilters()">Clear</button></div>
-        <div class="filter-grid">
-          <input id="log-filter-text" type="search" placeholder="Note, description, category..." oninput="updateLogFilters()">
-          <input id="log-filter-date-from" type="date" aria-label="From date" onchange="updateLogFilters()">
-          <input id="log-filter-date-to" type="date" aria-label="To date" onchange="updateLogFilters()">
-          <select id="log-filter-status" onchange="updateLogFilters()"><option value="">Any status</option><option>Pending</option><option>Fixed</option><option>Personal</option><option>Shared</option></select>
-          <input id="log-filter-type" type="text" placeholder="Expense type" oninput="updateLogFilters()">
-          <input id="log-filter-paid-by" type="text" placeholder="Paid by" oninput="updateLogFilters()">
-          <input id="log-filter-amount-min" type="number" step="0.01" placeholder="Min amount" oninput="updateLogFilters()">
-          <input id="log-filter-amount-max" type="number" step="0.01" placeholder="Max amount" oninput="updateLogFilters()">
-        </div>
-        <button class="btn-secondary" id="log-history-toggle" onclick="toggleLogHistory()">Show all history</button>
-      </div>
-
-      <div id="logs-subtab-maintenance" class="logs-subtab active">
-        <div id="maintenance-log-list" class="log-list"></div>
-      </div>
-
-      <div id="logs-subtab-expenses" class="logs-subtab">
-        <div id="expenses-log-list" class="log-list"></div>
-      </div>
-
-      <div id="logs-subtab-dashboard" class="logs-subtab">
-        <div class="stats-grid" id="stats-grid"></div>
-
-        <div class="card">
-          <h3>Personal Spending (Not Shared)</h3>
-          <p class="hint-text">Each person's own costs — trips, personal fines — that don't create a debt between you.</p>
-          <div id="personal-spend-body"></div>
+      <form id="quick-log-form">
+        <div class="form-group">
+          <label for="log-date">Date</label>
+          <input type="date" id="log-date" class="form-control" required>
         </div>
 
-        <div class="card highlight-card">
-          <div class="card-header-row"><h3>Shared Settlement Ledger</h3></div>
-          <p id="settlement-summary">—</p>
-          <p class="hint-text">Includes shared logs, down-payment contributions, and EMI payments — not personal expenses.</p>
-          <button class="btn-secondary" id="settle-up-btn" onclick="trySettleUp()">✓ Settle Up (Reset to Zero)</button>
-          <div id="settlement-history"></div>
+        <div class="form-group">
+          <label for="log-odometer">Current Odometer (KM)</label>
+          <input type="number" id="log-odometer" class="form-control" placeholder="e.g. 45200" required>
         </div>
-      </div>
-    </section>
+
+        <div class="form-group" id="category-group">
+          <label for="log-category">Category</label>
+          <select id="log-category" class="form-control">
+            <option value="Oil Change">Oil Change</option>
+            <option value="Tire Rotation">Tire Rotation</option>
+            <option value="Brake Service">Brake Service</option>
+            <option value="General Maintenance">General Maintenance</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="log-amount">Amount / Cost</label>
+          <input type="number" step="0.01" id="log-amount" class="form-control" placeholder="0.00" required>
+        </div>
+
+        <div class="form-group">
+          <label for="log-notes">Workshop / Notes</label>
+          <input type="text" id="log-notes" class="form-control" placeholder="e.g. Station or Workshop details">
+        </div>
+
+        <button type="submit" class="submit-btn">Save Entry</button>
+      </form>
+    </div>
 
   </main>
 
-  <!-- BOTTOM NAVIGATION BAR — 4 screens per spec -->
+  <!-- Bottom Navigation Bar -->
   <nav class="bottom-nav">
-    <button class="nav-item active" onclick="switchTab('screen-quick-entry', this)">
-      <span class="nav-icon">⚡</span><span class="nav-label">Quick Entry</span>
-    </button>
-    <button class="nav-item" onclick="switchTab('screen-profile', this)">
-      <span class="nav-icon">📋</span><span class="nav-label">Profile</span>
-    </button>
-    <button class="nav-item" onclick="switchTab('screen-finance', this)">
-      <span class="nav-icon">🏦</span><span class="nav-label">Finance</span>
-    </button>
-    <button class="nav-item" onclick="switchTab('screen-logs', this)">
-      <span class="nav-icon">📊</span><span class="nav-label">Logs</span>
-    </button>
+    <a href="#" class="nav-item active" data-target="quick-entry">
+      <span>⚡</span>
+      <span>Quick Entry</span>
+    </a>
+    <a href="#" class="nav-item" data-target="profile">
+      <span>📋</span>
+      <span>Profile</span>
+    </a>
+    <a href="#" class="nav-item" data-target="finance">
+      <span>🏛️</span>
+      <span>Finance</span>
+    </a>
+    <a href="#" class="nav-item" data-target="logs">
+      <span>📊</span>
+      <span>Logs</span>
+    </a>
   </nav>
-
-  <!-- GENERIC MODAL SHEET -->
-  <div id="modal-backdrop" class="modal-backdrop hidden" onclick="closeModalOnBackdrop(event)">
-    <div class="modal-sheet" id="modal-sheet"></div>
-  </div>
-
-  <!-- FULLSCREEN SETTINGS OVERLAY -->
-  <div id="settings-overlay" class="settings-overlay hidden">
-    <div class="settings-header">
-      <h2>Settings</h2>
-      <button class="icon-btn" onclick="closeSettings()">✕</button>
-    </div>
-    <div class="settings-body" id="settings-body"></div>
-  </div>
-
-  <!-- PINCH-ZOOM PHOTO VIEWER -->
-  <div id="zoom-viewer" class="zoom-viewer hidden">
-    <button class="icon-btn zoom-close" onclick="closeZoomViewer()">✕</button>
-    <div class="zoom-container" id="zoom-container">
-      <img id="zoom-image" src="" alt="Photo">
-    </div>
-  </div>
-
-  <!-- TOASTS -->
-  <div id="toast-container" class="toast-container"></div>
 
   <script src="constants.js"></script>
   <script src="storage.js"></script>
-  <script src="zoom.js"></script>
-  <script src="firebase-config.js"></script>
-  <script src="firebase-sync.js"></script>
   <script src="app.js"></script>
+  <script>
+    // Guest Mode Toggle Logic
+    document.addEventListener('DOMContentLoaded', () => {
+      const loginOverlay = document.getElementById('login-overlay');
+      const skipBtn = document.getElementById('skip-login-btn');
+      const loginForm = document.getElementById('login-form');
+
+      // Check if user previously selected Guest Mode or is logged in
+      const isGuestMode = localStorage.getItem('vehiclehub_guest_mode');
+      if (isGuestMode === 'true') {
+        loginOverlay.classList.add('hidden');
+      }
+
+      // Skip login / Continue without login event listener
+      if (skipBtn) {
+        skipBtn.addEventListener('click', () => {
+          localStorage.setItem('vehiclehub_guest_mode', 'true');
+          loginOverlay.classList.add('hidden');
+        });
+      }
+
+      // Handle standard login submit
+      if (loginForm) {
+        loginForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          localStorage.setItem('vehiclehub_guest_mode', 'false');
+          loginOverlay.classList.add('hidden');
+        });
+      }
+    });
+  </script>
 </body>
 </html>
