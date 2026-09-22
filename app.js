@@ -1,28 +1,118 @@
-// Core Application Controller
+// app.js - Core Application Logic & Event Handlers
+
 document.addEventListener('DOMContentLoaded', () => {
-  // Initialize default date in log form
-  const dateInput = document.getElementById('log-date');
-  if (dateInput) {
-    dateInput.value = new Date().toISOString().split('T')[0];
+  // Initialize inputs and options
+  initVehicleData();
+  setupTabNavigation();
+  setupQuickLogForm();
+  setupVehicleProfileForm();
+});
+
+// 1. Load and Render Vehicle Select Dropdown
+function initVehicleData() {
+  const vehicleSelect = document.getElementById('vehicle-select');
+  const inputVehicleName = document.getElementById('input-vehicle-name');
+  const inputRegNumber = document.getElementById('input-reg-number');
+
+  let vehicles = [];
+  if (typeof VehicleStorage !== 'undefined') {
+    vehicles = VehicleStorage.getVehicles();
+  } else {
+    const data = localStorage.getItem('vehiclehub_vehicles');
+    vehicles = data ? JSON.parse(data) : [];
   }
 
-  // Handle Tab Navigation for Quick Log Category Switching
-  let activeLogType = 'fuel';
+  // If no vehicles exist, create a default
+  if (vehicles.length === 0) {
+    vehicles = [{ id: 'v1', name: 'Primary Vehicle', regNumber: '', odometer: 0 }];
+    localStorage.setItem('vehiclehub_vehicles', JSON.stringify(vehicles));
+  }
+
+  const activeVehicle = vehicles[0];
+
+  // Update Dropdown Header Display
+  if (vehicleSelect) {
+    vehicleSelect.innerHTML = '';
+    vehicles.forEach(v => {
+      const option = document.createElement('option');
+      option.value = v.id;
+      option.textContent = v.regNumber 
+        ? `${v.name} (${v.regNumber.toUpperCase()})` 
+        : v.name;
+      vehicleSelect.appendChild(option);
+    });
+  }
+
+  // Populate Profile Inputs
+  if (inputVehicleName && activeVehicle) {
+    inputVehicleName.value = activeVehicle.name || '';
+  }
+  if (inputRegNumber && activeVehicle) {
+    inputRegNumber.value = activeVehicle.regNumber || '';
+  }
+}
+
+// 2. Setup "Update Vehicle Info" Button Submission
+function setupVehicleProfileForm() {
+  const vehicleSetupForm = document.getElementById('vehicle-setup-form');
+  const inputVehicleName = document.getElementById('input-vehicle-name');
+  const inputRegNumber = document.getElementById('input-reg-number');
+
+  if (!vehicleSetupForm) return;
+
+  vehicleSetupForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const newName = inputVehicleName.value.trim() || 'Primary Vehicle';
+    const newReg = inputRegNumber.value.trim();
+
+    // Fetch existing vehicles array
+    let vehicles = typeof VehicleStorage !== 'undefined' 
+      ? VehicleStorage.getVehicles() 
+      : JSON.parse(localStorage.getItem('vehiclehub_vehicles') || '[]');
+
+    if (vehicles.length === 0) {
+      vehicles = [{ id: 'v1', name: newName, regNumber: newReg, odometer: 0 }];
+    } else {
+      vehicles[0].name = newName;
+      vehicles[0].regNumber = newReg;
+    }
+
+    // Save back to storage
+    if (typeof VehicleStorage !== 'undefined') {
+      VehicleStorage.saveVehicles(vehicles);
+    } else {
+      localStorage.setItem('vehiclehub_vehicles', JSON.stringify(vehicles));
+    }
+
+    // Immediately refresh the header dropdown UI
+    initVehicleData();
+
+    alert('✅ Vehicle details updated successfully!');
+  });
+}
+
+// 3. Tab Switching for Log Categories
+function setupTabNavigation() {
   const tabButtons = document.querySelectorAll('.log-tabs .tab-btn');
   const categorySelect = document.getElementById('log-category');
 
-  function updateCategoryOptions(type) {
+  function updateCategories(type) {
     if (!categorySelect) return;
     categorySelect.innerHTML = '';
-    
-    const key = type.toUpperCase();
-    const options = CATEGORIES[key] || [];
 
-    options.forEach(opt => {
-      const el = document.createElement('option');
-      el.value = opt;
-      el.textContent = opt;
-      categorySelect.appendChild(el);
+    const opts = {
+      fuel: ['Full Tank', 'Partial Tank', 'Premium Fuel'],
+      maintenance: ['Oil Change', 'Tire Rotation', 'Brake Service', 'General Maintenance'],
+      expense: ['Toll', 'Parking', 'Car Wash', 'Insurance', 'Registration']
+    };
+
+    const list = opts[type] || opts.maintenance;
+    list.forEach(item => {
+      const opt = document.createElement('option');
+      opt.value = item;
+      opt.textContent = item;
+      categorySelect.appendChild(opt);
     });
   }
 
@@ -31,41 +121,49 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
       tabButtons.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      activeLogType = btn.dataset.type;
-      updateCategoryOptions(activeLogType);
+      const type = btn.getAttribute('data-type') || 'fuel';
+      updateCategories(type);
     });
   });
+}
 
-  // Form Submit Handler
-  const form = document.getElementById('quick-log-form');
-  if (form) {
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
+// 4. Quick Log Form Handler
+function setupQuickLogForm() {
+  const logForm = document.getElementById('quick-log-form');
+  const dateInput = document.getElementById('log-date');
 
-      const newEntry = {
-        id: Date.now(),
-        type: activeLogType,
-        date: document.getElementById('log-date').value,
-        odometer: Number(document.getElementById('log-odometer').value),
-        category: categorySelect ? categorySelect.value : '',
-        amount: Number(document.getElementById('log-amount').value),
-        notes: document.getElementById('log-notes').value
-      };
-
-      VehicleStorage.saveLog(newEntry);
-      alert('Log entry saved successfully!');
-      form.reset();
-      
-      // Reset default values
-      dateInput.value = new Date().toISOString().split('T')[0];
-      updateCategoryOptions(activeLogType);
-    });
+  if (dateInput) {
+    dateInput.value = new Date().toISOString().split('T')[0];
   }
 
-  // Register Service Worker for PWA Offline Support
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js')
-      .then(() => console.log('VehicleHub ServiceWorker Registered'))
-      .catch(err => console.log('ServiceWorker Registration Failed', err));
-  }
-});
+  if (!logForm) return;
+
+  logForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const activeTab = document.querySelector('.log-tabs .tab-btn.active');
+    const logType = activeTab ? activeTab.getAttribute('data-type') : 'fuel';
+
+    const newLog = {
+      id: Date.now(),
+      type: logType,
+      date: document.getElementById('log-date').value,
+      odometer: Number(document.getElementById('log-odometer').value),
+      category: document.getElementById('log-category')?.value || '',
+      amount: Number(document.getElementById('log-amount').value),
+      notes: document.getElementById('log-notes')?.value || ''
+    };
+
+    if (typeof VehicleStorage !== 'undefined') {
+      VehicleStorage.saveLog(newLog);
+    } else {
+      const logs = JSON.parse(localStorage.getItem('vehiclehub_logs') || '[]');
+      logs.unshift(newLog);
+      localStorage.setItem('vehiclehub_logs', JSON.stringify(logs));
+    }
+
+    alert('✅ Log entry saved successfully!');
+    logForm.reset();
+    if (dateInput) dateInput.value = new Date().toISOString().split('T')[0];
+  });
+}
