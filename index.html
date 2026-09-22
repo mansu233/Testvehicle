@@ -9,6 +9,14 @@
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <meta name="theme-color" content="#0b0f17">
   <style>
+    /* Section Visibility Toggle */
+    .app-section {
+      display: none;
+    }
+    .app-section.active-section {
+      display: block;
+    }
+
     /* Login Overlay Screen Styling */
     .login-overlay {
       position: fixed;
@@ -71,6 +79,31 @@
     .hidden {
       display: none !important;
     }
+
+    /* Logs & Finance Table Styles */
+    .log-item-card {
+      background-color: var(--card-bg, #161c28);
+      border: 1px solid var(--card-border, #232d3f);
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .log-item-title {
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: var(--text-main, #fff);
+    }
+    .log-item-sub {
+      font-size: 0.78rem;
+      color: var(--text-sub, #94a3b8);
+    }
+    .log-item-amount {
+      font-weight: 700;
+      color: var(--sky-blue, #38bdf8);
+    }
   </style>
 </head>
 <body>
@@ -126,115 +159,147 @@
     </div>
   </header>
 
-  <!-- Main Content Area -->
+  <!-- Main Container -->
   <main class="main-container">
-    
-    <div class="section-label">Overview</div>
-    <h1 class="section-title">Dashboard</h1>
 
-    <!-- Dashboard Grid Cards -->
-    <div class="dashboard-grid" id="dashboard-cards">
-      
-      <!-- Card 1: Urgent Alerts -->
-      <div class="grid-card border-red">
-        <div class="grid-card-title">Urgent Alerts</div>
-        <div class="grid-card-body">
-          <div class="grid-card-subtitle" id="urgent-line-1">No critical issues</div>
-          <div class="grid-card-subtitle" id="urgent-line-2">All systems normal</div>
+    <!-- 1. QUICK ENTRY SECTION -->
+    <section id="section-quick-entry" class="app-section active-section">
+      <div class="section-label">Overview</div>
+      <h1 class="section-title">Dashboard</h1>
+
+      <!-- Dashboard Grid Cards -->
+      <div class="dashboard-grid" id="dashboard-cards">
+        <div class="grid-card border-red">
+          <div class="grid-card-title">Urgent Alerts</div>
+          <div class="grid-card-body">
+            <div class="grid-card-subtitle" id="urgent-line-1">No critical issues</div>
+            <div class="grid-card-subtitle" id="urgent-line-2">All systems normal</div>
+          </div>
+        </div>
+
+        <div class="grid-card border-amber">
+          <div class="grid-card-title">Warnings</div>
+          <div class="grid-card-body">
+            <div class="grid-card-subtitle" id="warning-line-1">Documents clear</div>
+            <div class="grid-card-subtitle" id="warning-line-2">No pending items</div>
+          </div>
+        </div>
+
+        <div class="grid-card border-blue">
+          <div class="grid-card-title">Reminders</div>
+          <div class="grid-card-body">
+            <div class="grid-card-subtitle" id="reminder-line-1">No upcoming service</div>
+            <div class="grid-card-subtitle" id="reminder-line-2">Schedule is clear</div>
+          </div>
+        </div>
+
+        <div class="grid-card border-green">
+          <div class="grid-card-title">Notifications</div>
+          <div class="grid-card-body">
+            <div class="grid-card-subtitle" id="notify-line-1">System synchronized</div>
+            <div class="grid-card-subtitle" id="notify-line-2">Local database ready</div>
+          </div>
         </div>
       </div>
 
-      <!-- Card 2: Warnings / Near Expiry -->
-      <div class="grid-card border-amber">
-        <div class="grid-card-title">Warnings</div>
-        <div class="grid-card-body">
-          <div class="grid-card-subtitle" id="warning-line-1">Documents clear</div>
-          <div class="grid-card-subtitle" id="warning-line-2">No pending items</div>
+      <!-- Quick Log Card -->
+      <div class="quick-log-card">
+        <div class="section-title" style="font-size: 1.1rem; margin-bottom: 12px;">▼ Quick Log Entry</div>
+        
+        <div class="log-tabs">
+          <button class="tab-btn active" data-type="fuel">⛽ Fuel</button>
+          <button class="tab-btn" data-type="maintenance">🔧 Maintenance</button>
+          <button class="tab-btn" data-type="expense">💸 Expense / Toll</button>
         </div>
+
+        <form id="quick-log-form">
+          <div class="form-group">
+            <label for="log-date">Date</label>
+            <input type="date" id="log-date" class="form-control" required>
+          </div>
+
+          <div class="form-group">
+            <label for="log-odometer">Current Odometer (KM)</label>
+            <input type="number" id="log-odometer" class="form-control" placeholder="e.g. 45200" required>
+          </div>
+
+          <div class="form-group" id="category-group">
+            <label for="log-category">Category</label>
+            <select id="log-category" class="form-control">
+              <option value="Oil Change">Oil Change</option>
+              <option value="Tire Rotation">Tire Rotation</option>
+              <option value="Brake Service">Brake Service</option>
+              <option value="General Maintenance">General Maintenance</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="log-amount">Amount / Cost</label>
+            <input type="number" step="0.01" id="log-amount" class="form-control" placeholder="0.00" required>
+          </div>
+
+          <div class="form-group">
+            <label for="log-notes">Workshop / Notes</label>
+            <input type="text" id="log-notes" class="form-control" placeholder="e.g. Station or Workshop details">
+          </div>
+
+          <button type="submit" class="submit-btn">Save Entry</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- 2. PROFILE / SETUP SECTION -->
+    <section id="section-profile" class="app-section">
+      <div class="section-label">Settings</div>
+      <h1 class="section-title">Vehicle Profile</h1>
+
+      <div class="quick-log-card">
+        <div class="section-title" style="font-size: 1.1rem; margin-bottom: 12px;">🚘 Vehicle Setup</div>
+        <form id="vehicle-setup-form">
+          <div class="form-group">
+            <label for="input-vehicle-name">Vehicle Name</label>
+            <input type="text" id="input-vehicle-name" class="form-control" placeholder="e.g. Primary Car, Toyota Hiace" required>
+          </div>
+
+          <div class="form-group">
+            <label for="input-reg-number">Registration Number (Vehicle Number)</label>
+            <input type="text" id="input-reg-number" class="form-control" placeholder="e.g. KL 65 K 606" required>
+          </div>
+
+          <button type="submit" class="submit-btn" style="background-color: var(--accent-blue); color: #fff;">Update Vehicle Info</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- 3. FINANCE SECTION -->
+    <section id="section-finance" class="app-section">
+      <div class="section-label">Summary</div>
+      <h1 class="section-title">Finance Overview</h1>
+
+      <div class="quick-log-card" style="margin-bottom: 16px;">
+        <div class="section-title" style="font-size: 1.1rem; margin-bottom: 8px;">Total Spent</div>
+        <div id="finance-total-amount" style="font-size: 2rem; font-weight: 800; color: var(--sky-blue, #38bdf8);">0.00</div>
       </div>
 
-      <!-- Card 3: Reminders -->
-      <div class="grid-card border-blue">
-        <div class="grid-card-title">Reminders</div>
-        <div class="grid-card-body">
-          <div class="grid-card-subtitle" id="reminder-line-1">No upcoming service</div>
-          <div class="grid-card-subtitle" id="reminder-line-2">Schedule is clear</div>
+      <div class="quick-log-card">
+        <div class="section-title" style="font-size: 1rem; margin-bottom: 12px;">Expense Breakdown</div>
+        <div id="finance-breakdown">
+          <div class="log-item-card"><span>⛽ Fuel</span><span id="fin-fuel-cost">0.00</span></div>
+          <div class="log-item-card"><span>🔧 Maintenance</span><span id="fin-maint-cost">0.00</span></div>
+          <div class="log-item-card"><span>💸 Toll / Other</span><span id="fin-expense-cost">0.00</span></div>
         </div>
       </div>
+    </section>
 
-      <!-- Card 4: Other Notifications -->
-      <div class="grid-card border-green">
-        <div class="grid-card-title">Notifications</div>
-        <div class="grid-card-body">
-          <div class="grid-card-subtitle" id="notify-line-1">System synchronized</div>
-          <div class="grid-card-subtitle" id="notify-line-2">Local database ready</div>
-        </div>
+    <!-- 4. LOGS SECTION -->
+    <section id="section-logs" class="app-section">
+      <div class="section-label">History</div>
+      <h1 class="section-title">Recent Logs</h1>
+
+      <div id="logs-container">
+        <div style="color: var(--text-sub, #94a3b8); text-align: center; padding: 20px;">No logs recorded yet.</div>
       </div>
-
-    </div>
-
-    <!-- Vehicle Setup Form -->
-    <div class="quick-log-card" style="margin-bottom: 20px;">
-      <div class="section-title" style="font-size: 1.1rem; margin-bottom: 12px;">🚘 Vehicle Setup</div>
-      <form id="vehicle-setup-form">
-        <div class="form-group">
-          <label for="input-vehicle-name">Vehicle Name</label>
-          <input type="text" id="input-vehicle-name" class="form-control" placeholder="e.g. Primary Car, Toyota Hiace" required>
-        </div>
-
-        <div class="form-group">
-          <label for="input-reg-number">Registration Number (Vehicle Number)</label>
-          <input type="text" id="input-reg-number" class="form-control" placeholder="e.g. KL 65 K 606" required>
-        </div>
-
-        <button type="submit" class="submit-btn" style="background-color: var(--accent-blue); color: #fff;">Update Vehicle Info</button>
-      </form>
-    </div>
-
-    <!-- Quick Log Section -->
-    <div class="quick-log-card">
-      <div class="section-title" style="font-size: 1.1rem; margin-bottom: 12px;">▼ Quick Log Entry</div>
-      
-      <div class="log-tabs">
-        <button class="tab-btn active" data-type="fuel">⛽ Fuel</button>
-        <button class="tab-btn" data-type="maintenance">🔧 Maintenance</button>
-        <button class="tab-btn" data-type="expense">💸 Expense / Toll</button>
-      </div>
-
-      <form id="quick-log-form">
-        <div class="form-group">
-          <label for="log-date">Date</label>
-          <input type="date" id="log-date" class="form-control" required>
-        </div>
-
-        <div class="form-group">
-          <label for="log-odometer">Current Odometer (KM)</label>
-          <input type="number" id="log-odometer" class="form-control" placeholder="e.g. 45200" required>
-        </div>
-
-        <div class="form-group" id="category-group">
-          <label for="log-category">Category</label>
-          <select id="log-category" class="form-control">
-            <option value="Oil Change">Oil Change</option>
-            <option value="Tire Rotation">Tire Rotation</option>
-            <option value="Brake Service">Brake Service</option>
-            <option value="General Maintenance">General Maintenance</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label for="log-amount">Amount / Cost</label>
-          <input type="number" step="0.01" id="log-amount" class="form-control" placeholder="0.00" required>
-        </div>
-
-        <div class="form-group">
-          <label for="log-notes">Workshop / Notes</label>
-          <input type="text" id="log-notes" class="form-control" placeholder="e.g. Station or Workshop details">
-        </div>
-
-        <button type="submit" class="submit-btn">Save Entry</button>
-      </form>
-    </div>
+    </section>
 
   </main>
 
@@ -262,19 +327,47 @@
   <script src="storage.js"></script>
   <script src="app.js"></script>
   <script>
-    // Guest Mode Toggle Logic
+    // Tab Navigation & Section Switcher Logic
     document.addEventListener('DOMContentLoaded', () => {
+      const navItems = document.querySelectorAll('.bottom-nav .nav-item');
+      const sections = document.querySelectorAll('.app-section');
+
+      navItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+          e.preventDefault();
+          const target = item.getAttribute('data-target');
+
+          // Highlight Active Navigation Link
+          navItems.forEach(nav => nav.classList.remove('active'));
+          item.classList.add('active');
+
+          // Switch Visible Section
+          sections.forEach(sec => {
+            sec.classList.remove('active-section');
+            if (sec.id === `section-${target}`) {
+              sec.classList.add('active-section');
+            }
+          });
+
+          // Render Dynamic Tab Data
+          if (target === 'finance' && typeof updateFinanceUI === 'function') {
+            updateFinanceUI();
+          } else if (target === 'logs' && typeof updateLogsListUI === 'function') {
+            updateLogsListUI();
+          }
+        });
+      });
+
+      // Login / Guest Overlay Gate Logic
       const loginOverlay = document.getElementById('login-overlay');
       const skipBtn = document.getElementById('skip-login-btn');
       const loginForm = document.getElementById('login-form');
 
-      // Check if user previously selected Guest Mode or is logged in
       const isGuestMode = localStorage.getItem('vehiclehub_guest_mode');
       if (isGuestMode === 'true') {
         loginOverlay.classList.add('hidden');
       }
 
-      // Skip login / Continue without login event listener
       if (skipBtn) {
         skipBtn.addEventListener('click', () => {
           localStorage.setItem('vehiclehub_guest_mode', 'true');
@@ -282,7 +375,6 @@
         });
       }
 
-      // Handle standard login submit
       if (loginForm) {
         loginForm.addEventListener('submit', (e) => {
           e.preventDefault();
@@ -291,6 +383,49 @@
         });
       }
     });
+
+    // Dynamic UI Updates for Finance & Logs
+    function updateFinanceUI() {
+      const logs = typeof VehicleStorage !== 'undefined' ? VehicleStorage.getLogs() : [];
+      let total = 0, fuel = 0, maint = 0, exp = 0;
+
+      logs.forEach(l => {
+        const amt = l.amount || 0;
+        total += amt;
+        if (l.type === 'fuel') fuel += amt;
+        else if (l.type === 'maintenance') maint += amt;
+        else exp += amt;
+      });
+
+      document.getElementById('finance-total-amount').textContent = total.toFixed(2);
+      document.getElementById('fin-fuel-cost').textContent = fuel.toFixed(2);
+      document.getElementById('fin-maint-cost').textContent = maint.toFixed(2);
+      document.getElementById('fin-expense-cost').textContent = exp.toFixed(2);
+    }
+
+    function updateLogsListUI() {
+      const container = document.getElementById('logs-container');
+      const logs = typeof VehicleStorage !== 'undefined' ? VehicleStorage.getLogs() : [];
+
+      if (logs.length === 0) {
+        container.innerHTML = '<div style="color: var(--text-sub, #94a3b8); text-align: center; padding: 20px;">No logs recorded yet.</div>';
+        return;
+      }
+
+      container.innerHTML = '';
+      logs.forEach(l => {
+        const item = document.createElement('div');
+        item.className = 'log-item-card';
+        item.innerHTML = `
+          <div>
+            <div class="log-item-title">${l.category || l.type.toUpperCase()}</div>
+            <div class="log-item-sub">${l.date} • ${l.odometer} KM ${l.notes ? '• ' + l.notes : ''}</div>
+          </div>
+          <div class="log-item-amount">${Number(l.amount || 0).toFixed(2)}</div>
+        `;
+        container.appendChild(item);
+      });
+    }
   </script>
 </body>
 </html>
