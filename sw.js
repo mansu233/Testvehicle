@@ -1,39 +1,46 @@
-const CACHE_NAME = 'manskit-hub-v16';
-const ASSETS_TO_CACHE = [
+const CACHE_NAME = 'manskit-hub-v6-auth-config';
+const ASSETS = [
   './',
   './index.html',
+  './styles.css',
+  './constants.js',
+  './storage.js',
+  './zoom.js',
+  './firebase-config.js',
+  './firebase-sync.js',
+  './app.js',
   './manifest.json',
-  './180.png',
-  './192.png',
-  './512.png',
-  './1024.png'
+  './icons/icon-192.png',
+  './icons/icon-512.png',
+  './icons/icon-512-maskable.png',
+  './icons/apple-touch-icon.png',
+  './icons/favicon-32.png'
 ];
 
-// Install Event
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
-    })
+    caches.open(CACHE_NAME)
+      .then((cache) => cache.addAll(ASSETS))
+      .then(() => self.skipWaiting())
   );
-  self.skipWaiting();
 });
 
-// Activate Event — clear old caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
       Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
-    )
+    ).then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
-// Fetch Event
 self.addEventListener('fetch', (event) => {
+  if (new URL(event.request.url).pathname.endsWith('/firebase-config.js')) {
+    event.respondWith(fetch(event.request, { cache: 'no-store' }).catch(() => caches.match(event.request)));
+    return;
+  }
   event.respondWith(
     caches.match(event.request).then((response) => {
-      return response || fetch(event.request);
+      return response || fetch(event.request).catch(() => response);
     })
   );
 });

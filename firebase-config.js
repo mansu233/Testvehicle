@@ -1,0 +1,1 @@
+window.FIREBASE_CONFIG={apiKey:"AIzaSyCtAv-26Sg-L4DQNd02_hBa47tvrny8pSU",authDomain:"manskit-23d9f.firebaseapp.com",databaseURL:"https://manskit-23d9f-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"manskit-23d9f",storageBucket:"manskit-23d9f.firebasestorage.app",messagingSenderId:"504036502314",appId:"1:504036502314:web:4732882a7b93c66aa3cc53"};
