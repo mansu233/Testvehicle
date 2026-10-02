@@ -11,7 +11,6 @@
       --bg-color: #0b0f17;
       --card-bg: #131b2a;
       --card-border: #1e293b;
-      --card-hover: #1e293b;
       --text-main: #f8fafc;
       --text-sub: #94a3b8;
       --sky-blue: #38bdf8;
@@ -37,39 +36,28 @@
       overflow-x: hidden;
     }
 
-    /* Header Styling */
+    /* Header & Animated Vehicle Track */
     .app-header {
-      background: linear-gradient(180deg, #131b2a 0%, rgba(19, 27, 42, 0.8) 100%);
+      background: linear-gradient(180deg, #131b2a 0%, rgba(19, 27, 42, 0.95) 100%);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--card-border);
-      padding: 12px 16px;
+      padding: 10px 16px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       position: sticky;
       top: 0;
       z-index: 100;
+      gap: 12px;
     }
 
     .brand-container {
       display: flex;
       align-items: center;
-      gap: 12px;
-    }
-
-    .brand-avatar {
-      width: 40px;
-      height: 40px;
-      border-radius: 12px;
-      background: linear-gradient(135deg, #0284c7 0%, #38bdf8 100%);
-      box-shadow: 0 4px 12px var(--sky-blue-glow);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 900;
-      font-size: 1.1rem;
-      color: #ffffff;
+      gap: 6px;
+      position: relative;
+      flex-shrink: 0;
     }
 
     .brand-titles {
@@ -79,49 +67,111 @@
 
     .brand-name {
       font-weight: 800;
-      font-size: 1rem;
+      font-size: 0.95rem;
       letter-spacing: 0.5px;
       color: #ffffff;
     }
 
     .brand-sub {
-      font-size: 0.68rem;
+      font-size: 0.62rem;
       color: var(--sky-blue);
       font-weight: 700;
-      letter-spacing: 1.5px;
+      letter-spacing: 1.2px;
       text-transform: uppercase;
+    }
+
+    /* Moving Vehicle Animation Track (Reversed Right-to-Left) */
+    .vehicle-animation-track {
+      flex: 1;
+      position: relative;
+      height: 28px;
+      overflow: hidden;
+      margin: 0 4px;
+      border-bottom: 1px dashed rgba(56, 189, 248, 0.2);
+    }
+
+    .moving-vehicle {
+      position: absolute;
+      top: 2px;
+      right: 0;
+      font-size: 1.2rem;
+      line-height: 1;
+      animation: driveReverseAcross 6s linear infinite;
+      filter: drop-shadow(0 2px 6px var(--sky-blue-glow));
+    }
+
+    @keyframes driveReverseAcross {
+      0% {
+        right: -5%;
+        opacity: 0;
+        transform: scaleX(-1);
+      }
+      10% {
+        opacity: 1;
+      }
+      85% {
+        opacity: 1;
+      }
+      100% {
+        right: 98%;
+        opacity: 0;
+        transform: scaleX(-1);
+      }
     }
 
     .header-actions {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
+      flex-shrink: 0;
     }
 
     .vehicle-selector {
       background-color: #0b0f17;
       color: #ffffff;
       border: 1px solid var(--card-border);
-      padding: 8px 12px;
+      padding: 7px 10px;
       border-radius: 10px;
-      font-size: 0.82rem;
+      font-size: 0.78rem;
       font-weight: 700;
       outline: none;
+      max-width: 150px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .btn-icon-head {
       background: #0b0f17;
       color: var(--sky-blue);
       border: 1px solid var(--card-border);
-      width: 34px;
-      height: 34px;
+      width: 32px;
+      height: 32px;
       border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1rem;
+      font-size: 0.95rem;
       font-weight: 800;
       cursor: pointer;
+      position: relative;
+    }
+
+    .notif-badge {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      background: var(--danger);
+      color: #ffffff;
+      font-size: 0.6rem;
+      font-weight: 900;
+      width: 17px;
+      height: 17px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--bg-color);
     }
 
     /* Layout Container */
@@ -139,19 +189,21 @@
       display: block;
     }
 
-    /* Cards Styling */
+    /* Cards & Containers */
     .card-box {
       background-color: var(--card-bg);
       border: 1px solid var(--card-border);
       border-radius: 16px;
       padding: 16px;
       margin-bottom: 16px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+      position: relative;
+      z-index: 1;
     }
 
     .alert-banner {
-      background: rgba(245, 158, 11, 0.1);
-      border: 1px solid rgba(245, 158, 11, 0.3);
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.35);
       color: #fbbf24;
       padding: 12px 14px;
       border-radius: 12px;
@@ -161,9 +213,9 @@
       display: flex;
       align-items: center;
       gap: 10px;
+      cursor: pointer;
     }
 
-    /* Summary Header Box */
     .summary-card {
       background: linear-gradient(135deg, #131b2a 0%, #0d131f 100%);
       border: 1px solid var(--card-border);
@@ -287,15 +339,15 @@
       background: transparent;
       border: none;
       color: var(--text-sub);
-      padding: 10px 6px;
+      padding: 10px 4px;
       border-radius: 9px;
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       font-weight: 800;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
+      gap: 4px;
     }
 
     .tab-btn.active {
@@ -355,7 +407,7 @@
       fill: currentColor;
     }
 
-    /* Dynamic Item Cards */
+    /* List Cards */
     .list-card {
       background-color: #0b0f17;
       border: 1px solid var(--card-border);
@@ -365,6 +417,8 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      position: relative;
+      z-index: 2;
     }
 
     .card-title {
@@ -454,6 +508,43 @@
       justify-content: center;
     }
 
+    /* Modal Overlay for Notification Drawer */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(11, 15, 23, 0.88);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      z-index: 300;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-box {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 20px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+    }
+
+    .doc-pill {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.68rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .doc-pill.valid { background: rgba(16,185,129,0.15); color: var(--success); border: 1px solid var(--success); }
+    .doc-pill.expiring { background: rgba(245,158,11,0.15); color: var(--warning); border: 1px solid var(--warning); }
+    .doc-pill.expired { background: rgba(239,68,68,0.15); color: var(--danger); border: 1px solid var(--danger); }
+
     .hidden {
       display: none !important;
     }
@@ -464,18 +555,38 @@
   <!-- Header -->
   <header class="app-header">
     <div class="brand-container">
-      <div class="brand-avatar">M</div>
       <div class="brand-titles">
         <span class="brand-name">MANSKIT</span>
         <span class="brand-sub">VEHICLEHUB</span>
       </div>
     </div>
+
+    <!-- Continuous Animated Moving Vehicle Track (Opposite Direction Facing Left) -->
+    <div class="vehicle-animation-track">
+      <div class="moving-vehicle">🚗</div>
+    </div>
+
     <div class="header-actions">
       <select id="vehicle-select" class="vehicle-selector"></select>
+      <button id="btn-notif-center" class="btn-icon-head" title="Notifications">
+        🔔
+        <div id="notif-badge-count" class="notif-badge hidden">0</div>
+      </button>
       <button id="btn-add-vehicle" class="btn-icon-head" title="Add Vehicle">＋</button>
       <button id="btn-delete-vehicle" class="btn-icon-head" title="Delete Vehicle" style="color: var(--danger);">🗑️</button>
     </div>
   </header>
+
+  <!-- Notification Drawer Modal -->
+  <div id="notif-modal" class="modal-overlay hidden">
+    <div class="modal-box">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <div style="font-weight: 900; font-size: 1.1rem; color: #ffffff;">🔔 Document Due Notifications</div>
+        <button id="btn-close-notif" class="btn-act" style="font-size: 1.2rem; color: #ffffff;">✕</button>
+      </div>
+      <div id="notif-modal-list"></div>
+    </div>
+  </div>
 
   <!-- Main Container -->
   <main class="main-container">
@@ -485,7 +596,7 @@
       
       <div class="alert-banner" id="alert-box">
         <svg style="width:18px;height:18px;fill:currentColor;" viewBox="0 0 24 24"><path d="M12 2L1 21h22L12 2zm1 14h-2v-2h2v2zm0-4h-2V10h2v2z"/></svg>
-        <span id="alert-text">PUC (Pollution) expires in 15 days.</span>
+        <span id="alert-text">Checking document expiry alerts...</span>
       </div>
 
       <div class="summary-card">
@@ -522,15 +633,19 @@
 
         <div class="log-tabs">
           <button class="tab-btn active" id="tab-btn-fuel" data-type="fuel">
-            <svg style="width:16px;height:16px;fill:currentColor;" viewBox="0 0 24 24"><path d="M19.77 7.23l.01-.01-3.72-3.72L15 4.56l2.11 2.11c-.94.36-1.61 1.26-1.61 2.33 0 1.38 1.12 2.5 2.5 2.5.36 0 .69-.08 1-.21v7.21c0 .55-.45 1-1 1s-1-.45-1-1V14c0-1.1-.9-2-2-2h-1V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2v-5h1v4.5c0 1.38 1.12 2.5 2.5 2.5s2.5-1.12 2.5-2.5V9.5c0-.92-.51-1.72-1.23-2.27z"/></svg>
+            <svg style="width:14px;height:14px;fill:currentColor;" viewBox="0 0 24 24"><path d="M19.77 7.23l.01-.01-3.72-3.72L15 4.56l2.11 2.11c-.94.36-1.61 1.26-1.61 2.33 0 1.38 1.12 2.5 2.5 2.5.36 0 .69-.08 1-.21v7.21c0 .55-.45 1-1 1s-1-.45-1-1V14c0-1.1-.9-2-2-2h-1V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2v-5h1v4.5c0 1.38 1.12 2.5 2.5 2.5s2.5-1.12 2.5-2.5V9.5c0-.92-.51-1.72-1.23-2.27z"/></svg>
             Fuel
           </button>
           <button class="tab-btn" id="tab-btn-maint" data-type="maintenance">
-            <svg style="width:16px;height:16px;fill:currentColor;" viewBox="0 0 24 24"><path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"/></svg>
+            <svg style="width:14px;height:14px;fill:currentColor;" viewBox="0 0 24 24"><path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"/></svg>
             Maint.
           </button>
+          <button class="tab-btn" id="tab-btn-purchase" data-type="purchase">
+            <svg style="width:14px;height:14px;fill:currentColor;" viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
+            Buy/RTO
+          </button>
           <button class="tab-btn" id="tab-btn-expense" data-type="expense">
-            <svg style="width:16px;height:16px;fill:currentColor;" viewBox="0 0 24 24"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>
+            <svg style="width:14px;height:14px;fill:currentColor;" viewBox="0 0 24 24"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>
             Expense
           </button>
         </div>
@@ -559,7 +674,8 @@
             </div>
           </div>
 
-          <div class="form-group">
+          <!-- Multi-Partner Strategy Options -->
+          <div id="payment-strategy-box" class="form-group">
             <label for="log-payment-mode">Payment Strategy</label>
             <select id="log-payment-mode" class="form-control">
               <option value="personal">100% Personal Payment (Excl. from Settlement)</option>
@@ -575,19 +691,12 @@
           </div>
 
           <div id="split-payer-box" class="form-group hidden" style="background: #0b0f17; padding: 12px; border-radius: 10px; border: 1px solid var(--card-border);">
-            <div class="form-group">
-              <label id="lbl-split-a" for="split-amt-a">Partner 1 Contribution</label>
-              <input type="number" step="0.01" id="split-amt-a" class="form-control" placeholder="0.00">
-            </div>
-            <div class="form-group">
-              <label id="lbl-split-b" for="split-amt-b">Partner 2 Contribution</label>
-              <input type="number" step="0.01" id="split-amt-b" class="form-control" placeholder="0.00">
-            </div>
+            <div id="custom-split-fields-container"></div>
           </div>
 
           <div class="form-group">
             <label for="log-notes">Notes / Remarks</label>
-            <input type="text" id="log-notes" class="form-control" placeholder="e.g. Fuel station, oil filter change details...">
+            <input type="text" id="log-notes" class="form-control" placeholder="e.g. Down payment, RTO registration, EMI month #3...">
           </div>
 
           <button type="submit" id="btn-save-log" class="submit-btn">Save Log Entry</button>
@@ -605,12 +714,13 @@
             <select id="cat-type-input" class="form-control">
               <option value="fuel">Fuel</option>
               <option value="maintenance">Maintenance</option>
+              <option value="purchase">Purchase / RTO / Finance</option>
               <option value="expense">Expense / Toll</option>
             </select>
           </div>
           <div class="form-group">
             <label for="cat-name-input">Category Name</label>
-            <input type="text" id="cat-name-input" class="form-control" placeholder="e.g. Car Wash, Engine Oil" required>
+            <input type="text" id="cat-name-input" class="form-control" placeholder="e.g. Insurance Premium, RTO Tax" required>
           </div>
           <button type="submit" class="submit-btn">Save Category</button>
         </form>
@@ -624,6 +734,44 @@
 
     <!-- 3. PROFILE & SPECS TAB -->
     <section id="section-specs" class="app-section">
+      <!-- Document Vault Section -->
+      <div class="card-box">
+        <div style="font-weight: 800; font-size: 1rem; margin-bottom: 12px; color: #ffffff;">📄 Vehicle Document Vault</div>
+        <form id="upload-doc-form">
+          <div class="form-group">
+            <label for="doc-type">Document Type</label>
+            <select id="doc-type" class="form-control">
+              <option value="RC Paper (Registration)">RC Paper (Registration)</option>
+              <option value="Pollution Certificate (PUC)">Pollution Certificate (PUC)</option>
+              <option value="Insurance Policy">Insurance Policy</option>
+              <option value="Driving License">Driving License</option>
+              <option value="Permit / Fitness">Permit / Fitness Certificate</option>
+              <option value="Other Document">Other Legal Paper</option>
+            </select>
+          </div>
+
+          <div style="display: flex; gap: 8px;">
+            <div class="form-group" style="flex: 1;">
+              <label for="doc-expiry">Expiry / Due Date</label>
+              <input type="date" id="doc-expiry" class="form-control" required>
+            </div>
+            <div class="form-group" style="flex: 1;">
+              <label for="doc-number">Doc Number / ID</label>
+              <input type="text" id="doc-number" class="form-control" placeholder="e.g. KL-65-2023-XXXX">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="doc-file">Select Image / PDF File</label>
+            <input type="file" id="doc-file" class="form-control" accept="image/*,.pdf" required>
+          </div>
+
+          <button type="submit" class="submit-btn">Upload Document to Vault</button>
+        </form>
+
+        <div id="doc-vault-container" style="margin-top: 16px;"></div>
+      </div>
+
       <div class="card-box">
         <div style="font-weight: 800; font-size: 1rem; margin-bottom: 12px; color: #ffffff;">🚘 Vehicle Ownership Setup</div>
         <form id="vehicle-profile-form">
@@ -635,15 +783,56 @@
             <label for="prof-vreg">Registration Number (RC)</label>
             <input type="text" id="prof-vreg" class="form-control" required>
           </div>
-          <div class="form-group">
-            <label for="prof-p1">Owner / Partner 1 Name</label>
-            <input type="text" id="prof-p1" class="form-control" placeholder="Mansoor">
+
+          <!-- Dynamic Partner Management -->
+          <div style="display: flex; justify-content: space-between; align-items: center; margin: 16px 0 8px 0;">
+            <label style="font-size: 0.76rem; color: var(--text-sub); font-weight: 700; text-transform: uppercase;">Partners / Owners</label>
+            <button type="button" id="btn-add-partner-field" class="btn-act" style="color: var(--sky-blue); font-weight: 800;">＋ Add Partner</button>
           </div>
-          <div class="form-group">
-            <label for="prof-p2">Owner / Partner 2 Name</label>
-            <input type="text" id="prof-p2" class="form-control" placeholder="Partner 2">
+          <div id="partner-inputs-container"></div>
+
+          <button type="submit" class="submit-btn" style="margin-top: 12px;">Update Profile</button>
+        </form>
+      </div>
+
+      <!-- Vehicle Purchase & Loan Profile Details -->
+      <div class="card-box">
+        <div style="font-weight: 800; font-size: 1rem; margin-bottom: 12px; color: #ffffff;">🏦 Vehicle Purchase & Finance Setup</div>
+        <form id="vehicle-finance-form">
+          <div style="display: flex; gap: 8px;">
+            <div class="form-group" style="flex: 1;">
+              <label for="fin-exshowroom">Ex-Showroom Price (&#8377;)</label>
+              <input type="number" step="0.01" id="fin-exshowroom" class="form-control" placeholder="0.00">
+            </div>
+            <div class="form-group" style="flex: 1;">
+              <label for="fin-downpayment">Down Payment (&#8377;)</label>
+              <input type="number" step="0.01" id="fin-downpayment" class="form-control" placeholder="0.00">
+            </div>
           </div>
-          <button type="submit" class="submit-btn">Update Profile</button>
+
+          <div style="display: flex; gap: 8px;">
+            <div class="form-group" style="flex: 1;">
+              <label for="fin-loan-amt">Loan Amount (&#8377;)</label>
+              <input type="number" step="0.01" id="fin-loan-amt" class="form-control" placeholder="0.00">
+            </div>
+            <div class="form-group" style="flex: 1;">
+              <label for="fin-bank-name">Financier / Bank</label>
+              <input type="text" id="fin-bank-name" class="form-control" placeholder="e.g. HDFC Bank, SBI">
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 8px;">
+            <div class="form-group" style="flex: 1;">
+              <label for="fin-monthly-emi">Monthly EMI (&#8377;)</label>
+              <input type="number" step="0.01" id="fin-monthly-emi" class="form-control" placeholder="0.00">
+            </div>
+            <div class="form-group" style="flex: 1;">
+              <label for="fin-tenure-months">Tenure (Months)</label>
+              <input type="number" id="fin-tenure-months" class="form-control" placeholder="e.g. 36, 60">
+            </div>
+          </div>
+
+          <button type="submit" class="submit-btn">Save Purchase & Finance Details</button>
         </form>
       </div>
 
@@ -698,10 +887,17 @@
     <!-- 4. FINANCE & SETTLEMENT TAB -->
     <section id="section-finance" class="app-section">
       <div class="card-box">
-        <div style="font-weight: 800; font-size: 1rem; margin-bottom: 12px; color: #ffffff;">🏛️ Total Running Spend</div>
+        <div style="font-weight: 800; font-size: 1rem; margin-bottom: 12px; color: #ffffff;">🏛️ Total Running & Purchase Spend</div>
         <div class="list-card"><span>Total Running Expenses</span><span class="card-amt" id="fin-summary-total">&#8377;0</span></div>
+        <div class="list-card"><span>Purchase / RTO / Finance</span><span class="card-amt" id="fin-summary-purchase">&#8377;0</span></div>
         <div class="list-card"><span>Fuel Cost</span><span class="card-amt" id="fin-summary-fuel">&#8377;0</span></div>
         <div class="list-card"><span>Services & Maintenance</span><span class="card-amt" id="fin-summary-maint">&#8377;0</span></div>
+      </div>
+
+      <!-- Vehicle Finance Overview Card -->
+      <div class="card-box">
+        <div style="font-weight: 800; font-size: 1rem; margin-bottom: 12px; color: #ffffff;">📋 Purchase & Loan Overview</div>
+        <div id="vehicle-finance-summary-box"></div>
       </div>
 
       <div class="card-box">
@@ -748,7 +944,8 @@
     let activeLogType = 'fuel';
     const DEFAULT_CATEGORIES = {
       fuel: ['Full Tank', 'Partial Tank', 'Premium Fuel'],
-      maintenance: ['Oil Change', 'Tire Rotation', 'Brake Service'],
+      maintenance: ['Oil Change', 'Tire Rotation', 'Brake Service', 'General Service Fee'],
+      purchase: ['Down Payment', 'EMI Payment', 'RTO Tax & Reg', 'Insurance Premium', 'Loan Processing Fee', 'Dealer Accessories'],
       expense: ['Toll', 'Parking', 'Car Wash']
     };
 
@@ -771,6 +968,7 @@
       // Quick log type tabs
       document.getElementById('tab-btn-fuel').addEventListener('click', function() { setLogType('fuel'); });
       document.getElementById('tab-btn-maint').addEventListener('click', function() { setLogType('maintenance'); });
+      document.getElementById('tab-btn-purchase').addEventListener('click', function() { setLogType('purchase'); });
       document.getElementById('tab-btn-expense').addEventListener('click', function() { setLogType('expense'); });
 
       // Payment strategy change
@@ -780,15 +978,22 @@
       document.getElementById('quick-log-form').addEventListener('submit', saveLogEntry);
       document.getElementById('add-category-form').addEventListener('submit', addCategoryHandler);
       document.getElementById('vehicle-profile-form').addEventListener('submit', saveVehicleProfile);
+      document.getElementById('vehicle-finance-form').addEventListener('submit', saveVehicleFinanceProfile);
+      document.getElementById('upload-doc-form').addEventListener('submit', uploadDocHandler);
       document.getElementById('add-spec-form').addEventListener('submit', addTechnicalSpec);
       document.getElementById('upload-photo-form').addEventListener('submit', uploadPhotoHandler);
 
-      // Actions
+      // Header Actions & Modal
       document.getElementById('vehicle-select').addEventListener('change', switchVehicle);
       document.getElementById('btn-add-vehicle').addEventListener('click', addVehiclePrompt);
       document.getElementById('btn-delete-vehicle').addEventListener('click', deleteVehicleHandler);
+      document.getElementById('btn-notif-center').addEventListener('click', toggleNotifModal);
+      document.getElementById('btn-close-notif').addEventListener('click', toggleNotifModal);
+      document.getElementById('alert-box').addEventListener('click', toggleNotifModal);
+
       document.getElementById('btn-share-specs').addEventListener('click', shareFullSpecs);
       document.getElementById('btn-cancel-edit').addEventListener('click', cancelEditHandler);
+      document.getElementById('btn-add-partner-field').addEventListener('click', addPartnerFieldUI);
     }
 
     function initApp() {
@@ -798,12 +1003,31 @@
       loadDataAndUI();
     }
 
+    function getActiveVehiclePartners() {
+      const activeV = document.getElementById('vehicle-select').value || 'v1';
+      const vList = JSON.parse(localStorage.getItem('vh_vehicles') || '[]');
+      const target = vList.find(v => v.id === activeV);
+      if(!target || !target.partners) return ['Mansoor'];
+      return target.partners.map(p => p.trim()).filter(p => p !== '' && p.toLowerCase() !== 'no');
+    }
+
     function initVehicles() {
       let vList = JSON.parse(localStorage.getItem('vh_vehicles') || '[]');
       if(vList.length === 0) {
-        vList = [{ id: 'v1', name: 'Primary Vehicle', reg: 'KL 65 K 606', p1: 'Mansoor', p2: 'Partner 2' }];
+        vList = [{ id: 'v1', name: 'Primary Vehicle', reg: 'KL 65 K 606', partners: ['Mansoor'] }];
         localStorage.setItem('vh_vehicles', JSON.stringify(vList));
       }
+
+      vList.forEach(v => {
+        if(!v.partners) {
+          v.partners = [];
+          if(v.p1) v.partners.push(v.p1);
+          if(v.p2 && v.p2.toLowerCase() !== 'no') v.partners.push(v.p2);
+          if(v.partners.length === 0) v.partners = ['Mansoor'];
+        }
+      });
+      localStorage.setItem('vh_vehicles', JSON.stringify(vList));
+
       const select = document.getElementById('vehicle-select');
       const currentSelected = select.value || vList[0].id;
       select.innerHTML = '';
@@ -821,38 +1045,120 @@
       document.getElementById('v-plate-display').textContent = active.reg;
       document.getElementById('prof-vname').value = active.name;
       document.getElementById('prof-vreg').value = active.reg;
-      document.getElementById('prof-p1').value = active.p1 || 'Mansoor';
-      document.getElementById('prof-p2').value = active.p2 || 'Partner 2';
+
+      const fin = active.financeDetails || {};
+      document.getElementById('fin-exshowroom').value = fin.exShowroom || '';
+      document.getElementById('fin-downpayment').value = fin.downPayment || '';
+      document.getElementById('fin-loan-amt').value = fin.loanAmt || '';
+      document.getElementById('fin-bank-name').value = fin.bankName || '';
+      document.getElementById('fin-monthly-emi').value = fin.monthlyEmi || '';
+      document.getElementById('fin-tenure-months').value = fin.tenureMonths || '';
+
+      renderPartnerInputsUI(active.partners);
+      updateAppPartnerCapabilities();
+    }
+
+    function renderPartnerInputsUI(partners) {
+      const container = document.getElementById('partner-inputs-container');
+      container.innerHTML = '';
+
+      if(!partners || partners.length === 0) partners = ['Mansoor'];
+
+      partners.forEach((p, idx) => {
+        const row = document.createElement('div');
+        row.style.cssText = "display: flex; gap: 8px; margin-bottom: 8px; align-items: center;";
+        row.innerHTML = `<input type="text" class="form-control partner-input-val" value="${p}" placeholder="Partner ${idx + 1} Name" required>`;
+
+        if(partners.length > 1) {
+          const delBtn = document.createElement('button');
+          delBtn.type = 'button';
+          delBtn.className = 'btn-act';
+          delBtn.textContent = '🗑️';
+          delBtn.addEventListener('click', function() { row.remove(); });
+          row.appendChild(delBtn);
+        }
+
+        container.appendChild(row);
+      });
+    }
+
+    function addPartnerFieldUI() {
+      const container = document.getElementById('partner-inputs-container');
+      const count = container.querySelectorAll('.partner-input-val').length;
+      const row = document.createElement('div');
+      row.style.cssText = "display: flex; gap: 8px; margin-bottom: 8px; align-items: center;";
+      row.innerHTML = `<input type="text" class="form-control partner-input-val" value="" placeholder="Partner ${count + 1} Name" required>`;
+
+      const delBtn = document.createElement('button');
+      delBtn.type = 'button';
+      delBtn.className = 'btn-act';
+      delBtn.textContent = '🗑️';
+      delBtn.addEventListener('click', function() { row.remove(); });
+      row.appendChild(delBtn);
+
+      container.appendChild(row);
+    }
+
+    function updateAppPartnerCapabilities() {
+      const partners = getActiveVehiclePartners();
+      const strategyBox = document.getElementById('payment-strategy-box');
+      const singleBox = document.getElementById('single-payer-box');
+      const splitBox = document.getElementById('split-payer-box');
 
       const pSelect = document.getElementById('log-single-payer');
-      pSelect.innerHTML = `
-        <option value="${active.p1}">${active.p1}</option>
-        <option value="${active.p2}">${active.p2}</option>
-      `;
-      document.getElementById('lbl-split-a').textContent = `${active.p1} Contribution`;
-      document.getElementById('lbl-split-b').textContent = `${active.p2} Contribution`;
+      pSelect.innerHTML = '';
+      partners.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p;
+        opt.textContent = p;
+        pSelect.appendChild(opt);
+      });
+
+      const splitContainer = document.getElementById('custom-split-fields-container');
+      splitContainer.innerHTML = '';
+      partners.forEach((p, idx) => {
+        const div = document.createElement('div');
+        div.className = 'form-group';
+        div.innerHTML = `
+          <label for="split-amt-${idx}">${p} Contribution</label>
+          <input type="number" step="0.01" id="split-amt-${idx}" data-partner="${p}" class="form-control split-partner-input" placeholder="0.00">
+        `;
+        splitContainer.appendChild(div);
+      });
+
+      if(partners.length <= 1) {
+        strategyBox.classList.add('hidden');
+        singleBox.classList.add('hidden');
+        splitBox.classList.add('hidden');
+      } else {
+        strategyBox.classList.remove('hidden');
+        togglePaymentUI();
+      }
     }
 
     function deleteVehicleHandler() {
       let vList = JSON.parse(localStorage.getItem('vh_vehicles') || '[]');
       if(vList.length <= 1) {
-        alert('⚠️ Security Alert: Cannot delete the primary vehicle profile. At least one vehicle must remain.');
+        alert('⚠️️ Security Alert: Cannot delete the primary vehicle profile.');
         return;
       }
 
       const activeV = document.getElementById('vehicle-select').value;
       const target = vList.find(v => v.id === activeV);
 
-      if(confirm(`🔒 SECURITY CONFIRMATION:\nAre you sure you want to permanently delete vehicle "${target.name} (${target.reg})"?\nAll associated history logs will remain accessible.`)) {
+      if(confirm(`🔒 SECURITY CONFIRMATION:\nDelete vehicle "${target.name} (${target.reg})"?`)) {
         vList = vList.filter(v => v.id !== activeV);
         localStorage.setItem('vh_vehicles', JSON.stringify(vList));
         initVehicles();
         loadDataAndUI();
-        alert('✅ Vehicle profile deleted.');
+        alert('✅ Vehicle deleted.');
       }
     }
 
     function togglePaymentUI() {
+      const partners = getActiveVehiclePartners();
+      if(partners.length <= 1) return;
+
       const mode = document.getElementById('log-payment-mode').value;
       const singleBox = document.getElementById('single-payer-box');
       const splitBox = document.getElementById('split-payer-box');
@@ -902,7 +1208,7 @@
       const cats = JSON.parse(localStorage.getItem('vh_categories') || '{}');
       container.innerHTML = '';
 
-      ['fuel', 'maintenance', 'expense'].forEach(t => {
+      ['fuel', 'maintenance', 'purchase', 'expense'].forEach(t => {
         (cats[t] || []).forEach((c, idx) => {
           const item = document.createElement('div');
           item.className = 'list-card';
@@ -961,12 +1267,169 @@
     function deleteCategory(type, idx) {
       const cats = JSON.parse(localStorage.getItem('vh_categories') || '{}');
       const name = cats[type][idx];
-      if(confirm(`🔒 SECURITY CONFIRMATION:\nAre you sure you want to delete category "${name}"?`)) {
+      if(confirm(`🔒 SECURITY CONFIRMATION:\nDelete category "${name}"?`)) {
         cats[type].splice(idx, 1);
         localStorage.setItem('vh_categories', JSON.stringify(cats));
         renderCategoryList();
         populateCategoryDropdown(activeLogType);
       }
+    }
+
+    /* Document Vault Upload */
+    function uploadDocHandler(e) {
+      e.preventDefault();
+      const activeV = document.getElementById('vehicle-select').value || 'v1';
+      const type = document.getElementById('doc-type').value;
+      const expiry = document.getElementById('doc-expiry').value;
+      const num = document.getElementById('doc-number').value.trim();
+      const file = document.getElementById('doc-file').files[0];
+
+      if(file) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          let docs = JSON.parse(localStorage.getItem('vh_documents') || '[]');
+          docs.unshift({
+            id: Date.now(),
+            vehicleId: activeV,
+            type,
+            expiry,
+            num,
+            fileData: event.target.result,
+            fileName: file.name,
+            isPdf: file.type.includes('pdf')
+          });
+          localStorage.setItem('vh_documents', JSON.stringify(docs));
+          document.getElementById('upload-doc-form').reset();
+          loadDataAndUI();
+          alert('✅ Document uploaded successfully!');
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function renderDocVaultUI() {
+      const activeV = document.getElementById('vehicle-select').value || 'v1';
+      const container = document.getElementById('doc-vault-container');
+      const docs = JSON.parse(localStorage.getItem('vh_documents') || '[]').filter(d => d.vehicleId === activeV);
+      container.innerHTML = '';
+
+      if(docs.length === 0) {
+        container.innerHTML = `<div style="text-align:center; color: var(--text-sub); font-size: 0.82rem; padding: 12px; background:#0b0f17; border-radius:10px; border:1px solid var(--card-border);">No documents uploaded yet.</div>`;
+        return;
+      }
+
+      docs.forEach(d => {
+        let statusClass = 'valid';
+        let statusText = 'Valid';
+
+        const expDate = new Date(d.expiry);
+        const now = new Date();
+        const diffDays = Math.ceil((expDate - now) / (1000 * 60 * 60 * 24));
+
+        if(diffDays < 0) {
+          statusClass = 'expired';
+          statusText = 'Expired';
+        } else if(diffDays <= 30) {
+          statusClass = 'expiring';
+          statusText = `Expires in ${diffDays} Days`;
+        }
+
+        const card = document.createElement('div');
+        card.style.cssText = "background:#0b0f17; border:1px solid var(--card-border); border-radius:12px; padding:12px; margin-bottom:12px;";
+
+        let previewHTML = '';
+        if(!d.isPdf) {
+          previewHTML = `<img src="${d.fileData}" style="width:100%; height:120px; object-fit:cover; border-radius:8px; margin: 8px 0;">`;
+        } else {
+          previewHTML = `<div style="background:#131b2a; padding:10px; border-radius:8px; font-size:0.8rem; color:var(--sky-blue); margin: 8px 0;">📄 PDF Document: ${d.fileName}</div>`;
+        }
+
+        card.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div class="card-title">${d.type}</div>
+              <div class="card-sub">${d.num ? 'Doc #' + d.num + ' • ' : ''}Due Date: <strong>${d.expiry}</strong></div>
+            </div>
+            <div><span class="doc-pill ${statusClass}">${statusText}</span></div>
+          </div>
+          ${previewHTML}
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <a href="${d.fileData}" download="${d.fileName || 'Document'}" class="btn-act" style="color:var(--sky-blue); font-weight:800; text-decoration:none;">📥 View/Download</a>
+            <button class="btn-act" style="color:var(--danger);" onclick="deleteDocument(${d.id})">🗑️ Delete</button>
+          </div>
+        `;
+
+        container.appendChild(card);
+      });
+    }
+
+    function deleteDocument(id) {
+      if(confirm('🔒 SECURITY CONFIRMATION:\nDelete this stored document?')) {
+        let docs = JSON.parse(localStorage.getItem('vh_documents') || '[]');
+        docs = docs.filter(d => d.id != id);
+        localStorage.setItem('vh_documents', JSON.stringify(docs));
+        loadDataAndUI();
+      }
+    }
+
+    function updateNotificationsSystem() {
+      const activeV = document.getElementById('vehicle-select').value || 'v1';
+      const docs = JSON.parse(localStorage.getItem('vh_documents') || '[]').filter(d => d.vehicleId === activeV);
+      const today = new Date();
+
+      let urgentAlerts = [];
+
+      docs.forEach(d => {
+        const expDate = new Date(d.expiry);
+        const diffDays = Math.ceil((expDate - today) / (1000 * 60 * 60 * 24));
+
+        if(diffDays < 0) {
+          urgentAlerts.push({ type: d.type, text: `EXPIRED on ${d.expiry}`, isExpired: true });
+        } else if(diffDays <= 30) {
+          urgentAlerts.push({ type: d.type, text: `Expires in ${diffDays} days (${d.expiry})`, isExpired: false });
+        }
+      });
+
+      const badge = document.getElementById('notif-badge-count');
+      if(urgentAlerts.length > 0) {
+        badge.textContent = urgentAlerts.length;
+        badge.classList.remove('hidden');
+      } else {
+        badge.classList.add('hidden');
+      }
+
+      const alertBox = document.getElementById('alert-box');
+      const alertText = document.getElementById('alert-text');
+      if(urgentAlerts.length > 0) {
+        alertBox.classList.remove('hidden');
+        alertText.innerHTML = `<strong>${urgentAlerts.length} Alert(s):</strong> ${urgentAlerts[0].type} ${urgentAlerts[0].text}`;
+      } else {
+        alertText.innerHTML = `✅ All vehicle papers and certificates are up to date.`;
+      }
+
+      const modalList = document.getElementById('notif-modal-list');
+      modalList.innerHTML = '';
+      if(urgentAlerts.length === 0) {
+        modalList.innerHTML = `<div style="text-align:center; color:var(--text-sub); padding:16px;">🎉 No pending document renewals! All papers are up to date.</div>`;
+      } else {
+        urgentAlerts.forEach(a => {
+          const item = document.createElement('div');
+          item.className = 'list-card';
+          item.innerHTML = `
+            <div>
+              <div class="card-title">${a.type}</div>
+              <div class="card-sub">${a.text}</div>
+            </div>
+            <span class="doc-pill ${a.isExpired ? 'expired' : 'expiring'}">${a.isExpired ? 'EXPIRED' : 'DUE SOON'}</span>
+          `;
+          modalList.appendChild(item);
+        });
+      }
+    }
+
+    function toggleNotifModal() {
+      const modal = document.getElementById('notif-modal');
+      modal.classList.toggle('hidden');
     }
 
     function saveLogEntry(e) {
@@ -978,37 +1441,44 @@
       const cat = document.getElementById('log-category').value;
       const notes = document.getElementById('log-notes').value;
       const date = document.getElementById('log-date').value;
-      const mode = document.getElementById('log-payment-mode').value;
-
-      const vList = JSON.parse(localStorage.getItem('vh_vehicles') || '[]');
-      const veh = vList.find(v => v.id === activeV) || { p1: 'Mansoor', p2: 'Partner 2' };
+      const partners = getActiveVehiclePartners();
 
       let pDetails = {};
-      if(mode === 'personal') {
-        const p = document.getElementById('log-single-payer').value;
-        pDetails = { mode, payer: p, text: `100% Personal (${p})` };
-      } else if(mode === 'shared_partner') {
-        const p = document.getElementById('log-single-payer').value;
-        pDetails = { mode, payer: p, text: `Shared Debt (${p})` };
-      } else if(mode === 'custom_split') {
-        const amtA = Number(document.getElementById('split-amt-a').value) || 0;
-        const amtB = Number(document.getElementById('split-amt-b').value) || 0;
-        pDetails = { mode, amtA, amtB, text: `Split: ${veh.p1} (&#8377;${amtA}) / ${veh.p2} (&#8377;${amtB})` };
+
+      if(partners.length <= 1) {
+        pDetails = { mode: 'personal', payer: partners[0], text: `Paid by ${partners[0]}` };
       } else {
-        pDetails = { mode, text: `Shared Fund Pool` };
+        const mode = document.getElementById('log-payment-mode').value;
+        if(mode === 'personal') {
+          const p = document.getElementById('log-single-payer').value;
+          pDetails = { mode, payer: p, text: `100% Personal (${p})` };
+        } else if(mode === 'shared_partner') {
+          const p = document.getElementById('log-single-payer').value;
+          pDetails = { mode, payer: p, text: `Shared Debt (${p})` };
+        } else if(mode === 'custom_split') {
+          const customSplits = {};
+          let textParts = [];
+          document.querySelectorAll('.split-partner-input').forEach(inp => {
+            const pName = inp.getAttribute('data-partner');
+            const val = Number(inp.value) || 0;
+            customSplits[pName] = val;
+            textParts.push(`${pName}: &#8377;${val}`);
+          });
+          pDetails = { mode, splits: customSplits, text: `Split: ${textParts.join(' / ')}` };
+        } else {
+          pDetails = { mode, text: `Shared Fund Pool` };
+        }
       }
 
       let logs = JSON.parse(localStorage.getItem('vh_logs') || '[]');
 
       if(editingId) {
-        // Update Existing Record
         const logIndex = logs.findIndex(l => l.id == editingId);
         if(logIndex !== -1) {
           logs[logIndex] = { id: Number(editingId), vehicleId: activeV, type: activeLogType, date, odo, cat, amt, notes, pDetails };
           alert('✅ Log entry updated successfully!');
         }
       } else {
-        // Create New Record
         const newLog = { id: Date.now(), vehicleId: activeV, type: activeLogType, date, odo, cat, amt, notes, pDetails };
         logs.unshift(newLog);
         alert('✅ Log entry saved successfully!');
@@ -1024,7 +1494,6 @@
       const target = logs.find(l => l.id == id);
       if(!target) return;
 
-      // Populate Form
       document.getElementById('editing-log-id').value = target.id;
       document.getElementById('log-date').value = target.date;
       document.getElementById('log-odometer').value = target.odo;
@@ -1035,24 +1504,27 @@
       populateCategoryDropdown(target.type || 'fuel');
       document.getElementById('log-category').value = target.cat;
 
-      const pd = target.pDetails || {};
-      const mode = pd.mode || 'personal';
-      document.getElementById('log-payment-mode').value = mode;
-      togglePaymentUI();
+      const partners = getActiveVehiclePartners();
+      if(partners.length > 1) {
+        const pd = target.pDetails || {};
+        const mode = pd.mode || 'personal';
+        document.getElementById('log-payment-mode').value = mode;
+        togglePaymentUI();
 
-      if(mode === 'personal' || mode === 'shared_partner') {
-        if(pd.payer) document.getElementById('log-single-payer').value = pd.payer;
-      } else if(mode === 'custom_split') {
-        document.getElementById('split-amt-a').value = pd.amtA || '';
-        document.getElementById('split-amt-b').value = pd.amtB || '';
+        if(mode === 'personal' || mode === 'shared_partner') {
+          if(pd.payer) document.getElementById('log-single-payer').value = pd.payer;
+        } else if(mode === 'custom_split' && pd.splits) {
+          document.querySelectorAll('.split-partner-input').forEach(inp => {
+            const pName = inp.getAttribute('data-partner');
+            if(pd.splits[pName] !== undefined) inp.value = pd.splits[pName];
+          });
+        }
       }
 
-      // UI Indicators
       document.getElementById('form-heading-title').textContent = '✏️ Edit Log Entry';
       document.getElementById('btn-save-log').textContent = 'Update Log Entry';
       document.getElementById('btn-cancel-edit').classList.remove('hidden');
 
-      // Scroll to form
       switchTab('quick-entry', document.getElementById('nav-quick-entry'));
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -1070,11 +1542,16 @@
     function loadDataAndUI() {
       const activeV = document.getElementById('vehicle-select').value || 'v1';
       const logs = JSON.parse(localStorage.getItem('vh_logs') || '[]').filter(l => l.vehicleId === activeV || !l.vehicleId);
-      const vList = JSON.parse(localStorage.getItem('vh_vehicles') || '[]');
-      const veh = vList.find(v => v.id === activeV) || { p1: 'Mansoor', p2: 'Partner 2' };
+      const partners = getActiveVehiclePartners();
 
-      let total = 0, fuel = 0, maint = 0, maxOdo = 0;
-      let sharedA = 0, sharedB = 0, personalA = 0, personalB = 0;
+      let total = 0, fuel = 0, maint = 0, purchaseSpend = 0, maxOdo = 0;
+      let sharedContrib = {};
+      let personalContrib = {};
+
+      partners.forEach(p => {
+        sharedContrib[p] = 0;
+        personalContrib[p] = 0;
+      });
 
       const historyContainer = document.getElementById('logs-history-container');
       historyContainer.innerHTML = '';
@@ -1087,17 +1564,19 @@
         total += amt;
         if(l.type === 'fuel') fuel += amt;
         else if(l.type === 'maintenance') maint += amt;
+        else if(l.type === 'purchase') purchaseSpend += amt;
 
         const pd = l.pDetails || {};
-        if(pd.mode === 'personal') {
-          if(pd.payer === veh.p1) personalA += amt;
-          else personalB += amt;
-        } else if(pd.mode === 'shared_partner') {
-          if(pd.payer === veh.p1) sharedA += amt;
-          else sharedB += amt;
-        } else if(pd.mode === 'custom_split') {
-          sharedA += Number(pd.amtA || 0);
-          sharedB += Number(pd.amtB || 0);
+        if(partners.length > 1) {
+          if(pd.mode === 'personal' && pd.payer) {
+            personalContrib[pd.payer] = (personalContrib[pd.payer] || 0) + amt;
+          } else if(pd.mode === 'shared_partner' && pd.payer) {
+            sharedContrib[pd.payer] = (sharedContrib[pd.payer] || 0) + amt;
+          } else if(pd.mode === 'custom_split' && pd.splits) {
+            Object.keys(pd.splits).forEach(pName => {
+              sharedContrib[pName] = (sharedContrib[pName] || 0) + Number(pd.splits[pName] || 0);
+            });
+          }
         }
 
         const card = document.createElement('div');
@@ -1106,7 +1585,7 @@
           <div>
             <div class="card-title">${l.cat}</div>
             <div class="card-sub">${l.date} • ${Number(l.odo).toLocaleString()} KM ${l.notes ? '• ' + l.notes : ''}</div>
-            <div style="font-size:0.72rem; color:var(--sky-blue); margin-top:2px;">${pd.text || 'Shared Entry'}</div>
+            <div style="font-size:0.72rem; color:var(--sky-blue); margin-top:2px;">${pd.text || 'Log Entry'}</div>
           </div>
           <div style="text-align:right;">
             <div class="card-amt">&#8377;${amt.toLocaleString()}</div>
@@ -1135,46 +1614,94 @@
         historyContainer.appendChild(card);
       });
 
-      // Update Header Stats
       document.getElementById('v-odo-val').textContent = maxOdo.toLocaleString();
       document.getElementById('stat-total').innerHTML = '&#8377;' + total.toLocaleString();
       document.getElementById('stat-fuel').innerHTML = '&#8377;' + fuel.toLocaleString();
       document.getElementById('stat-maint').innerHTML = '&#8377;' + maint.toLocaleString();
 
       document.getElementById('fin-summary-total').innerHTML = '&#8377;' + total.toLocaleString();
+      document.getElementById('fin-summary-purchase').innerHTML = '&#8377;' + purchaseSpend.toLocaleString();
       document.getElementById('fin-summary-fuel').innerHTML = '&#8377;' + fuel.toLocaleString();
       document.getElementById('fin-summary-maint').innerHTML = '&#8377;' + maint.toLocaleString();
 
-      // Debt Balance Calculations
-      const sharedTotal = sharedA + sharedB;
-      const targetHalf = sharedTotal / 2;
-      const diffA = sharedA - targetHalf;
+      renderFinanceSummaryCard();
 
       const ledgerContainer = document.getElementById('partner-ledger-container');
-      let debtMsg = "";
-      if(Math.abs(diffA) < 1) {
-        debtMsg = `⚖️ Shared debt balanced!`;
-      } else if(diffA > 0) {
-        debtMsg = `💸 <strong>${veh.p2}</strong> owes <strong>${veh.p1}</strong>: &#8377;${diffA.toLocaleString()}`;
+      ledgerContainer.innerHTML = '';
+
+      if(partners.length <= 1) {
+        ledgerContainer.innerHTML = `
+          <div style="background:#0b0f17; padding:14px; border-radius:10px; border: 1px solid var(--card-border); text-align:center; color: var(--text-sub); font-size:0.85rem;">
+            👤 Solo Vehicle Ownership Mode.<br>Settlement calculations are disabled.
+          </div>
+        `;
       } else {
-        debtMsg = `💸 <strong>${veh.p1}</strong> owes <strong>${veh.p2}</strong>: &#8377;${Math.abs(diffA).toLocaleString()}`;
+        let totalSharedSpent = 0;
+        let summaryRows = '';
+        partners.forEach(p => {
+          const sAmt = sharedContrib[p] || 0;
+          totalSharedSpent += sAmt;
+          summaryRows += `<div class="list-card"><span>${p} Shared Paid:</span><span>&#8377;${sAmt.toLocaleString()}</span></div>`;
+        });
+
+        const perPartnerTarget = totalSharedSpent / partners.length;
+        let settlementMatrixHTML = '';
+
+        partners.forEach(p => {
+          const diff = (sharedContrib[p] || 0) - perPartnerTarget;
+          if(diff > 0.01) {
+            settlementMatrixHTML += `<div style="margin-bottom:4px;">🟢 <strong>${p}</strong> is owed: <span style="color:var(--sky-blue); font-weight:800;">&#8377;${diff.toLocaleString()}</span></div>`;
+          } else if(diff < -0.01) {
+            settlementMatrixHTML += `<div style="margin-bottom:4px;">💸 <strong>${p}</strong> owes: <span style="color:var(--warning); font-weight:800;">&#8377;${Math.abs(diff).toLocaleString()}</span></div>`;
+          } else {
+            settlementMatrixHTML += `<div style="margin-bottom:4px;">⚖️ <strong>${p}</strong> is balanced.</div>`;
+          }
+        });
+
+        ledgerContainer.innerHTML = `
+          <div style="background:#0b0f17; padding:12px; border-radius:10px; margin-bottom:10px; border: 1px solid var(--card-border);">
+            ${summaryRows}
+            <div style="font-size:0.74rem; color:var(--text-sub); margin-top:6px;">
+              Excl. Personal Trips: ${partners.map(p => `${p} (&#8377;${(personalContrib[p] || 0).toLocaleString()})`).join(', ')}
+            </div>
+          </div>
+          <div style="background:rgba(56,189,248,0.1); border:1px solid var(--sky-blue); padding:12px; border-radius:10px; font-size:0.85rem;">
+            ${settlementMatrixHTML}
+          </div>
+        `;
       }
 
-      ledgerContainer.innerHTML = `
-        <div style="background:#0b0f17; padding:12px; border-radius:10px; margin-bottom:10px; border: 1px solid var(--card-border);">
-          <div class="list-card"><span>${veh.p1} Shared Paid:</span><span>&#8377;${sharedA.toLocaleString()}</span></div>
-          <div class="list-card"><span>${veh.p2} Shared Paid:</span><span>&#8377;${sharedB.toLocaleString()}</span></div>
-          <div style="font-size:0.74rem; color:var(--text-sub); margin-top:6px;">
-            Excl. Personal Trips: ${veh.p1} (&#8377;${personalA.toLocaleString()}), ${veh.p2} (&#8377;${personalB.toLocaleString()})
-          </div>
-        </div>
-        <div style="background:rgba(56,189,248,0.1); border:1px solid var(--sky-blue); padding:12px; border-radius:10px; text-align:center;">
-          ${debtMsg}
-        </div>
-      `;
-
+      renderDocVaultUI();
       renderSpecsUI();
       renderPhotosUI();
+      updateNotificationsSystem();
+    }
+
+    function renderFinanceSummaryCard() {
+      const activeV = document.getElementById('vehicle-select').value || 'v1';
+      const vList = JSON.parse(localStorage.getItem('vh_vehicles') || '[]');
+      const target = vList.find(v => v.id === activeV);
+      const container = document.getElementById('vehicle-finance-summary-box');
+
+      if(!target || !target.financeDetails || Object.keys(target.financeDetails).length === 0) {
+        container.innerHTML = `
+          <div style="background:#0b0f17; padding:14px; border-radius:10px; border: 1px solid var(--card-border); text-align:center; color: var(--text-sub); font-size:0.85rem;">
+            ℹ No Purchase or Loan details added yet. Configure them under the Specs/Prof tab.
+          </div>
+        `;
+        return;
+      }
+
+      const fin = target.financeDetails;
+      container.innerHTML = `
+        <div style="background:#0b0f17; padding:12px; border-radius:10px; border: 1px solid var(--card-border);">
+          <div class="list-card"><span>Ex-Showroom Price</span><span style="font-weight:800;">&#8377;${Number(fin.exShowroom || 0).toLocaleString()}</span></div>
+          <div class="list-card"><span>Down Payment Paid</span><span style="font-weight:800; color:var(--success);">&#8377;${Number(fin.downPayment || 0).toLocaleString()}</span></div>
+          <div class="list-card"><span>Loan Amount Financed</span><span style="font-weight:800; color:var(--sky-blue);">&#8377;${Number(fin.loanAmt || 0).toLocaleString()}</span></div>
+          <div class="list-card"><span>Financier / Bank</span><span style="font-weight:800;">${fin.bankName || 'N/A'}</span></div>
+          <div class="list-card"><span>Monthly EMI / Tenure</span><span style="font-weight:800; color:var(--warning);">&#8377;${Number(fin.monthlyEmi || 0).toLocaleString()} / ${fin.tenureMonths || 0} Mos</span></div>
+        </div>
+      `;
     }
 
     function deleteLogEntry(id) {
@@ -1196,11 +1723,42 @@
       if(target) {
         target.name = document.getElementById('prof-vname').value;
         target.reg = document.getElementById('prof-vreg').value;
-        target.p1 = document.getElementById('prof-p1').value || 'Mansoor';
-        target.p2 = document.getElementById('prof-p2').value || 'Partner 2';
+
+        const partnerInputs = document.querySelectorAll('.partner-input-val');
+        const updatedPartners = [];
+        partnerInputs.forEach(inp => {
+          const val = inp.value.trim();
+          if(val !== '') updatedPartners.push(val);
+        });
+
+        target.partners = updatedPartners.length > 0 ? updatedPartners : ['Mansoor'];
+
         localStorage.setItem('vh_vehicles', JSON.stringify(vList));
         initVehicles();
-        alert('✅ Vehicle Profile Updated!');
+        loadDataAndUI();
+        alert('✅ Vehicle Profile Updated Successfully!');
+      }
+    }
+
+    function saveVehicleFinanceProfile(e) {
+      e.preventDefault();
+      const activeV = document.getElementById('vehicle-select').value || 'v1';
+      const vList = JSON.parse(localStorage.getItem('vh_vehicles') || '[]');
+      const target = vList.find(v => v.id === activeV);
+
+      if(target) {
+        target.financeDetails = {
+          exShowroom: document.getElementById('fin-exshowroom').value,
+          downPayment: document.getElementById('fin-downpayment').value,
+          loanAmt: document.getElementById('fin-loan-amt').value,
+          bankName: document.getElementById('fin-bank-name').value,
+          monthlyEmi: document.getElementById('fin-monthly-emi').value,
+          tenureMonths: document.getElementById('fin-tenure-months').value
+        };
+
+        localStorage.setItem('vh_vehicles', JSON.stringify(vList));
+        loadDataAndUI();
+        alert('✅ Purchase & Loan details saved!');
       }
     }
 
@@ -1370,7 +1928,7 @@
       const reg = prompt('Enter Registration Number (RC):');
       if(name && reg) {
         let vList = JSON.parse(localStorage.getItem('vh_vehicles') || '[]');
-        const newV = { id: 'v' + Date.now(), name, reg, p1: 'Mansoor', p2: 'Partner 2' };
+        const newV = { id: 'v' + Date.now(), name, reg, partners: ['Mansoor'] };
         vList.push(newV);
         localStorage.setItem('vh_vehicles', JSON.stringify(vList));
         initVehicles();
