@@ -6,9 +6,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>MANSKIT VehicleHub</title>
   <meta name="theme-color" content="#0b0f17">
+  <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="css/styles.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
+
+  <!-- App Security Lock Overlay -->
+  <div id="security-pin-overlay" class="modal-overlay hidden" style="z-index: 500;">
+    <div class="modal-box" style="text-align: center;">
+      <div style="font-size: 2.5rem; margin-bottom: 8px;">🔒</div>
+      <div style="font-weight: 900; font-size: 1.2rem; color: #ffffff; margin-bottom: 4px;">Security Lock</div>
+      <div style="font-size: 0.8rem; color: var(--text-sub); margin-bottom: 16px;">Enter 4-Digit Security PIN to Access</div>
+      
+      <input type="password" id="pin-input" class="form-control" placeholder="••••" maxlength="4" style="text-align: center; font-size: 1.8rem; letter-spacing: 12px; margin-bottom: 16px;">
+      <button type="button" id="btn-unlock-app" class="submit-btn">Unlock MANSKIT</button>
+    </div>
+  </div>
 
   <!-- Top Navigation Header -->
   <header class="app-header">
@@ -45,8 +59,8 @@
   <!-- Notification Drawer Modal -->
   <div id="notif-modal" class="modal-overlay hidden">
     <div class="modal-box">
-      <div class="modal-header">
-        <div style="font-weight: 900; font-size: 1.1rem; color: #ffffff;">🔔 Document Due Notifications</div>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <div style="font-weight: 900; font-size: 1.1rem; color: #ffffff;">🔔 Notifications & Service Due</div>
         <button id="btn-close-notif" class="btn-act" style="font-size: 1.2rem; color: #ffffff;">✕</button>
       </div>
       <div id="notif-modal-list"></div>
@@ -60,7 +74,7 @@
     <section id="section-quick-entry" class="app-section active-section">
       <div class="alert-banner" id="alert-box">
         <svg style="width:18px;height:18px;fill:currentColor;" viewBox="0 0 24 24"><path d="M12 2L1 21h22L12 2zm1 14h-2v-2h2v2zm0-4h-2V10h2v2z"/></svg>
-        <span id="alert-text">Checking document expiry alerts...</span>
+        <span id="alert-text">Checking alerts...</span>
       </div>
 
       <div class="summary-card">
@@ -73,7 +87,7 @@
           </div>
         </div>
 
-        <div class="stats-grid">
+        <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr);">
           <div class="stat-item">
             <div class="stat-label">Total Spend</div>
             <div class="stat-val" style="color: var(--sky-blue);" id="stat-total">₹0</div>
@@ -86,7 +100,17 @@
             <div class="stat-label">Maintenance</div>
             <div class="stat-val" style="color: var(--sky-blue);" id="stat-maint">₹0</div>
           </div>
+          <div class="stat-item">
+            <div class="stat-label">Avg Mileage</div>
+            <div class="stat-val" style="color: #10b981;" id="stat-mileage">0 KM/L</div>
+          </div>
         </div>
+      </div>
+
+      <!-- Service Maintenance Reminders Card -->
+      <div class="card-box">
+        <div style="font-weight: 800; font-size: 0.95rem; color: #ffffff; margin-bottom: 10px;">🔧 Service Odometer Tracker</div>
+        <div id="service-reminder-box"></div>
       </div>
 
       <div class="card-box">
@@ -124,6 +148,12 @@
               <label for="log-amount">Amount (₹)</label>
               <input type="number" step="0.01" id="log-amount" class="form-control" placeholder="0.00" required>
             </div>
+          </div>
+
+          <!-- Fuel Liters Input for Mileage Calculation -->
+          <div id="fuel-liters-box" class="form-group">
+            <label for="log-fuel-liters">Fuel Volume (Liters)</label>
+            <input type="number" step="0.01" id="log-fuel-liters" class="form-control" placeholder="e.g. 35.5 (For Mileage Calc)">
           </div>
 
           <div id="payment-strategy-box" class="form-group">
@@ -245,46 +275,6 @@
       </div>
 
       <div class="card-box">
-        <div style="font-weight: 800; font-size: 1rem; margin-bottom: 12px; color: #ffffff;">🏦 Vehicle Purchase & Finance Setup</div>
-        <form id="vehicle-finance-form">
-          <div style="display: flex; gap: 8px;">
-            <div class="form-group" style="flex: 1;">
-              <label for="fin-exshowroom">Ex-Showroom Price (₹)</label>
-              <input type="number" step="0.01" id="fin-exshowroom" class="form-control" placeholder="0.00">
-            </div>
-            <div class="form-group" style="flex: 1;">
-              <label for="fin-downpayment">Down Payment (₹)</label>
-              <input type="number" step="0.01" id="fin-downpayment" class="form-control" placeholder="0.00">
-            </div>
-          </div>
-
-          <div style="display: flex; gap: 8px;">
-            <div class="form-group" style="flex: 1;">
-              <label for="fin-loan-amt">Loan Amount (₹)</label>
-              <input type="number" step="0.01" id="fin-loan-amt" class="form-control" placeholder="0.00">
-            </div>
-            <div class="form-group" style="flex: 1;">
-              <label for="fin-bank-name">Financier / Bank</label>
-              <input type="text" id="fin-bank-name" class="form-control" placeholder="e.g. HDFC Bank, SBI">
-            </div>
-          </div>
-
-          <div style="display: flex; gap: 8px;">
-            <div class="form-group" style="flex: 1;">
-              <label for="fin-monthly-emi">Monthly EMI (₹)</label>
-              <input type="number" step="0.01" id="fin-monthly-emi" class="form-control" placeholder="0.00">
-            </div>
-            <div class="form-group" style="flex: 1;">
-              <label for="fin-tenure-months">Tenure (Months)</label>
-              <input type="number" id="fin-tenure-months" class="form-control" placeholder="e.g. 36, 60">
-            </div>
-          </div>
-
-          <button type="submit" class="submit-btn">Save Purchase & Finance Details</button>
-        </form>
-      </div>
-
-      <div class="card-box">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
           <div style="font-weight: 800; font-size: 1rem; color: #ffffff;">🛠️ Dynamic Technical Specs</div>
           <button id="btn-share-specs" class="btn-act" style="color: var(--sky-blue); font-weight: 800;">📤 Share All</button>
@@ -335,6 +325,46 @@
     <!-- 4. FINANCE & SETTLEMENT TAB -->
     <section id="section-finance" class="app-section">
       <div class="card-box">
+        <div style="font-weight: 800; font-size: 1rem; margin-bottom: 12px; color: #ffffff;">🏦 Vehicle Purchase & Finance Setup</div>
+        <form id="vehicle-finance-form">
+          <div style="display: flex; gap: 8px;">
+            <div class="form-group" style="flex: 1;">
+              <label for="fin-exshowroom">Ex-Showroom Price (₹)</label>
+              <input type="number" step="0.01" id="fin-exshowroom" class="form-control" placeholder="0.00">
+            </div>
+            <div class="form-group" style="flex: 1;">
+              <label for="fin-downpayment">Down Payment (₹)</label>
+              <input type="number" step="0.01" id="fin-downpayment" class="form-control" placeholder="0.00">
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 8px;">
+            <div class="form-group" style="flex: 1;">
+              <label for="fin-loan-amt">Loan Amount (₹)</label>
+              <input type="number" step="0.01" id="fin-loan-amt" class="form-control" placeholder="0.00">
+            </div>
+            <div class="form-group" style="flex: 1;">
+              <label for="fin-bank-name">Financier / Bank</label>
+              <input type="text" id="fin-bank-name" class="form-control" placeholder="e.g. HDFC Bank, SBI">
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 8px;">
+            <div class="form-group" style="flex: 1;">
+              <label for="fin-monthly-emi">Monthly EMI (₹)</label>
+              <input type="number" step="0.01" id="fin-monthly-emi" class="form-control" placeholder="0.00">
+            </div>
+            <div class="form-group" style="flex: 1;">
+              <label for="fin-tenure-months">Tenure (Months)</label>
+              <input type="number" id="fin-tenure-months" class="form-control" placeholder="e.g. 36, 60">
+            </div>
+          </div>
+
+          <button type="submit" class="submit-btn">Save Purchase & Finance Details</button>
+        </form>
+      </div>
+
+      <div class="card-box">
         <div style="font-weight: 800; font-size: 1rem; margin-bottom: 12px; color: #ffffff;">🏛️ Total Running & Purchase Spend</div>
         <div class="list-card"><span>Total Running Expenses</span><span class="card-amt" id="fin-summary-total">₹0</span></div>
         <div class="list-card"><span>Purchase / RTO / Finance</span><span class="card-amt" id="fin-summary-purchase">₹0</span></div>
@@ -353,12 +383,17 @@
       </div>
     </section>
 
-    <!-- 5. HISTORY LOGS TAB WITH SEARCH & FILTER -->
+    <!-- 5. HISTORY LOGS TAB WITH CSV & PDF EXPORTS -->
     <section id="section-logs" class="app-section">
       <div class="card-box">
-        <div style="font-weight: 800; font-size: 1rem; margin-bottom: 12px; color: #ffffff;">📊 Activity History Logs</div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <div style="font-weight: 800; font-size: 1rem; color: #ffffff;">📊 Activity History Logs</div>
+          <div style="display: flex; gap: 6px;">
+            <button id="btn-export-csv" class="btn-act" style="color: var(--sky-blue); font-weight: 800;">📥 CSV</button>
+            <button id="btn-export-pdf" class="btn-act" style="color: var(--success); font-weight: 800;">📄 PDF</button>
+          </div>
+        </div>
         
-        <!-- Search & Filter Controls -->
         <div class="filter-controls-box">
           <div class="form-group" style="margin-bottom: 8px;">
             <input type="text" id="log-search-input" class="form-control" placeholder="🔍 Search logs by notes, category, date...">
@@ -388,8 +423,21 @@
       </div>
     </section>
 
-    <!-- 6. CLOUD BACKUP & ACCOUNT TAB (NEW PAGE) -->
+    <!-- 6. CLOUD BACKUP, SECURITY & ACCOUNT TAB -->
     <section id="section-account" class="app-section">
+      <div class="card-box">
+        <div style="font-weight: 800; font-size: 1rem; margin-bottom: 12px; color: #ffffff;">🔐 App Security & PIN Lock</div>
+        <div class="form-group">
+          <label for="security-pin-set">Set 4-Digit Passcode / PIN</label>
+          <input type="password" id="security-pin-set" class="form-control" placeholder="e.g. 1234" maxlength="4">
+        </div>
+        <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
+          <input type="checkbox" id="security-lock-enable" style="width: 18px; height: 18px;">
+          <label for="security-lock-enable" style="margin-bottom: 0;">Enable PIN Protection on App Startup</label>
+        </div>
+        <button type="button" id="btn-save-security-pin" class="submit-btn">Save Security PIN</button>
+      </div>
+
       <div class="card-box">
         <div style="font-weight: 800; font-size: 1rem; margin-bottom: 12px; color: #ffffff;">☁️ Email Backup & Cloud Sync</div>
         
@@ -401,6 +449,10 @@
           <div class="form-group">
             <label for="auth-password">Password</label>
             <input type="password" id="auth-password" class="form-control" placeholder="••••••••" required>
+          </div>
+          <div class="form-group" style="display: flex; align-items: center; gap: 8px;">
+            <input type="checkbox" id="auth-remember-me" checked style="width: 18px; height: 18px;">
+            <label for="auth-remember-me" style="margin-bottom: 0;">Remember login on this device</label>
           </div>
           <div style="display: flex; gap: 8px; margin-top: 12px;">
             <button type="button" id="btn-login-email" class="submit-btn" style="flex: 1;">Sign In</button>
@@ -453,7 +505,12 @@
     </a>
   </nav>
 
-  <!-- External JavaScript Modules -->
+  <!-- PWA Service Worker Registration & External Scripts -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js');
+    }
+  </script>
   <script src="js/app.js"></script>
   <script src="js/auth.js"></script>
 </body>

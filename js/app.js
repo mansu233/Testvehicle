@@ -16,8 +16,7 @@ function bindEvents() {
   document.querySelectorAll('.bottom-nav .nav-item').forEach(item => {
     item.addEventListener('click', function(e) {
       e.preventDefault();
-      const target = this.getAttribute('data-target');
-      switchTab(target, this);
+      switchTab(this.getAttribute('data-target'), this);
     });
   });
 
@@ -37,10 +36,12 @@ function bindEvents() {
   document.getElementById('add-spec-form').addEventListener('submit', addTechnicalSpec);
   document.getElementById('upload-photo-form').addEventListener('submit', uploadPhotoHandler);
 
-  // Search & Filters
+  // Search, Filters & Export
   document.getElementById('log-search-input').addEventListener('input', loadDataAndUI);
   document.getElementById('log-type-filter').addEventListener('change', loadDataAndUI);
   document.getElementById('log-sort-filter').addEventListener('change', loadDataAndUI);
+  document.getElementById('btn-export-csv').addEventListener('click', exportLogsCSV);
+  document.getElementById('btn-export-pdf').addEventListener('click', exportLogsPDF);
 
   // Header & Modals
   document.getElementById('vehicle-select').addEventListener('change', switchVehicle);
@@ -80,9 +81,7 @@ function initVehicles() {
   }
 
   vList.forEach(v => {
-    if(!v.partners || v.partners.length === 0) {
-      v.partners = ['Mansoor'];
-    }
+    if(!v.partners || v.partners.length === 0) v.partners = ['Mansoor'];
   });
   localStorage.setItem('vh_vehicles', JSON.stringify(vList));
 
@@ -237,6 +236,11 @@ function setLogType(type) {
   document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
   const activeBtn = document.querySelector(`.tab-btn[data-type="${type}"]`);
   if(activeBtn) activeBtn.classList.add('active');
+
+  const litersBox = document.getElementById('fuel-liters-box');
+  if(type === 'fuel') litersBox.classList.remove('hidden');
+  else litersBox.classList.add('hidden');
+
   populateCategoryDropdown(type);
 }
 
@@ -492,6 +496,7 @@ function saveLogEntry(e) {
   const cat = document.getElementById('log-category').value;
   const notes = document.getElementById('log-notes').value;
   const date = document.getElementById('log-date').value;
+  const liters = Number(document.getElementById('log-fuel-liters').value) || 0;
   const partners = getActiveVehiclePartners();
 
   let pDetails = {};
@@ -523,11 +528,11 @@ function saveLogEntry(e) {
   if(editingId) {
     const logIndex = logs.findIndex(l => l.id == editingId);
     if(logIndex !== -1) {
-      logs[logIndex] = { id: Number(editingId), vehicleId: activeV, type: activeLogType, date, odo, cat, amt, notes, pDetails };
+      logs[logIndex] = { id: Number(editingId), vehicleId: activeV, type: activeLogType, date, odo, cat, amt, notes, liters, pDetails };
       alert('✅ Log entry updated successfully!');
     }
   } else {
-    const newLog = { id: Date.now(), vehicleId: activeV, type: activeLogType, date, odo, cat, amt, notes, pDetails };
+    const newLog = { id: Date.now(), vehicleId: activeV, type: activeLogType, date, odo, cat, amt, notes, liters, pDetails };
     logs.unshift(newLog);
     alert('✅ Log entry saved successfully!');
   }
@@ -547,6 +552,7 @@ function editLogEntry(id) {
   document.getElementById('log-odometer').value = target.odo;
   document.getElementById('log-amount').value = target.amt;
   document.getElementById('log-notes').value = target.notes || '';
+  document.getElementById('log-fuel-liters').value = target.liters || '';
 
   setLogType(target.type || 'fuel');
   populateCategoryDropdown(target.type || 'fuel');
@@ -569,7 +575,7 @@ function editLogEntry(id) {
     }
   }
 
-  document.getElementById('form-heading-title').textContent = '✏️️ EDIT LOG ENTRY';
+  document.getElementById('form-heading-title').textContent = '✏ EDIT LOG ENTRY';
   document.getElementById('btn-save-log').textContent = 'Update Log Entry';
   document.getElementById('btn-cancel-edit').classList.remove('hidden');
 
@@ -600,6 +606,15 @@ function loadDataAndUI() {
     sharedContrib[p] = 0;
     personalContrib[p] = 0;
   });
+
+  // Mileage Calculation Setup
+  let fuelLogs = logs.filter(l => l.type === 'fuel' && l.liters > 0).sort((a,b) => Number(a.odo) - Number(b.odo));
+  let avgMileage = 0;
+  if(fuelLogs.length >= 2) {
+    let totalKm = Number(fuelLogs[fuelLogs.length - 1].odo) - Number(fuelLogs[0].odo);
+    let totalLiters = fuelLogs.slice(1).reduce((acc, curr) => acc + Number(curr.liters), 0);
+    if(totalLiters > 0) avgMileage = (totalKm / totalLiters).toFixed(1);
+  }
 
   // Calculate Totals & Ledger Balance
   logs.forEach(l => {
@@ -662,7 +677,7 @@ function loadDataAndUI() {
       card.className = 'list-card';
       card.innerHTML = `
         <div>
-          <div class="card-title">${l.cat}</div>
+          <div class="card-title">${l.cat} ${l.liters ? ' ('+l.liters+' L)' : ''}</div>
           <div class="card-sub">${l.date} • ${Number(l.odo).toLocaleString()} KM ${l.notes ? '• ' + l.notes : ''}</div>
           <div style="font-size:0.72rem; color:var(--sky-blue); margin-top:2px;">${pd.text || 'Log Entry'}</div>
         </div>
@@ -697,12 +712,14 @@ function loadDataAndUI() {
   document.getElementById('stat-total').innerHTML = '₹' + total.toLocaleString();
   document.getElementById('stat-fuel').innerHTML = '₹' + fuel.toLocaleString();
   document.getElementById('stat-maint').innerHTML = '₹' + maint.toLocaleString();
+  document.getElementById('stat-mileage').textContent = `${avgMileage} KM/L`;
 
   document.getElementById('fin-summary-total').innerHTML = '₹' + total.toLocaleString();
   document.getElementById('fin-summary-purchase').innerHTML = '₹' + purchaseSpend.toLocaleString();
   document.getElementById('fin-summary-fuel').innerHTML = '₹' + fuel.toLocaleString();
   document.getElementById('fin-summary-maint').innerHTML = '₹' + maint.toLocaleString();
 
+  renderServiceRemindersUI(maxOdo, logs);
   renderFinanceSummaryCard();
 
   const ledgerContainer = document.getElementById('partner-ledger-container');
@@ -756,6 +773,68 @@ function loadDataAndUI() {
   updateNotificationsSystem();
 }
 
+/* Service Interval Odometer Tracker */
+function renderServiceRemindersUI(currentOdo, logs) {
+  const box = document.getElementById('service-reminder-box');
+  const oilLogs = logs.filter(l => l.cat.toLowerCase().includes('oil')).sort((a,b) => Number(b.odo) - Number(a.odo));
+  const lastOilOdo = oilLogs.length > 0 ? Number(oilLogs[0].odo) : 0;
+  const nextOilOdo = lastOilOdo > 0 ? lastOilOdo + 10000 : 10000;
+  const kmRemaining = nextOilOdo - currentOdo;
+
+  box.innerHTML = `
+    <div class="list-card">
+      <div>
+        <div class="card-title">🛢️ Engine Oil Change Interval</div>
+        <div class="card-sub">Last Service: ${lastOilOdo.toLocaleString()} KM • Due At: ${nextOilOdo.toLocaleString()} KM</div>
+      </div>
+      <span class="doc-pill ${kmRemaining < 1000 ? 'expiring' : 'valid'}">${kmRemaining <= 0 ? 'DUE NOW' : kmRemaining + ' KM Left'}</span>
+    </div>
+  `;
+}
+
+/* CSV and PDF Export Functions */
+function exportLogsCSV() {
+  const activeV = document.getElementById('vehicle-select').value || 'v1';
+  let logs = JSON.parse(localStorage.getItem('vh_logs') || '[]').filter(l => l.vehicleId === activeV || !l.vehicleId);
+  
+  if(logs.length === 0) return alert('No logs available to export.');
+
+  let csvContent = "data:text/csv;charset=utf-8,ID,Date,Odometer,Type,Category,Amount,Notes,PaymentText\n";
+  logs.forEach(l => {
+    csvContent += `"${l.id}","${l.date}","${l.odo}","${l.type}","${l.cat}","${l.amt}","${l.notes || ''}","${l.pDetails?.text || ''}"\n`;
+  });
+
+  const encodedUri = encodeURI(csvContent);
+  const link = document.createElement("a");
+  link.setAttribute("href", encodedUri);
+  link.setAttribute("download", `VehicleHub_Logs_${activeV}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+function exportLogsPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  const activeV = document.getElementById('vehicle-select').value || 'v1';
+  let logs = JSON.parse(localStorage.getItem('vh_logs') || '[]').filter(l => l.vehicleId === activeV || !l.vehicleId);
+
+  doc.setFontSize(16);
+  doc.text("MANSKIT VehicleHub - Financial Activity Log", 14, 20);
+  doc.setFontSize(10);
+  doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 14, 28);
+
+  let y = 38;
+  logs.forEach((l, i) => {
+    if(y > 270) { doc.addPage(); y = 20; }
+    doc.text(`${i + 1}. [${l.date}] ${l.cat} - Rs.${l.amt} (${l.odo} KM)`, 14, y);
+    doc.text(`   Remarks: ${l.notes || 'N/A'} | ${l.pDetails?.text || ''}`, 14, y + 5);
+    y += 12;
+  });
+
+  doc.save(`VehicleHub_Report_${activeV}.pdf`);
+}
+
 function renderFinanceSummaryCard() {
   const activeV = document.getElementById('vehicle-select').value || 'v1';
   const vList = JSON.parse(localStorage.getItem('vh_vehicles') || '[]');
@@ -765,7 +844,7 @@ function renderFinanceSummaryCard() {
   if(!target || !target.financeDetails || Object.keys(target.financeDetails).length === 0) {
     container.innerHTML = `
       <div style="background:#0b0f17; padding:14px; border-radius:10px; border: 1px solid var(--card-border); text-align:center; color: var(--text-sub); font-size:0.85rem;">
-        ℹ No Purchase or Loan details added yet. Configure them under the Specs/Prof tab.
+        ℹ No Purchase or Loan details added yet.
       </div>
     `;
     return;
