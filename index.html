@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>MANSKIT VehicleHub</title>
   <meta name="theme-color" content="#0b0f17">
@@ -36,7 +36,7 @@
       overflow-x: hidden;
     }
 
-    /* Header & Animated Vehicle Track */
+    /* Top Navigation Header */
     .app-header {
       background: linear-gradient(180deg, #131b2a 0%, rgba(19, 27, 42, 0.95) 100%);
       backdrop-filter: blur(12px);
@@ -49,7 +49,7 @@
       position: sticky;
       top: 0;
       z-index: 100;
-      gap: 12px;
+      gap: 8px;
     }
 
     .brand-container {
@@ -80,31 +80,65 @@
       text-transform: uppercase;
     }
 
-    /* Moving Vehicle Animation Track (Reversed Right-to-Left) */
+    /* Animated Vehicle Track & Smoke Animation */
     .vehicle-animation-track {
       flex: 1;
       position: relative;
-      height: 28px;
+      height: 32px;
       overflow: hidden;
       margin: 0 4px;
       border-bottom: 1px dashed rgba(56, 189, 248, 0.2);
     }
 
-    .moving-vehicle {
+    .vehicle-assembly {
       position: absolute;
       top: 2px;
-      right: 0;
-      font-size: 1.2rem;
+      left: -15%;
+      display: flex;
+      align-items: center;
+      animation: driveForwardAcross 6s linear infinite;
+    }
+
+    .car-body {
+      font-size: 1.5rem;
       line-height: 1;
-      animation: driveReverseAcross 6s linear infinite;
+      z-index: 2;
       filter: drop-shadow(0 2px 6px var(--sky-blue-glow));
     }
 
-    @keyframes driveReverseAcross {
+    .smoke-container {
+      position: absolute;
+      left: -6px;
+      bottom: 2px;
+      display: flex;
+      gap: 3px;
+      z-index: 1;
+    }
+
+    .smoke-puff {
+      width: 6px;
+      height: 6px;
+      background: rgba(226, 232, 240, 0.5);
+      border-radius: 50%;
+      animation: puffSmoke 0.8s infinite ease-out;
+    }
+
+    .smoke-puff:nth-child(2) {
+      animation-delay: 0.2s;
+      width: 8px;
+      height: 8px;
+    }
+
+    .smoke-puff:nth-child(3) {
+      animation-delay: 0.4s;
+      width: 10px;
+      height: 10px;
+    }
+
+    @keyframes driveForwardAcross {
       0% {
-        right: -5%;
+        left: -15%;
         opacity: 0;
-        transform: scaleX(-1);
       }
       10% {
         opacity: 1;
@@ -113,9 +147,19 @@
         opacity: 1;
       }
       100% {
-        right: 98%;
+        left: 100%;
         opacity: 0;
-        transform: scaleX(-1);
+      }
+    }
+
+    @keyframes puffSmoke {
+      0% {
+        transform: translate(0, 0) scale(0.4);
+        opacity: 0.8;
+      }
+      100% {
+        transform: translate(-18px, -10px) scale(2.2);
+        opacity: 0;
       }
     }
 
@@ -135,7 +179,7 @@
       font-size: 0.78rem;
       font-weight: 700;
       outline: none;
-      max-width: 150px;
+      max-width: 135px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -174,7 +218,7 @@
       border: 2px solid var(--bg-color);
     }
 
-    /* Layout Container */
+    /* Main Container & Sections */
     .main-container {
       padding: 16px;
       max-width: 600px;
@@ -189,7 +233,7 @@
       display: block;
     }
 
-    /* Cards & Containers */
+    /* Cards & Boxes */
     .card-box {
       background-color: var(--card-bg);
       border: 1px solid var(--card-border);
@@ -292,7 +336,7 @@
       font-weight: 800;
     }
 
-    /* Forms & Inputs */
+    /* Form Controls */
     .form-group {
       margin-bottom: 14px;
     }
@@ -323,7 +367,6 @@
       border-color: var(--sky-blue);
     }
 
-    /* Segmented Log Tabs */
     .log-tabs {
       display: flex;
       gap: 6px;
@@ -369,7 +412,7 @@
       margin-top: 6px;
     }
 
-    /* Bottom Nav Bar */
+    /* Navigation Bar */
     .bottom-nav {
       position: fixed;
       bottom: 0;
@@ -407,7 +450,7 @@
       fill: currentColor;
     }
 
-    /* List Cards */
+    /* Cards Layout */
     .list-card {
       background-color: #0b0f17;
       border: 1px solid var(--card-border);
@@ -508,7 +551,7 @@
       justify-content: center;
     }
 
-    /* Modal Overlay for Notification Drawer */
+    /* Notification Drawer Modal */
     .modal-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
@@ -561,9 +604,16 @@
       </div>
     </div>
 
-    <!-- Continuous Animated Moving Vehicle Track (Opposite Direction Facing Left) -->
+    <!-- Animated Forward Vehicle with Rear Silencer Exhaust Smoke Particles -->
     <div class="vehicle-animation-track">
-      <div class="moving-vehicle">🚗</div>
+      <div class="vehicle-assembly">
+        <div class="smoke-container">
+          <div class="smoke-puff"></div>
+          <div class="smoke-puff"></div>
+          <div class="smoke-puff"></div>
+        </div>
+        <div class="car-body">🚗</div>
+      </div>
     </div>
 
     <div class="header-actions">
@@ -588,7 +638,7 @@
     </div>
   </div>
 
-  <!-- Main Container -->
+  <!-- Main Content Areas -->
   <main class="main-container">
 
     <!-- 1. DASHBOARD TAB -->
@@ -612,22 +662,22 @@
         <div class="stats-grid">
           <div class="stat-item">
             <div class="stat-label">Total Spend</div>
-            <div class="stat-val" style="color: var(--sky-blue);" id="stat-total">&#8377;0</div>
+            <div class="stat-val" style="color: var(--sky-blue);" id="stat-total">₹0</div>
           </div>
           <div class="stat-item">
             <div class="stat-label">Fuel Spend</div>
-            <div class="stat-val" style="color: #f59e0b;" id="stat-fuel">&#8377;0</div>
+            <div class="stat-val" style="color: #f59e0b;" id="stat-fuel">₹0</div>
           </div>
           <div class="stat-item">
             <div class="stat-label">Maintenance</div>
-            <div class="stat-val" style="color: var(--sky-blue);" id="stat-maint">&#8377;0</div>
+            <div class="stat-val" style="color: var(--sky-blue);" id="stat-maint">₹0</div>
           </div>
         </div>
       </div>
 
       <div class="card-box">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-          <div style="font-weight: 800; font-size: 0.95rem; color: #ffffff;" id="form-heading-title">⚡ Quick Log Entry</div>
+          <div style="font-weight: 800; font-size: 0.95rem; color: #ffffff;" id="form-heading-title">⚡ QUICK LOG ENTRY</div>
           <button id="btn-cancel-edit" class="btn-act hidden" style="color: var(--warning);">✕ Cancel Edit</button>
         </div>
 
@@ -642,7 +692,7 @@
           </button>
           <button class="tab-btn" id="tab-btn-purchase" data-type="purchase">
             <svg style="width:14px;height:14px;fill:currentColor;" viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
-            Buy/RTO
+            RTO/Purchase
           </button>
           <button class="tab-btn" id="tab-btn-expense" data-type="expense">
             <svg style="width:14px;height:14px;fill:currentColor;" viewBox="0 0 24 24"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>
@@ -669,16 +719,15 @@
               <select id="log-category" class="form-control"></select>
             </div>
             <div class="form-group" style="flex: 1;">
-              <label for="log-amount">Amount (&#8377;)</label>
+              <label for="log-amount">Amount (₹)</label>
               <input type="number" step="0.01" id="log-amount" class="form-control" placeholder="0.00" required>
             </div>
           </div>
 
-          <!-- Multi-Partner Strategy Options -->
           <div id="payment-strategy-box" class="form-group">
             <label for="log-payment-mode">Payment Strategy</label>
             <select id="log-payment-mode" class="form-control">
-              <option value="personal">100% Personal Payment (Excl. from Settlement)</option>
+              <option value="personal">100% Personal Payment (Excluded from Settlement)</option>
               <option value="shared_partner">100% Partner Shared Payment (Shared Debt)</option>
               <option value="custom_split">Custom Multi-Partner Cash Split</option>
               <option value="shared_fund">Shared Vehicle Fund / Common Pool</option>
@@ -686,7 +735,7 @@
           </div>
 
           <div id="single-payer-box" class="form-group">
-            <label for="log-single-payer">Paid By</label>
+            <label for="log-single-payer">Paid By Partner</label>
             <select id="log-single-payer" class="form-control"></select>
           </div>
 
@@ -696,7 +745,7 @@
 
           <div class="form-group">
             <label for="log-notes">Notes / Remarks</label>
-            <input type="text" id="log-notes" class="form-control" placeholder="e.g. Down payment, RTO registration, EMI month #3...">
+            <input type="text" id="log-notes" class="form-control" placeholder="e.g. Shell station, full tank, synth oil replacement...">
           </div>
 
           <button type="submit" id="btn-save-log" class="submit-btn">Save Log Entry</button>
@@ -734,7 +783,6 @@
 
     <!-- 3. PROFILE & SPECS TAB -->
     <section id="section-specs" class="app-section">
-      <!-- Document Vault Section -->
       <div class="card-box">
         <div style="font-weight: 800; font-size: 1rem; margin-bottom: 12px; color: #ffffff;">📄 Vehicle Document Vault</div>
         <form id="upload-doc-form">
@@ -784,7 +832,6 @@
             <input type="text" id="prof-vreg" class="form-control" required>
           </div>
 
-          <!-- Dynamic Partner Management -->
           <div style="display: flex; justify-content: space-between; align-items: center; margin: 16px 0 8px 0;">
             <label style="font-size: 0.76rem; color: var(--text-sub); font-weight: 700; text-transform: uppercase;">Partners / Owners</label>
             <button type="button" id="btn-add-partner-field" class="btn-act" style="color: var(--sky-blue); font-weight: 800;">＋ Add Partner</button>
@@ -795,24 +842,23 @@
         </form>
       </div>
 
-      <!-- Vehicle Purchase & Loan Profile Details -->
       <div class="card-box">
         <div style="font-weight: 800; font-size: 1rem; margin-bottom: 12px; color: #ffffff;">🏦 Vehicle Purchase & Finance Setup</div>
         <form id="vehicle-finance-form">
           <div style="display: flex; gap: 8px;">
             <div class="form-group" style="flex: 1;">
-              <label for="fin-exshowroom">Ex-Showroom Price (&#8377;)</label>
+              <label for="fin-exshowroom">Ex-Showroom Price (₹)</label>
               <input type="number" step="0.01" id="fin-exshowroom" class="form-control" placeholder="0.00">
             </div>
             <div class="form-group" style="flex: 1;">
-              <label for="fin-downpayment">Down Payment (&#8377;)</label>
+              <label for="fin-downpayment">Down Payment (₹)</label>
               <input type="number" step="0.01" id="fin-downpayment" class="form-control" placeholder="0.00">
             </div>
           </div>
 
           <div style="display: flex; gap: 8px;">
             <div class="form-group" style="flex: 1;">
-              <label for="fin-loan-amt">Loan Amount (&#8377;)</label>
+              <label for="fin-loan-amt">Loan Amount (₹)</label>
               <input type="number" step="0.01" id="fin-loan-amt" class="form-control" placeholder="0.00">
             </div>
             <div class="form-group" style="flex: 1;">
@@ -823,7 +869,7 @@
 
           <div style="display: flex; gap: 8px;">
             <div class="form-group" style="flex: 1;">
-              <label for="fin-monthly-emi">Monthly EMI (&#8377;)</label>
+              <label for="fin-monthly-emi">Monthly EMI (₹)</label>
               <input type="number" step="0.01" id="fin-monthly-emi" class="form-control" placeholder="0.00">
             </div>
             <div class="form-group" style="flex: 1;">
@@ -888,13 +934,12 @@
     <section id="section-finance" class="app-section">
       <div class="card-box">
         <div style="font-weight: 800; font-size: 1rem; margin-bottom: 12px; color: #ffffff;">🏛️ Total Running & Purchase Spend</div>
-        <div class="list-card"><span>Total Running Expenses</span><span class="card-amt" id="fin-summary-total">&#8377;0</span></div>
-        <div class="list-card"><span>Purchase / RTO / Finance</span><span class="card-amt" id="fin-summary-purchase">&#8377;0</span></div>
-        <div class="list-card"><span>Fuel Cost</span><span class="card-amt" id="fin-summary-fuel">&#8377;0</span></div>
-        <div class="list-card"><span>Services & Maintenance</span><span class="card-amt" id="fin-summary-maint">&#8377;0</span></div>
+        <div class="list-card"><span>Total Running Expenses</span><span class="card-amt" id="fin-summary-total">₹0</span></div>
+        <div class="list-card"><span>Purchase / RTO / Finance</span><span class="card-amt" id="fin-summary-purchase">₹0</span></div>
+        <div class="list-card"><span>Fuel Cost</span><span class="card-amt" id="fin-summary-fuel">₹0</span></div>
+        <div class="list-card"><span>Services & Maintenance</span><span class="card-amt" id="fin-summary-maint">₹0</span></div>
       </div>
 
-      <!-- Vehicle Finance Overview Card -->
       <div class="card-box">
         <div style="font-weight: 800; font-size: 1rem; margin-bottom: 12px; color: #ffffff;">📋 Purchase & Loan Overview</div>
         <div id="vehicle-finance-summary-box"></div>
@@ -916,7 +961,7 @@
 
   </main>
 
-  <!-- Navigation Bar -->
+  <!-- Bottom Navigation -->
   <nav class="bottom-nav">
     <a id="nav-quick-entry" class="nav-item active" data-target="quick-entry">
       <svg class="nav-icon" viewBox="0 0 24 24"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg>
@@ -956,7 +1001,6 @@
     });
 
     function bindEvents() {
-      // Bottom Nav Item switching
       document.querySelectorAll('.bottom-nav .nav-item').forEach(item => {
         item.addEventListener('click', function(e) {
           e.preventDefault();
@@ -965,16 +1009,13 @@
         });
       });
 
-      // Quick log type tabs
       document.getElementById('tab-btn-fuel').addEventListener('click', function() { setLogType('fuel'); });
       document.getElementById('tab-btn-maint').addEventListener('click', function() { setLogType('maintenance'); });
       document.getElementById('tab-btn-purchase').addEventListener('click', function() { setLogType('purchase'); });
       document.getElementById('tab-btn-expense').addEventListener('click', function() { setLogType('expense'); });
 
-      // Payment strategy change
       document.getElementById('log-payment-mode').addEventListener('change', togglePaymentUI);
 
-      // Forms
       document.getElementById('quick-log-form').addEventListener('submit', saveLogEntry);
       document.getElementById('add-category-form').addEventListener('submit', addCategoryHandler);
       document.getElementById('vehicle-profile-form').addEventListener('submit', saveVehicleProfile);
@@ -983,7 +1024,6 @@
       document.getElementById('add-spec-form').addEventListener('submit', addTechnicalSpec);
       document.getElementById('upload-photo-form').addEventListener('submit', uploadPhotoHandler);
 
-      // Header Actions & Modal
       document.getElementById('vehicle-select').addEventListener('change', switchVehicle);
       document.getElementById('btn-add-vehicle').addEventListener('click', addVehiclePrompt);
       document.getElementById('btn-delete-vehicle').addEventListener('click', deleteVehicleHandler);
@@ -1007,8 +1047,10 @@
       const activeV = document.getElementById('vehicle-select').value || 'v1';
       const vList = JSON.parse(localStorage.getItem('vh_vehicles') || '[]');
       const target = vList.find(v => v.id === activeV);
-      if(!target || !target.partners) return ['Mansoor'];
-      return target.partners.map(p => p.trim()).filter(p => p !== '' && p.toLowerCase() !== 'no');
+      if(!target || !target.partners || target.partners.length === 0) return ['Mansoor'];
+      
+      const cleanPartners = target.partners.map(p => p.trim()).filter(p => p !== '' && p.toLowerCase() !== 'no' && p.toLowerCase() !== 'undefined');
+      return cleanPartners.length > 0 ? cleanPartners : ['Mansoor'];
     }
 
     function initVehicles() {
@@ -1019,7 +1061,7 @@
       }
 
       vList.forEach(v => {
-        if(!v.partners) {
+        if(!v.partners || v.partners.length === 0) {
           v.partners = [];
           if(v.p1) v.partners.push(v.p1);
           if(v.p2 && v.p2.toLowerCase() !== 'no') v.partners.push(v.p2);
@@ -1120,7 +1162,7 @@
         const div = document.createElement('div');
         div.className = 'form-group';
         div.innerHTML = `
-          <label for="split-amt-${idx}">${p} Contribution</label>
+          <label for="split-amt-${idx}">${p} Contribution (₹)</label>
           <input type="number" step="0.01" id="split-amt-${idx}" data-partner="${p}" class="form-control split-partner-input" placeholder="0.00">
         `;
         splitContainer.appendChild(div);
@@ -1139,7 +1181,7 @@
     function deleteVehicleHandler() {
       let vList = JSON.parse(localStorage.getItem('vh_vehicles') || '[]');
       if(vList.length <= 1) {
-        alert('⚠️️ Security Alert: Cannot delete the primary vehicle profile.');
+        alert('⚠️ Security Alert: Cannot delete the primary vehicle profile.');
         return;
       }
 
@@ -1275,7 +1317,6 @@
       }
     }
 
-    /* Document Vault Upload */
     function uploadDocHandler(e) {
       e.preventDefault();
       const activeV = document.getElementById('vehicle-select').value || 'v1';
@@ -1450,10 +1491,10 @@
       } else {
         const mode = document.getElementById('log-payment-mode').value;
         if(mode === 'personal') {
-          const p = document.getElementById('log-single-payer').value;
+          const p = document.getElementById('log-single-payer').value || partners[0];
           pDetails = { mode, payer: p, text: `100% Personal (${p})` };
         } else if(mode === 'shared_partner') {
-          const p = document.getElementById('log-single-payer').value;
+          const p = document.getElementById('log-single-payer').value || partners[0];
           pDetails = { mode, payer: p, text: `Shared Debt (${p})` };
         } else if(mode === 'custom_split') {
           const customSplits = {};
@@ -1462,7 +1503,7 @@
             const pName = inp.getAttribute('data-partner');
             const val = Number(inp.value) || 0;
             customSplits[pName] = val;
-            textParts.push(`${pName}: &#8377;${val}`);
+            textParts.push(`${pName}: ₹${val}`);
           });
           pDetails = { mode, splits: customSplits, text: `Split: ${textParts.join(' / ')}` };
         } else {
@@ -1521,7 +1562,7 @@
         }
       }
 
-      document.getElementById('form-heading-title').textContent = '✏️ Edit Log Entry';
+      document.getElementById('form-heading-title').textContent = '✏️ EDIT LOG ENTRY';
       document.getElementById('btn-save-log').textContent = 'Update Log Entry';
       document.getElementById('btn-cancel-edit').classList.remove('hidden');
 
@@ -1533,7 +1574,7 @@
       document.getElementById('editing-log-id').value = '';
       document.getElementById('quick-log-form').reset();
       document.getElementById('log-date').valueAsDate = new Date();
-      document.getElementById('form-heading-title').textContent = '⚡ Quick Log Entry';
+      document.getElementById('form-heading-title').textContent = '⚡ QUICK LOG ENTRY';
       document.getElementById('btn-save-log').textContent = 'Save Log Entry';
       document.getElementById('btn-cancel-edit').classList.add('hidden');
       togglePaymentUI();
@@ -1588,7 +1629,7 @@
             <div style="font-size:0.72rem; color:var(--sky-blue); margin-top:2px;">${pd.text || 'Log Entry'}</div>
           </div>
           <div style="text-align:right;">
-            <div class="card-amt">&#8377;${amt.toLocaleString()}</div>
+            <div class="card-amt">₹${amt.toLocaleString()}</div>
           </div>
         `;
 
@@ -1615,14 +1656,14 @@
       });
 
       document.getElementById('v-odo-val').textContent = maxOdo.toLocaleString();
-      document.getElementById('stat-total').innerHTML = '&#8377;' + total.toLocaleString();
-      document.getElementById('stat-fuel').innerHTML = '&#8377;' + fuel.toLocaleString();
-      document.getElementById('stat-maint').innerHTML = '&#8377;' + maint.toLocaleString();
+      document.getElementById('stat-total').innerHTML = '₹' + total.toLocaleString();
+      document.getElementById('stat-fuel').innerHTML = '₹' + fuel.toLocaleString();
+      document.getElementById('stat-maint').innerHTML = '₹' + maint.toLocaleString();
 
-      document.getElementById('fin-summary-total').innerHTML = '&#8377;' + total.toLocaleString();
-      document.getElementById('fin-summary-purchase').innerHTML = '&#8377;' + purchaseSpend.toLocaleString();
-      document.getElementById('fin-summary-fuel').innerHTML = '&#8377;' + fuel.toLocaleString();
-      document.getElementById('fin-summary-maint').innerHTML = '&#8377;' + maint.toLocaleString();
+      document.getElementById('fin-summary-total').innerHTML = '₹' + total.toLocaleString();
+      document.getElementById('fin-summary-purchase').innerHTML = '₹' + purchaseSpend.toLocaleString();
+      document.getElementById('fin-summary-fuel').innerHTML = '₹' + fuel.toLocaleString();
+      document.getElementById('fin-summary-maint').innerHTML = '₹' + maint.toLocaleString();
 
       renderFinanceSummaryCard();
 
@@ -1632,7 +1673,7 @@
       if(partners.length <= 1) {
         ledgerContainer.innerHTML = `
           <div style="background:#0b0f17; padding:14px; border-radius:10px; border: 1px solid var(--card-border); text-align:center; color: var(--text-sub); font-size:0.85rem;">
-            👤 Solo Vehicle Ownership Mode.<br>Settlement calculations are disabled.
+            👤 Solo Vehicle Ownership Mode.<br>Settlement calculations disabled.
           </div>
         `;
       } else {
@@ -1641,7 +1682,7 @@
         partners.forEach(p => {
           const sAmt = sharedContrib[p] || 0;
           totalSharedSpent += sAmt;
-          summaryRows += `<div class="list-card"><span>${p} Shared Paid:</span><span>&#8377;${sAmt.toLocaleString()}</span></div>`;
+          summaryRows += `<div class="list-card"><span>${p} Shared Paid:</span><span>₹${sAmt.toLocaleString()}</span></div>`;
         });
 
         const perPartnerTarget = totalSharedSpent / partners.length;
@@ -1650,9 +1691,9 @@
         partners.forEach(p => {
           const diff = (sharedContrib[p] || 0) - perPartnerTarget;
           if(diff > 0.01) {
-            settlementMatrixHTML += `<div style="margin-bottom:4px;">🟢 <strong>${p}</strong> is owed: <span style="color:var(--sky-blue); font-weight:800;">&#8377;${diff.toLocaleString()}</span></div>`;
+            settlementMatrixHTML += `<div style="margin-bottom:4px;">🟢 <strong>${p}</strong> is owed: <span style="color:var(--sky-blue); font-weight:800;">₹${diff.toLocaleString()}</span></div>`;
           } else if(diff < -0.01) {
-            settlementMatrixHTML += `<div style="margin-bottom:4px;">💸 <strong>${p}</strong> owes: <span style="color:var(--warning); font-weight:800;">&#8377;${Math.abs(diff).toLocaleString()}</span></div>`;
+            settlementMatrixHTML += `<div style="margin-bottom:4px;">💸 <strong>${p}</strong> owes: <span style="color:var(--warning); font-weight:800;">₹${Math.abs(diff).toLocaleString()}</span></div>`;
           } else {
             settlementMatrixHTML += `<div style="margin-bottom:4px;">⚖️ <strong>${p}</strong> is balanced.</div>`;
           }
@@ -1662,7 +1703,7 @@
           <div style="background:#0b0f17; padding:12px; border-radius:10px; margin-bottom:10px; border: 1px solid var(--card-border);">
             ${summaryRows}
             <div style="font-size:0.74rem; color:var(--text-sub); margin-top:6px;">
-              Excl. Personal Trips: ${partners.map(p => `${p} (&#8377;${(personalContrib[p] || 0).toLocaleString()})`).join(', ')}
+              Excl. Personal Trips: ${partners.map(p => `${p} (₹${(personalContrib[p] || 0).toLocaleString()})`).join(', ')}
             </div>
           </div>
           <div style="background:rgba(56,189,248,0.1); border:1px solid var(--sky-blue); padding:12px; border-radius:10px; font-size:0.85rem;">
@@ -1695,11 +1736,11 @@
       const fin = target.financeDetails;
       container.innerHTML = `
         <div style="background:#0b0f17; padding:12px; border-radius:10px; border: 1px solid var(--card-border);">
-          <div class="list-card"><span>Ex-Showroom Price</span><span style="font-weight:800;">&#8377;${Number(fin.exShowroom || 0).toLocaleString()}</span></div>
-          <div class="list-card"><span>Down Payment Paid</span><span style="font-weight:800; color:var(--success);">&#8377;${Number(fin.downPayment || 0).toLocaleString()}</span></div>
-          <div class="list-card"><span>Loan Amount Financed</span><span style="font-weight:800; color:var(--sky-blue);">&#8377;${Number(fin.loanAmt || 0).toLocaleString()}</span></div>
+          <div class="list-card"><span>Ex-Showroom Price</span><span style="font-weight:800;">₹${Number(fin.exShowroom || 0).toLocaleString()}</span></div>
+          <div class="list-card"><span>Down Payment Paid</span><span style="font-weight:800; color:var(--success);">₹${Number(fin.downPayment || 0).toLocaleString()}</span></div>
+          <div class="list-card"><span>Loan Amount Financed</span><span style="font-weight:800; color:var(--sky-blue);">₹${Number(fin.loanAmt || 0).toLocaleString()}</span></div>
           <div class="list-card"><span>Financier / Bank</span><span style="font-weight:800;">${fin.bankName || 'N/A'}</span></div>
-          <div class="list-card"><span>Monthly EMI / Tenure</span><span style="font-weight:800; color:var(--warning);">&#8377;${Number(fin.monthlyEmi || 0).toLocaleString()} / ${fin.tenureMonths || 0} Mos</span></div>
+          <div class="list-card"><span>Monthly EMI / Tenure</span><span style="font-weight:800; color:var(--warning);">₹${Number(fin.monthlyEmi || 0).toLocaleString()} / ${fin.tenureMonths || 0} Mos</span></div>
         </div>
       `;
     }
@@ -1728,7 +1769,7 @@
         const updatedPartners = [];
         partnerInputs.forEach(inp => {
           const val = inp.value.trim();
-          if(val !== '') updatedPartners.push(val);
+          if(val !== '' && val.toLowerCase() !== 'undefined') updatedPartners.push(val);
         });
 
         target.partners = updatedPartners.length > 0 ? updatedPartners : ['Mansoor'];
