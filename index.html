@@ -11,6 +11,7 @@
       --bg-color: #0b0f17;
       --card-bg: #131b2a;
       --card-border: #1e293b;
+      --card-hover: #1e293b;
       --text-main: #f8fafc;
       --text-sub: #94a3b8;
       --sky-blue: #38bdf8;
@@ -384,6 +385,12 @@
       font-size: 0.95rem;
     }
 
+    .action-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
     .btn-act {
       background: transparent;
       border: none;
@@ -391,6 +398,12 @@
       color: var(--text-sub);
       padding: 4px 6px;
       font-size: 0.85rem;
+      border-radius: 6px;
+    }
+
+    .btn-act:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: #ffffff;
     }
 
     .photo-grid {
@@ -460,6 +473,7 @@
     <div class="header-actions">
       <select id="vehicle-select" class="vehicle-selector"></select>
       <button id="btn-add-vehicle" class="btn-icon-head" title="Add Vehicle">＋</button>
+      <button id="btn-delete-vehicle" class="btn-icon-head" title="Delete Vehicle" style="color: var(--danger);">🗑️</button>
     </div>
   </header>
 
@@ -502,7 +516,8 @@
 
       <div class="card-box">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-          <div style="font-weight: 800; font-size: 0.95rem; color: #ffffff;">⚡ Quick Log Entry</div>
+          <div style="font-weight: 800; font-size: 0.95rem; color: #ffffff;" id="form-heading-title">⚡ Quick Log Entry</div>
+          <button id="btn-cancel-edit" class="btn-act hidden" style="color: var(--warning);">✕ Cancel Edit</button>
         </div>
 
         <div class="log-tabs">
@@ -521,6 +536,7 @@
         </div>
 
         <form id="quick-log-form">
+          <input type="hidden" id="editing-log-id" value="">
           <div style="display: flex; gap: 8px;">
             <div class="form-group" style="flex: 1;">
               <label for="log-date">Date</label>
@@ -574,7 +590,7 @@
             <input type="text" id="log-notes" class="form-control" placeholder="e.g. Fuel station, oil filter change details...">
           </div>
 
-          <button type="submit" class="submit-btn">Save Log Entry</button>
+          <button type="submit" id="btn-save-log" class="submit-btn">Save Log Entry</button>
         </form>
       </div>
     </section>
@@ -743,7 +759,7 @@
     });
 
     function bindEvents() {
-      // Nav item tab switching
+      // Bottom Nav Item switching
       document.querySelectorAll('.bottom-nav .nav-item').forEach(item => {
         item.addEventListener('click', function(e) {
           e.preventDefault();
@@ -752,7 +768,7 @@
         });
       });
 
-      // Segmented quick log tab buttons
+      // Quick log type tabs
       document.getElementById('tab-btn-fuel').addEventListener('click', function() { setLogType('fuel'); });
       document.getElementById('tab-btn-maint').addEventListener('click', function() { setLogType('maintenance'); });
       document.getElementById('tab-btn-expense').addEventListener('click', function() { setLogType('expense'); });
@@ -767,10 +783,12 @@
       document.getElementById('add-spec-form').addEventListener('submit', addTechnicalSpec);
       document.getElementById('upload-photo-form').addEventListener('submit', uploadPhotoHandler);
 
-      // Header buttons
+      // Actions
       document.getElementById('vehicle-select').addEventListener('change', switchVehicle);
       document.getElementById('btn-add-vehicle').addEventListener('click', addVehiclePrompt);
+      document.getElementById('btn-delete-vehicle').addEventListener('click', deleteVehicleHandler);
       document.getElementById('btn-share-specs').addEventListener('click', shareFullSpecs);
+      document.getElementById('btn-cancel-edit').addEventListener('click', cancelEditHandler);
     }
 
     function initApp() {
@@ -787,6 +805,7 @@
         localStorage.setItem('vh_vehicles', JSON.stringify(vList));
       }
       const select = document.getElementById('vehicle-select');
+      const currentSelected = select.value || vList[0].id;
       select.innerHTML = '';
       vList.forEach(v => {
         const opt = document.createElement('option');
@@ -795,7 +814,9 @@
         select.appendChild(opt);
       });
 
-      const active = vList[0];
+      select.value = vList.some(v => v.id === currentSelected) ? currentSelected : vList[0].id;
+      const active = vList.find(v => v.id === select.value) || vList[0];
+
       document.getElementById('v-name-display').textContent = active.name;
       document.getElementById('v-plate-display').textContent = active.reg;
       document.getElementById('prof-vname').value = active.name;
@@ -810,6 +831,25 @@
       `;
       document.getElementById('lbl-split-a').textContent = `${active.p1} Contribution`;
       document.getElementById('lbl-split-b').textContent = `${active.p2} Contribution`;
+    }
+
+    function deleteVehicleHandler() {
+      let vList = JSON.parse(localStorage.getItem('vh_vehicles') || '[]');
+      if(vList.length <= 1) {
+        alert('⚠️ Security Alert: Cannot delete the primary vehicle profile. At least one vehicle must remain.');
+        return;
+      }
+
+      const activeV = document.getElementById('vehicle-select').value;
+      const target = vList.find(v => v.id === activeV);
+
+      if(confirm(`🔒 SECURITY CONFIRMATION:\nAre you sure you want to permanently delete vehicle "${target.name} (${target.reg})"?\nAll associated history logs will remain accessible.`)) {
+        vList = vList.filter(v => v.id !== activeV);
+        localStorage.setItem('vh_vehicles', JSON.stringify(vList));
+        initVehicles();
+        loadDataAndUI();
+        alert('✅ Vehicle profile deleted.');
+      }
     }
 
     function togglePaymentUI() {
@@ -868,12 +908,22 @@
           item.className = 'list-card';
           item.innerHTML = `<span>${t.toUpperCase()} - ${c}</span>`;
           
+          const actions = document.createElement('div');
+          actions.className = 'action-group';
+
+          const editBtn = document.createElement('button');
+          editBtn.className = 'btn-act';
+          editBtn.textContent = '✏️';
+          editBtn.addEventListener('click', function() { editCategory(t, idx); });
+          actions.appendChild(editBtn);
+
           const delBtn = document.createElement('button');
           delBtn.className = 'btn-act';
           delBtn.textContent = '🗑️';
           delBtn.addEventListener('click', function() { deleteCategory(t, idx); });
-          item.appendChild(delBtn);
+          actions.appendChild(delBtn);
 
+          item.appendChild(actions);
           container.appendChild(item);
         });
       });
@@ -893,19 +943,35 @@
       document.getElementById('cat-name-input').value = '';
       renderCategoryList();
       populateCategoryDropdown(activeLogType);
-      alert('Category added successfully!');
+      alert('✅ Category added!');
+    }
+
+    function editCategory(type, idx) {
+      const cats = JSON.parse(localStorage.getItem('vh_categories') || '{}');
+      const current = cats[type][idx];
+      const updated = prompt('Edit Category Name:', current);
+      if(updated && updated.trim() !== '') {
+        cats[type][idx] = updated.trim();
+        localStorage.setItem('vh_categories', JSON.stringify(cats));
+        renderCategoryList();
+        populateCategoryDropdown(activeLogType);
+      }
     }
 
     function deleteCategory(type, idx) {
       const cats = JSON.parse(localStorage.getItem('vh_categories') || '{}');
-      cats[type].splice(idx, 1);
-      localStorage.setItem('vh_categories', JSON.stringify(cats));
-      renderCategoryList();
-      populateCategoryDropdown(activeLogType);
+      const name = cats[type][idx];
+      if(confirm(`🔒 SECURITY CONFIRMATION:\nAre you sure you want to delete category "${name}"?`)) {
+        cats[type].splice(idx, 1);
+        localStorage.setItem('vh_categories', JSON.stringify(cats));
+        renderCategoryList();
+        populateCategoryDropdown(activeLogType);
+      }
     }
 
     function saveLogEntry(e) {
       e.preventDefault();
+      const editingId = document.getElementById('editing-log-id').value;
       const activeV = document.getElementById('vehicle-select').value || 'v1';
       const odo = document.getElementById('log-odometer').value;
       const amt = Number(document.getElementById('log-amount').value);
@@ -932,18 +998,73 @@
         pDetails = { mode, text: `Shared Fund Pool` };
       }
 
-      const newLog = { id: Date.now(), vehicleId: activeV, type: activeLogType, date, odo, cat, amt, notes, pDetails };
-
       let logs = JSON.parse(localStorage.getItem('vh_logs') || '[]');
-      logs.unshift(newLog);
+
+      if(editingId) {
+        // Update Existing Record
+        const logIndex = logs.findIndex(l => l.id == editingId);
+        if(logIndex !== -1) {
+          logs[logIndex] = { id: Number(editingId), vehicleId: activeV, type: activeLogType, date, odo, cat, amt, notes, pDetails };
+          alert('✅ Log entry updated successfully!');
+        }
+      } else {
+        // Create New Record
+        const newLog = { id: Date.now(), vehicleId: activeV, type: activeLogType, date, odo, cat, amt, notes, pDetails };
+        logs.unshift(newLog);
+        alert('✅ Log entry saved successfully!');
+      }
+
       localStorage.setItem('vh_logs', JSON.stringify(logs));
-
-      document.getElementById('v-odo-val').textContent = Number(odo).toLocaleString();
-      e.target.reset();
-      document.getElementById('log-date').valueAsDate = new Date();
-
+      cancelEditHandler();
       loadDataAndUI();
-      alert('Entry saved successfully!');
+    }
+
+    function editLogEntry(id) {
+      const logs = JSON.parse(localStorage.getItem('vh_logs') || '[]');
+      const target = logs.find(l => l.id == id);
+      if(!target) return;
+
+      // Populate Form
+      document.getElementById('editing-log-id').value = target.id;
+      document.getElementById('log-date').value = target.date;
+      document.getElementById('log-odometer').value = target.odo;
+      document.getElementById('log-amount').value = target.amt;
+      document.getElementById('log-notes').value = target.notes || '';
+
+      setLogType(target.type || 'fuel');
+      populateCategoryDropdown(target.type || 'fuel');
+      document.getElementById('log-category').value = target.cat;
+
+      const pd = target.pDetails || {};
+      const mode = pd.mode || 'personal';
+      document.getElementById('log-payment-mode').value = mode;
+      togglePaymentUI();
+
+      if(mode === 'personal' || mode === 'shared_partner') {
+        if(pd.payer) document.getElementById('log-single-payer').value = pd.payer;
+      } else if(mode === 'custom_split') {
+        document.getElementById('split-amt-a').value = pd.amtA || '';
+        document.getElementById('split-amt-b').value = pd.amtB || '';
+      }
+
+      // UI Indicators
+      document.getElementById('form-heading-title').textContent = '✏️ Edit Log Entry';
+      document.getElementById('btn-save-log').textContent = 'Update Log Entry';
+      document.getElementById('btn-cancel-edit').classList.remove('hidden');
+
+      // Scroll to form
+      switchTab('quick-entry', document.getElementById('nav-quick-entry'));
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function cancelEditHandler() {
+      document.getElementById('editing-log-id').value = '';
+      document.getElementById('quick-log-form').reset();
+      document.getElementById('log-date').valueAsDate = new Date();
+      document.getElementById('form-heading-title').textContent = '⚡ Quick Log Entry';
+      document.getElementById('btn-save-log').textContent = 'Save Log Entry';
+      document.getElementById('btn-cancel-edit').classList.add('hidden');
+      togglePaymentUI();
     }
 
     function loadDataAndUI() {
@@ -952,7 +1073,7 @@
       const vList = JSON.parse(localStorage.getItem('vh_vehicles') || '[]');
       const veh = vList.find(v => v.id === activeV) || { p1: 'Mansoor', p2: 'Partner 2' };
 
-      let total = 0, fuel = 0, maint = 0;
+      let total = 0, fuel = 0, maint = 0, maxOdo = 0;
       let sharedA = 0, sharedB = 0, personalA = 0, personalB = 0;
 
       const historyContainer = document.getElementById('logs-history-container');
@@ -960,6 +1081,9 @@
 
       logs.forEach(l => {
         const amt = Number(l.amt) || 0;
+        const currentOdo = Number(l.odo) || 0;
+        if(currentOdo > maxOdo) maxOdo = currentOdo;
+
         total += amt;
         if(l.type === 'fuel') fuel += amt;
         else if(l.type === 'maintenance') maint += amt;
@@ -989,16 +1113,30 @@
           </div>
         `;
 
+        const actions = document.createElement('div');
+        actions.className = 'action-group';
+        actions.style.marginTop = '4px';
+
+        const editBtn = document.createElement('button');
+        editBtn.className = 'btn-act';
+        editBtn.textContent = '✏️';
+        editBtn.title = 'Edit Log Record';
+        editBtn.addEventListener('click', function() { editLogEntry(l.id); });
+        actions.appendChild(editBtn);
+
         const delBtn = document.createElement('button');
         delBtn.className = 'btn-act';
         delBtn.textContent = '🗑️';
+        delBtn.title = 'Delete Log Record';
         delBtn.addEventListener('click', function() { deleteLogEntry(l.id); });
-        card.querySelector('div:nth-child(2)').appendChild(delBtn);
+        actions.appendChild(delBtn);
 
+        card.querySelector('div:nth-child(2)').appendChild(actions);
         historyContainer.appendChild(card);
       });
 
-      // Stats Update
+      // Update Header Stats
+      document.getElementById('v-odo-val').textContent = maxOdo.toLocaleString();
       document.getElementById('stat-total').innerHTML = '&#8377;' + total.toLocaleString();
       document.getElementById('stat-fuel').innerHTML = '&#8377;' + fuel.toLocaleString();
       document.getElementById('stat-maint').innerHTML = '&#8377;' + maint.toLocaleString();
@@ -1040,11 +1178,12 @@
     }
 
     function deleteLogEntry(id) {
-      if(confirm('Delete log entry?')) {
+      if(confirm('🔒 SECURITY CONFIRMATION:\nAre you sure you want to permanently delete this log entry?')) {
         let logs = JSON.parse(localStorage.getItem('vh_logs') || '[]');
-        logs = logs.filter(l => l.id !== id);
+        logs = logs.filter(l => l.id != id);
         localStorage.setItem('vh_logs', JSON.stringify(logs));
         loadDataAndUI();
+        alert('✅ Log entry deleted.');
       }
     }
 
@@ -1061,7 +1200,7 @@
         target.p2 = document.getElementById('prof-p2').value || 'Partner 2';
         localStorage.setItem('vh_vehicles', JSON.stringify(vList));
         initVehicles();
-        alert('Profile Updated Successfully!');
+        alert('✅ Vehicle Profile Updated!');
       }
     }
 
@@ -1098,12 +1237,22 @@
           item.className = 'list-card';
           item.innerHTML = `<span>${i.key}: <strong>${i.val}</strong></span>`;
           
+          const actions = document.createElement('div');
+          actions.className = 'action-group';
+
+          const editBtn = document.createElement('button');
+          editBtn.className = 'btn-act';
+          editBtn.textContent = '✏️';
+          editBtn.addEventListener('click', function() { editSpec(group, i.id); });
+          actions.appendChild(editBtn);
+
           const delBtn = document.createElement('button');
           delBtn.className = 'btn-act';
           delBtn.textContent = '🗑️';
           delBtn.addEventListener('click', function() { deleteSpec(group, i.id); });
-          item.appendChild(delBtn);
+          actions.appendChild(delBtn);
 
+          item.appendChild(actions);
           box.appendChild(item);
         });
 
@@ -1111,13 +1260,29 @@
       });
     }
 
-    function deleteSpec(group, id) {
+    function editSpec(group, id) {
       const activeV = document.getElementById('vehicle-select').value || 'v1';
       let specs = JSON.parse(localStorage.getItem(`vh_specs_${activeV}`) || '{}');
-      specs[group] = specs[group].filter(i => i.id !== id);
-      if(specs[group].length === 0) delete specs[group];
-      localStorage.setItem(`vh_specs_${activeV}`, JSON.stringify(specs));
-      renderSpecsUI();
+      const target = specs[group].find(i => i.id == id);
+      if(!target) return;
+
+      const newVal = prompt(`Edit value for "${target.key}":`, target.val);
+      if(newVal && newVal.trim() !== '') {
+        target.val = newVal.trim();
+        localStorage.setItem(`vh_specs_${activeV}`, JSON.stringify(specs));
+        renderSpecsUI();
+      }
+    }
+
+    function deleteSpec(group, id) {
+      if(confirm('🔒 SECURITY CONFIRMATION:\nDelete this technical spec entry?')) {
+        const activeV = document.getElementById('vehicle-select').value || 'v1';
+        let specs = JSON.parse(localStorage.getItem(`vh_specs_${activeV}`) || '{}');
+        specs[group] = specs[group].filter(i => i.id != id);
+        if(specs[group].length === 0) delete specs[group];
+        localStorage.setItem(`vh_specs_${activeV}`, JSON.stringify(specs));
+        renderSpecsUI();
+      }
     }
 
     function shareFullSpecs() {
@@ -1178,10 +1343,12 @@
     }
 
     function deletePhoto(id) {
-      let photos = JSON.parse(localStorage.getItem('vh_photos') || '[]');
-      photos = photos.filter(p => p.id !== id);
-      localStorage.setItem('vh_photos', JSON.stringify(photos));
-      renderPhotosUI();
+      if(confirm('🔒 SECURITY CONFIRMATION:\nDelete this gallery photo?')) {
+        let photos = JSON.parse(localStorage.getItem('vh_photos') || '[]');
+        photos = photos.filter(p => p.id != id);
+        localStorage.setItem('vh_photos', JSON.stringify(photos));
+        renderPhotosUI();
+      }
     }
 
     function switchTab(target, elem) {
