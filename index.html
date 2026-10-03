@@ -33,15 +33,15 @@
       </div>
     </div>
 
-    <!-- Animated Forward Vehicle with Exhaust Particles -->
+    <!-- Forward Moving Vehicle Track -->
     <div class="vehicle-animation-track">
       <div class="vehicle-assembly">
+        <div class="car-body">🚗</div>
         <div class="smoke-container">
           <div class="smoke-puff"></div>
           <div class="smoke-puff"></div>
           <div class="smoke-puff"></div>
         </div>
-        <div class="car-body">🚗</div>
       </div>
     </div>
 
@@ -107,7 +107,6 @@
         </div>
       </div>
 
-      <!-- Dynamic Dual-Interval Tracker (KM & Days) -->
       <div class="card-box">
         <div style="font-weight: 800; font-size: 0.95rem; color: #ffffff; margin-bottom: 10px;">⚙️ Service & Check Interval Tracker</div>
         <div id="service-reminder-box"></div>
@@ -150,7 +149,6 @@
             </div>
           </div>
 
-          <!-- Fuel Liters Input for Mileage Calculation -->
           <div id="fuel-liters-box" class="form-group">
             <label for="log-fuel-liters">Fuel Volume (Liters)</label>
             <input type="number" step="0.01" id="log-fuel-liters" class="form-control" placeholder="e.g. 35.5 (For Mileage Calc)">
@@ -208,7 +206,7 @@
       </div>
 
       <div class="card-box">
-        <div style="font-weight: 800; font-size: 1rem; margin-bottom: 12px; color: #ffffff;">🏷️️ Active Categories</div>
+        <div style="font-weight: 800; font-size: 1rem; margin-bottom: 12px; color: #ffffff;">🏷️ Active Categories</div>
         <div id="category-list"></div>
       </div>
     </section>
@@ -274,7 +272,6 @@
         </form>
       </div>
 
-      <!-- Specs Form with Dual Intervals: KM and Days -->
       <div class="card-box">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
           <div style="font-weight: 800; font-size: 1rem; color: #ffffff;">🛠️ Dynamic Technical Specs</div>
@@ -311,7 +308,7 @@
       </div>
 
       <div class="card-box">
-        <div style="font-weight: 800; font-size: 1rem; margin-bottom: 12px; color: #ffffff;">🖼️️ Gallery Photos</div>
+        <div style="font-weight: 800; font-size: 1rem; margin-bottom: 12px; color: #ffffff;">🖼️ Gallery Photos</div>
         <form id="upload-photo-form">
           <div class="form-group">
             <label for="photo-angle">Angle / View</label>
@@ -394,7 +391,7 @@
       </div>
     </section>
 
-    <!-- 5. HISTORY LOGS TAB WITH CSV & PDF EXPORTS -->
+    <!-- 5. HISTORY LOGS TAB WITH DYNAMIC FILTERED TOTAL SUMMARY -->
     <section id="section-logs" class="app-section">
       <div class="card-box">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
@@ -428,6 +425,12 @@
               </select>
             </div>
           </div>
+        </div>
+
+        <!-- Filtered Content Summary Total Banner -->
+        <div id="filtered-logs-summary-bar" style="background: rgba(56, 189, 248, 0.12); border: 1px solid var(--sky-blue); padding: 10px 14px; border-radius: 10px; margin-top: 12px; display: flex; justify-content: space-between; align-items: center;">
+          <div style="font-size: 0.82rem; color: var(--text-sub);" id="filtered-logs-count-label">Showing 0 entries</div>
+          <div style="font-size: 0.95rem; font-weight: 900; color: #ffffff;">Filtered Total: <span id="filtered-logs-total-val" style="color: var(--sky-blue);">₹0</span></div>
         </div>
 
         <div id="logs-history-container" style="margin-top: 12px;"></div>

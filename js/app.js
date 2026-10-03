@@ -653,6 +653,16 @@ function loadDataAndUI() {
     return matchesType && matchesSearch;
   });
 
+  // Calculate Live Total for Filtered Results
+  let filteredTotalAmount = 0;
+  filteredLogs.forEach(l => {
+    filteredTotalAmount += Number(l.amt) || 0;
+  });
+
+  // Update Summary Bar Elements above history list
+  document.getElementById('filtered-logs-count-label').textContent = `Showing ${filteredLogs.length} entry/entries`;
+  document.getElementById('filtered-logs-total-val').textContent = `₹${filteredTotalAmount.toLocaleString()}`;
+
   // Sort Logs
   filteredLogs.sort((a, b) => {
     if(sortFilter === 'newest') return new Date(b.date) - new Date(a.date);
@@ -773,7 +783,6 @@ function loadDataAndUI() {
   updateNotificationsSystem();
 }
 
-/* Dynamic Service & Dual-Interval Tracker (KM & Days) */
 function renderServiceRemindersUI(currentOdo, logs) {
   const activeV = document.getElementById('vehicle-select').value || 'v1';
   const box = document.getElementById('service-reminder-box');
@@ -781,7 +790,6 @@ function renderServiceRemindersUI(currentOdo, logs) {
 
   let intervalItems = [];
 
-  // Gather dynamic check items from Technical Specs
   Object.keys(specs).forEach(group => {
     specs[group].forEach(spec => {
       if((spec.interval && Number(spec.interval) > 0) || (spec.intervalDays && Number(spec.intervalDays) > 0)) {
@@ -795,7 +803,6 @@ function renderServiceRemindersUI(currentOdo, logs) {
     });
   });
 
-  // Default Engine Oil interval if no custom spec item exists yet
   const hasCustomOilSpec = intervalItems.some(item => item.key.toLowerCase().includes('oil'));
   if(!hasCustomOilSpec) {
     intervalItems.unshift({ key: 'Engine Oil', val: '15W-40 / Synthetic', intervalKm: 10000, intervalDays: 180 });
@@ -806,7 +813,6 @@ function renderServiceRemindersUI(currentOdo, logs) {
   const today = new Date();
 
   intervalItems.forEach(item => {
-    // Find logs matching this item name in either category or remarks
     const matchingLogs = logs.filter(l => 
       l.cat.toLowerCase().includes(item.key.toLowerCase()) || 
       (l.notes && l.notes.toLowerCase().includes(item.key.toLowerCase()))
@@ -819,13 +825,11 @@ function renderServiceRemindersUI(currentOdo, logs) {
     let kmRemaining = null;
     let daysRemaining = null;
 
-    // KM Calculation
     if(item.intervalKm > 0) {
       const nextDueOdo = lastDoneOdo > 0 ? lastDoneOdo + item.intervalKm : item.intervalKm;
       kmRemaining = nextDueOdo - currentOdo;
     }
 
-    // Days Calculation
     if(item.intervalDays > 0) {
       if(lastDoneDate) {
         const nextDueDate = new Date(lastDoneDate);
@@ -836,7 +840,6 @@ function renderServiceRemindersUI(currentOdo, logs) {
       }
     }
 
-    // Determine status badge (whichever limit comes first)
     let pillClass = 'valid';
     let statusTextParts = [];
 
@@ -854,7 +857,6 @@ function renderServiceRemindersUI(currentOdo, logs) {
 
     let statusPillText = pillClass === 'expired' ? 'DUE NOW' : `${statusTextParts.join(' / ')} Left`;
 
-    // Subtitle text construction
     let subParts = [];
     if(item.intervalKm > 0) subParts.push(`Every ${item.intervalKm.toLocaleString()} KM`);
     if(item.intervalDays > 0) subParts.push(`Every ${item.intervalDays} Days`);
