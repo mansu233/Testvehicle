@@ -1,7 +1,7 @@
 let activeLogType = 'fuel';
 const DEFAULT_CATEGORIES = {
   fuel: ['Full Tank', 'Partial Tank', 'Premium Fuel'],
-  maintenance: ['Oil Change', 'Tire Rotation', 'Brake Service', 'General Service Fee'],
+  maintenance: ['Oil Change', 'Tire Rotation', 'Brake Service', 'General Service Fee', 'Air Pressure Check'],
   purchase: ['Down Payment', 'EMI Payment', 'RTO Tax & Reg', 'Insurance Premium', 'Loan Processing Fee'],
   expense: ['Toll', 'Parking', 'Car Wash']
 };
@@ -67,21 +67,21 @@ function getActiveVehiclePartners() {
   const activeV = document.getElementById('vehicle-select').value || 'v1';
   const vList = JSON.parse(localStorage.getItem('vh_vehicles') || '[]');
   const target = vList.find(v => v.id === activeV);
-  if(!target || !target.partners || target.partners.length === 0) return ['Mansoor'];
+  if(!target || !target.partners || target.partners.length === 0) return ['Owner'];
   
   const cleanPartners = target.partners.map(p => p.trim()).filter(p => p !== '' && p.toLowerCase() !== 'no' && p.toLowerCase() !== 'undefined');
-  return cleanPartners.length > 0 ? cleanPartners : ['Mansoor'];
+  return cleanPartners.length > 0 ? cleanPartners : ['Owner'];
 }
 
 function initVehicles() {
   let vList = JSON.parse(localStorage.getItem('vh_vehicles') || '[]');
   if(vList.length === 0) {
-    vList = [{ id: 'v1', name: 'Primary Vehicle', reg: 'KL 65 K 606', partners: ['Mansoor'] }];
+    vList = [{ id: 'v1', name: 'Primary Vehicle', reg: 'KL 65 K 606', partners: ['Owner'] }];
     localStorage.setItem('vh_vehicles', JSON.stringify(vList));
   }
 
   vList.forEach(v => {
-    if(!v.partners || v.partners.length === 0) v.partners = ['Mansoor'];
+    if(!v.partners || v.partners.length === 0) v.partners = ['Owner'];
   });
   localStorage.setItem('vh_vehicles', JSON.stringify(vList));
 
@@ -118,12 +118,12 @@ function initVehicles() {
 function renderPartnerInputsUI(partners) {
   const container = document.getElementById('partner-inputs-container');
   container.innerHTML = '';
-  if(!partners || partners.length === 0) partners = ['Mansoor'];
+  if(!partners || partners.length === 0) partners = ['Owner'];
 
   partners.forEach((p, idx) => {
     const row = document.createElement('div');
     row.style.cssText = "display: flex; gap: 8px; margin-bottom: 8px; align-items: center;";
-    row.innerHTML = `<input type="text" class="form-control partner-input-val" value="${p}" placeholder="Partner ${idx + 1} Name" required>`;
+    row.innerHTML = `<input type="text" class="form-control partner-input-val" value="${p}" placeholder="Partner ${idx + 1} Name (e.g. Alex)" required>`;
 
     if(partners.length > 1) {
       const delBtn = document.createElement('button');
@@ -143,7 +143,7 @@ function addPartnerFieldUI() {
   const count = container.querySelectorAll('.partner-input-val').length;
   const row = document.createElement('div');
   row.style.cssText = "display: flex; gap: 8px; margin-bottom: 8px; align-items: center;";
-  row.innerHTML = `<input type="text" class="form-control partner-input-val" value="" placeholder="Partner ${count + 1} Name" required>`;
+  row.innerHTML = `<input type="text" class="form-control partner-input-val" value="" placeholder="Partner ${count + 1} Name (e.g. Jordan)" required>`;
 
   const delBtn = document.createElement('button');
   delBtn.type = 'button';
@@ -773,26 +773,105 @@ function loadDataAndUI() {
   updateNotificationsSystem();
 }
 
-/* Service Interval Odometer Tracker */
+/* Dynamic Service & Dual-Interval Tracker (KM & Days) */
 function renderServiceRemindersUI(currentOdo, logs) {
+  const activeV = document.getElementById('vehicle-select').value || 'v1';
   const box = document.getElementById('service-reminder-box');
-  const oilLogs = logs.filter(l => l.cat.toLowerCase().includes('oil')).sort((a,b) => Number(b.odo) - Number(a.odo));
-  const lastOilOdo = oilLogs.length > 0 ? Number(oilLogs[0].odo) : 0;
-  const nextOilOdo = lastOilOdo > 0 ? lastOilOdo + 10000 : 10000;
-  const kmRemaining = nextOilOdo - currentOdo;
+  const specs = JSON.parse(localStorage.getItem(`vh_specs_${activeV}`) || '{}');
 
-  box.innerHTML = `
-    <div class="list-card">
+  let intervalItems = [];
+
+  // Gather dynamic check items from Technical Specs
+  Object.keys(specs).forEach(group => {
+    specs[group].forEach(spec => {
+      if((spec.interval && Number(spec.interval) > 0) || (spec.intervalDays && Number(spec.intervalDays) > 0)) {
+        intervalItems.push({
+          key: spec.key,
+          val: spec.val,
+          intervalKm: Number(spec.interval) || 0,
+          intervalDays: Number(spec.intervalDays) || 0
+        });
+      }
+    });
+  });
+
+  // Default Engine Oil interval if no custom spec item exists yet
+  const hasCustomOilSpec = intervalItems.some(item => item.key.toLowerCase().includes('oil'));
+  if(!hasCustomOilSpec) {
+    intervalItems.unshift({ key: 'Engine Oil', val: '15W-40 / Synthetic', intervalKm: 10000, intervalDays: 180 });
+  }
+
+  box.innerHTML = '';
+
+  const today = new Date();
+
+  intervalItems.forEach(item => {
+    // Find logs matching this item name in either category or remarks
+    const matchingLogs = logs.filter(l => 
+      l.cat.toLowerCase().includes(item.key.toLowerCase()) || 
+      (l.notes && l.notes.toLowerCase().includes(item.key.toLowerCase()))
+    ).sort((a,b) => new Date(b.date) - new Date(a.date));
+
+    const lastLog = matchingLogs.length > 0 ? matchingLogs[0] : null;
+    const lastDoneOdo = lastLog ? Number(lastLog.odo) : 0;
+    const lastDoneDate = lastLog ? new Date(lastLog.date) : null;
+
+    let kmRemaining = null;
+    let daysRemaining = null;
+
+    // KM Calculation
+    if(item.intervalKm > 0) {
+      const nextDueOdo = lastDoneOdo > 0 ? lastDoneOdo + item.intervalKm : item.intervalKm;
+      kmRemaining = nextDueOdo - currentOdo;
+    }
+
+    // Days Calculation
+    if(item.intervalDays > 0) {
+      if(lastDoneDate) {
+        const nextDueDate = new Date(lastDoneDate);
+        nextDueDate.setDate(nextDueDate.getDate() + item.intervalDays);
+        daysRemaining = Math.ceil((nextDueDate - today) / (1000 * 60 * 60 * 24));
+      } else {
+        daysRemaining = item.intervalDays;
+      }
+    }
+
+    // Determine status badge (whichever limit comes first)
+    let pillClass = 'valid';
+    let statusTextParts = [];
+
+    if(kmRemaining !== null) {
+      if(kmRemaining <= 0) pillClass = 'expired';
+      else if(kmRemaining <= 500 && pillClass !== 'expired') pillClass = 'expiring';
+      statusTextParts.push(kmRemaining <= 0 ? '0 KM' : `${kmRemaining.toLocaleString()} KM`);
+    }
+
+    if(daysRemaining !== null) {
+      if(daysRemaining <= 0) pillClass = 'expired';
+      else if(daysRemaining <= 7 && pillClass !== 'expired') pillClass = 'expiring';
+      statusTextParts.push(daysRemaining <= 0 ? '0 Days' : `${daysRemaining} Days`);
+    }
+
+    let statusPillText = pillClass === 'expired' ? 'DUE NOW' : `${statusTextParts.join(' / ')} Left`;
+
+    // Subtitle text construction
+    let subParts = [];
+    if(item.intervalKm > 0) subParts.push(`Every ${item.intervalKm.toLocaleString()} KM`);
+    if(item.intervalDays > 0) subParts.push(`Every ${item.intervalDays} Days`);
+
+    const card = document.createElement('div');
+    card.className = 'list-card';
+    card.innerHTML = `
       <div>
-        <div class="card-title">🛢️ Engine Oil Change Interval</div>
-        <div class="card-sub">Last Service: ${lastOilOdo.toLocaleString()} KM • Due At: ${nextOilOdo.toLocaleString()} KM</div>
+        <div class="card-title">⚙️ ${item.key} <span style="font-size:0.75rem; color:var(--text-sub);">(${item.val})</span></div>
+        <div class="card-sub">Last Check: ${lastDoneOdo ? lastDoneOdo.toLocaleString() + ' KM' : 'Not Recorded'} • ${subParts.join(' or ')}</div>
       </div>
-      <span class="doc-pill ${kmRemaining < 1000 ? 'expiring' : 'valid'}">${kmRemaining <= 0 ? 'DUE NOW' : kmRemaining + ' KM Left'}</span>
-    </div>
-  `;
+      <span class="doc-pill ${pillClass}">${statusPillText}</span>
+    `;
+    box.appendChild(card);
+  });
 }
 
-/* CSV and PDF Export Functions */
 function exportLogsCSV() {
   const activeV = document.getElementById('vehicle-select').value || 'v1';
   let logs = JSON.parse(localStorage.getItem('vh_logs') || '[]').filter(l => l.vehicleId === activeV || !l.vehicleId);
@@ -889,7 +968,7 @@ function saveVehicleProfile(e) {
       if(val !== '' && val.toLowerCase() !== 'undefined') updatedPartners.push(val);
     });
 
-    target.partners = updatedPartners.length > 0 ? updatedPartners : ['Mansoor'];
+    target.partners = updatedPartners.length > 0 ? updatedPartners : ['Owner'];
 
     localStorage.setItem('vh_vehicles', JSON.stringify(vList));
     initVehicles();
@@ -926,15 +1005,21 @@ function addTechnicalSpec(e) {
   const group = document.getElementById('spec-group').value.trim();
   const key = document.getElementById('spec-key').value.trim();
   const val = document.getElementById('spec-val').value.trim();
+  const interval = Number(document.getElementById('spec-interval').value) || 0;
+  const intervalDays = Number(document.getElementById('spec-interval-days').value) || 0;
 
   let specs = JSON.parse(localStorage.getItem(`vh_specs_${activeV}`) || '{}');
   if(!specs[group]) specs[group] = [];
-  specs[group].push({ id: Date.now(), key, val });
+  specs[group].push({ id: Date.now(), key, val, interval, intervalDays });
 
   localStorage.setItem(`vh_specs_${activeV}`, JSON.stringify(specs));
   document.getElementById('spec-key').value = '';
   document.getElementById('spec-val').value = '';
+  document.getElementById('spec-interval').value = '';
+  document.getElementById('spec-interval-days').value = '';
+  
   renderSpecsUI();
+  loadDataAndUI();
 }
 
 function renderSpecsUI() {
@@ -949,9 +1034,18 @@ function renderSpecsUI() {
     box.innerHTML = `<div style="font-weight:800; color:var(--sky-blue); margin-bottom:6px;">${group}</div>`;
     
     specs[group].forEach(i => {
+      let intervalLabel = [];
+      if(i.interval) intervalLabel.push(`${Number(i.interval).toLocaleString()} KM`);
+      if(i.intervalDays) intervalLabel.push(`${i.intervalDays} Days`);
+
       const item = document.createElement('div');
       item.className = 'list-card';
-      item.innerHTML = `<span>${i.key}: <strong>${i.val}</strong></span>`;
+      item.innerHTML = `
+        <div>
+          <div class="card-title">${i.key}: <strong>${i.val}</strong></div>
+          ${intervalLabel.length > 0 ? `<div class="card-sub" style="color:var(--sky-blue);">⏱️ Check Every ${intervalLabel.join(' or ')}</div>` : ''}
+        </div>
+      `;
       
       const actions = document.createElement('div');
       actions.className = 'action-group';
@@ -987,6 +1081,7 @@ function editSpec(group, id) {
     target.val = newVal.trim();
     localStorage.setItem(`vh_specs_${activeV}`, JSON.stringify(specs));
     renderSpecsUI();
+    loadDataAndUI();
   }
 }
 
@@ -998,6 +1093,7 @@ function deleteSpec(group, id) {
     if(specs[group].length === 0) delete specs[group];
     localStorage.setItem(`vh_specs_${activeV}`, JSON.stringify(specs));
     renderSpecsUI();
+    loadDataAndUI();
   }
 }
 
@@ -1086,7 +1182,7 @@ function addVehiclePrompt() {
   const reg = prompt('Enter Registration Number (RC):');
   if(name && reg) {
     let vList = JSON.parse(localStorage.getItem('vh_vehicles') || '[]');
-    const newV = { id: 'v' + Date.now(), name, reg, partners: ['Mansoor'] };
+    const newV = { id: 'v' + Date.now(), name, reg, partners: ['Owner'] };
     vList.push(newV);
     localStorage.setItem('vh_vehicles', JSON.stringify(vList));
     initVehicles();

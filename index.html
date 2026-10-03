@@ -107,9 +107,9 @@
         </div>
       </div>
 
-      <!-- Service Maintenance Reminders Card -->
+      <!-- Dynamic Dual-Interval Tracker (KM & Days) -->
       <div class="card-box">
-        <div style="font-weight: 800; font-size: 0.95rem; color: #ffffff; margin-bottom: 10px;">🔧 Service Odometer Tracker</div>
+        <div style="font-weight: 800; font-size: 0.95rem; color: #ffffff; margin-bottom: 10px;">⚙️ Service & Check Interval Tracker</div>
         <div id="service-reminder-box"></div>
       </div>
 
@@ -177,7 +177,7 @@
 
           <div class="form-group">
             <label for="log-notes">Notes / Remarks</label>
-            <input type="text" id="log-notes" class="form-control" placeholder="e.g. Shell station, synth oil replacement...">
+            <input type="text" id="log-notes" class="form-control" placeholder="e.g. Tyre air pressure check, engine oil change...">
           </div>
 
           <button type="submit" id="btn-save-log" class="submit-btn">Save Log Entry</button>
@@ -208,7 +208,7 @@
       </div>
 
       <div class="card-box">
-        <div style="font-weight: 800; font-size: 1rem; margin-bottom: 12px; color: #ffffff;">🏷️ Active Categories</div>
+        <div style="font-weight: 800; font-size: 1rem; margin-bottom: 12px; color: #ffffff;">🏷️️ Active Categories</div>
         <div id="category-list"></div>
       </div>
     </section>
@@ -274,6 +274,7 @@
         </form>
       </div>
 
+      <!-- Specs Form with Dual Intervals: KM and Days -->
       <div class="card-box">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
           <div style="font-weight: 800; font-size: 1rem; color: #ffffff;">🛠️ Dynamic Technical Specs</div>
@@ -283,24 +284,34 @@
         <form id="add-spec-form" style="background: #0b0f17; padding: 12px; border-radius: 10px; border: 1px solid var(--card-border); margin-bottom: 12px;">
           <div class="form-group">
             <label for="spec-group">Group Name</label>
-            <input type="text" id="spec-group" class="form-control" placeholder="e.g. Tyres, Battery, Engine" required>
+            <input type="text" id="spec-group" class="form-control" placeholder="e.g. Tyres, Engine, Brakes" required>
           </div>
           <div class="form-group">
             <label for="spec-key">Spec Field Name</label>
-            <input type="text" id="spec-key" class="form-control" placeholder="e.g. Air Pressure, Oil Grade" required>
+            <input type="text" id="spec-key" class="form-control" placeholder="e.g. Air Pressure, Engine Oil, Tire Rotation" required>
           </div>
           <div class="form-group">
             <label for="spec-val">Value / Details</label>
             <input type="text" id="spec-val" class="form-control" placeholder="e.g. 33 PSI, 15W-40" required>
           </div>
-          <button type="submit" class="submit-btn">＋ Add Technical Spec</button>
+          <div style="display: flex; gap: 8px;">
+            <div class="form-group" style="flex: 1;">
+              <label for="spec-interval">Interval (KM)</label>
+              <input type="number" id="spec-interval" class="form-control" placeholder="e.g. 1000 or 10000">
+            </div>
+            <div class="form-group" style="flex: 1;">
+              <label for="spec-interval-days">Interval (Days)</label>
+              <input type="number" id="spec-interval-days" class="form-control" placeholder="e.g. 30 or 180">
+            </div>
+          </div>
+          <button type="submit" class="submit-btn">＋ Add Spec & Trackers</button>
         </form>
 
         <div id="specs-container"></div>
       </div>
 
       <div class="card-box">
-        <div style="font-weight: 800; font-size: 1rem; margin-bottom: 12px; color: #ffffff;">🖼️ Gallery Photos</div>
+        <div style="font-weight: 800; font-size: 1rem; margin-bottom: 12px; color: #ffffff;">🖼️️ Gallery Photos</div>
         <form id="upload-photo-form">
           <div class="form-group">
             <label for="photo-angle">Angle / View</label>
